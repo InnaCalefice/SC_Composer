@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -9,7 +10,7 @@
 :root {
   --sw-red:  #E4003A;
   --sw-blue: #0028A5;
-  --sw-navy: #1A1467;
+  --sw-navy: #001155;
   --bg:      #080812;
   --surf:    #111120;
   --surf2:   #181828;
@@ -263,12 +264,7 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
       <div id="iconControls" style="display:none;gap:8px;flex-direction:column;">
         <div class="prop-row">
           <span class="prop-label">Farbe</span>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div class="swatch" id="iconTintSwatch" style="background:#ffffff" title="Icon Farbe">
-              <input type="color" id="iconTintColor" value="#ffffff">
-            </div>
-            <button id="iconTintOff" title="Originalfarbe" style="padding:2px 8px;border:1px solid #2e2e4a;background:#1a1a2e;color:var(--text2);border-radius:5px;font-size:10px;cursor:pointer;">Original</button>
-          </div>
+          <div id="iconColorPalette" style="display:flex;gap:5px;align-items:center;"></div>
         </div>
         <div class="prop-row">
           <span class="prop-label">Position</span>
@@ -369,7 +365,7 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
 // ────────────────────────────────────────────────────
 // CONSTANTS
 // ────────────────────────────────────────────────────
-const SW = { red:'#E4003A', blue:'#0028A5', navy:'#1A1467' };
+const SW = { red:'#E4003A', blue:'#0028A5', navy:'#001155' };
 
 const FORMATS = {
   '1:1':{w:1,h:1}, '4:3':{w:4,h:3}, '16:9':{w:16,h:9}, '3:4':{w:3,h:4},
@@ -577,17 +573,24 @@ function rebuildPalette() {
 }
 
 function addCircleBadge(cc) {
-  const baseR=Math.round(Math.min(CW,CH)*.17);
+  const baseR = S.badge?.baseR || Math.round(Math.min(CW,CH)*.17);
+  const prev  = S.badge;
   S.badge={
     kind:'circle',
     colorId: cc.id,
     fill: JSON.parse(JSON.stringify(cc.fill)),
     fg:   cc.fg,
     fgGradient: false,
-    x: CW-baseR-25, y: baseR+18,
+    x: prev?.x ?? CW-baseR-25,
+    y: prev?.y ?? baseR+18,
     r: baseR, baseR,
     text1: document.getElementById('txt1').value,
     text2: document.getElementById('txt2').value,
+    // preserve existing icon
+    iconUrl:     prev?.iconUrl,
+    iconImg:     prev?.iconImg,
+    iconOffsetY: prev?.iconOffsetY,
+    iconBounds:  prev?.iconBounds,
   };
   syncBadgeProps();
   S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); render();
@@ -633,19 +636,26 @@ function addImageBadge(item) {
     const img=new Image(); img.src=item.dataUrl;
     img.onload=()=>{ imgCache[item.id]=img; render(); };
   }
-  const baseR=Math.round(Math.min(CW,CH)*.17);
+  const baseR = S.badge?.baseR || Math.round(Math.min(CW,CH)*.17);
+  const prev  = S.badge;
   const ar=(item.h||1)/(item.w||1);
   S.badge={
     kind:'image',
     shapeId: item.id,
     dataUrl: item.dataUrl,
-    fg: '#ffffff',
-    fgGradient: false,
-    x: CW-baseR-25, y: baseR+18,
+    fg: prev?.fg || '#ffffff',
+    fgGradient: prev?.fgGradient || false,
+    x: prev?.x ?? CW-baseR-25,
+    y: prev?.y ?? baseR+18,
     r: baseR, baseR,     // r = half-width for images
     ar,
     text1: document.getElementById('txt1').value,
     text2: document.getElementById('txt2').value,
+    // preserve existing icon
+    iconUrl:     prev?.iconUrl,
+    iconImg:     prev?.iconImg,
+    iconOffsetY: prev?.iconOffsetY,
+    iconBounds:  prev?.iconBounds,
   };
   syncBadgeProps();
   S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); render();
@@ -668,11 +678,9 @@ function syncIconPreview() {
   document.getElementById('iconControls').style.display  = hasIcon ? 'flex' : 'none';
   if (hasIcon) {
     document.getElementById('iconThumb').src = S.badge.iconUrl;
-    const tint = S.badge.iconTint || '#ffffff';
-    document.getElementById('iconTintColor').value = tint;
-    document.getElementById('iconTintSwatch').style.background = S.badge.iconTint ? tint : 'none';
     document.getElementById('iconPosSlider').value = Math.round((S.badge.iconOffsetY||0)*100);
     document.getElementById('iconPosVal').textContent = Math.round((S.badge.iconOffsetY||0)*100)+'%';
+    updateIconColorPalette();
   }
 }
 
@@ -982,11 +990,48 @@ document.getElementById('swGradTextBtn').addEventListener('click',()=>{
 
 document.getElementById('iconInput').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file || !S.badge) return;
-  const dataUrl = await toDataUrl(file);
+  let dataUrl = await toDataUrl(file);
+  // SVGs without explicit width/height: Chrome can't render them in canvas via drawImage.
+  // Fix: inject width/height into the SVG root so naturalWidth is always > 0.
+  if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+    try {
+      const text = await file.text();
+      const fixed = text.replace(/<svg([^>]*)>/i, (m, attrs) => {
+        if (!/\bwidth\s*=/.test(attrs)) attrs += ' width="256"';
+        if (!/\bheight\s*=/.test(attrs)) attrs += ' height="256"';
+        return `<svg${attrs}>`;
+      });
+      dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(fixed)));
+    } catch(err) { /* keep original dataUrl */ }
+  }
   const img = new Image(); img.src = dataUrl;
   img.onload = () => {
     S.badge.iconUrl = dataUrl;
     S.badge.iconImg = img;
+    S.badge.iconBounds = null; // reset; detect below
+    delete S.badge.iconTint;   // reset to auto-follow on fresh upload
+    // Detect tight bounding box of visible pixels (fixes extra-whitespace PNGs)
+    try {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      if (W > 0 && H > 0) {
+        const bbc = document.createElement('canvas'); bbc.width=W; bbc.height=H;
+        const bbx = bbc.getContext('2d'); bbx.drawImage(img, 0, 0);
+        const id = bbx.getImageData(0, 0, W, H); const d = id.data;
+        // Only crop if icon has transparency (solid-bg icons use full bounds)
+        let hasAlpha = false;
+        for (let i=3; i<d.length; i+=4) { if (d[i]<255) { hasAlpha=true; break; } }
+        if (hasAlpha) {
+          let minX=W, minY=H, maxX=-1, maxY=-1;
+          for (let y=0; y<H; y++) for (let x=0; x<W; x++) {
+            if (d[(y*W+x)*4+3] > 10) {
+              if (x<minX) minX=x; if (x>maxX) maxX=x;
+              if (y<minY) minY=y; if (y>maxY) maxY=y;
+            }
+          }
+          if (maxX >= 0) S.badge.iconBounds = {x:minX, y:minY, w:maxX-minX+1, h:maxY-minY+1};
+        }
+      }
+    } catch(e) { /* cross-origin SVG – skip bounds detection */ }
     syncIconPreview();
     render();
   };
@@ -1000,19 +1045,46 @@ document.getElementById('iconRemove').addEventListener('click', () => {
   syncIconPreview(); render();
 });
 
-document.getElementById('iconTintColor').addEventListener('input', e => {
-  if (!S.badge) return;
-  S.badge.iconTint = e.target.value;
-  document.getElementById('iconTintSwatch').style.background = e.target.value;
-  render();
-});
+// Icon color palette: null = auto (follow text), or a fixed hex
+const ICON_COLORS = [
+  { label:'Auto', color: null },
+  { label:'Weiss', color: '#ffffff' },
+  { label:'Navy',  color: '#050820' },
+  { label:'Schwarz', color: '#000000' },
+];
 
-document.getElementById('iconTintOff').addEventListener('click', () => {
-  if (!S.badge) return;
-  delete S.badge.iconTint;
-  document.getElementById('iconTintSwatch').style.background = 'none';
-  render();
-});
+function buildIconColorPalette() {
+  const wrap = document.getElementById('iconColorPalette');
+  wrap.innerHTML = '';
+  ICON_COLORS.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.title = opt.label;
+    const bg = opt.color || 'linear-gradient(135deg,#E4003A,#0028A5,#009DE0)';
+    btn.style.cssText = `width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;background:${bg};`;
+    btn.addEventListener('click', () => {
+      if (!S.badge) return;
+      S.badge.iconTint = opt.color; // null = auto (follow text)
+      updateIconColorPalette();
+      render();
+    });
+    wrap.appendChild(btn);
+  });
+  updateIconColorPalette();
+}
+
+function updateIconColorPalette() {
+  const wrap = document.getElementById('iconColorPalette');
+  if (!wrap) return;
+  [...wrap.children].forEach((btn, i) => {
+    const isActive = (ICON_COLORS[i].color === null)
+      ? (S.badge?.iconTint === null || S.badge?.iconTint === undefined)
+      : S.badge?.iconTint === ICON_COLORS[i].color;
+    btn.style.borderColor = isActive ? '#6366f1' : 'transparent';
+  });
+}
+
+buildIconColorPalette();
+
 
 document.getElementById('iconPosSlider').addEventListener('input', e => {
   if (!S.badge) return;
@@ -1251,24 +1323,65 @@ function drawBg(c,W,H) {
   }
 }
 
-function drawIconTinted(c, img, x, y, w, h, tint) {
-  if (!tint) { c.drawImage(img, x, y, w, h); return; }
-  const oc = document.createElement('canvas'); oc.width=w; oc.height=h;
-  const ox = oc.getContext('2d');
-  ox.drawImage(img, 0, 0, w, h);
-  ox.globalCompositeOperation = 'source-atop';
-  ox.fillStyle = tint; ox.fillRect(0, 0, w, h);
-  c.drawImage(oc, x, y, w, h);
+// sx,sy,sw,sh = optional source crop (tight bounds for whitespace-padded PNGs)
+function drawIconTinted(c, img, x, y, w, h, tint, sx=0, sy=0, sw=null, sh=null) {
+  const pw = Math.ceil(w)||1, ph = Math.ceil(h)||1;
+  const srcW = sw ?? (img.naturalWidth || pw);
+  const srcH = sh ?? (img.naturalHeight || ph);
+  // SVGs without explicit dimensions have naturalWidth=0; 9-arg drawImage fails silently for them.
+  // Use 5-arg form (render to destination size) in that case.
+  const hasDims = img.naturalWidth > 0;
+  const doDraw = (ctx, dx, dy, dw, dh) =>
+    hasDims ? ctx.drawImage(img, sx, sy, srcW, srcH, dx, dy, dw, dh)
+            : ctx.drawImage(img, dx, dy, dw, dh);
+
+  if (!tint) { doDraw(c, x, y, w, h); return; }
+
+  // Approach A: pixel-level replacement (data-URL PNGs are same-origin)
+  // willReadFrequently keeps canvas in CPU memory for reliable getImageData
+  let drawn = false;
+  try {
+    const oc = document.createElement('canvas'); oc.width=pw; oc.height=ph;
+    const ox = oc.getContext('2d', { willReadFrequently: true });
+    doDraw(ox, 0, 0, pw, ph);
+    const id = ox.getImageData(0, 0, pw, ph);
+    const d = id.data;
+    // Parse tint → RGB
+    const tc = document.createElement('canvas'); tc.width=1; tc.height=1;
+    const tx = tc.getContext('2d'); tx.fillStyle=tint; tx.fillRect(0,0,1,1);
+    const td = tx.getImageData(0,0,1,1).data;
+    const tr=td[0], tg=td[1], tb=td[2];
+    for (let i=0; i<d.length; i+=4) {
+      if (d[i+3]>0) { d[i]=tr; d[i+1]=tg; d[i+2]=tb; }
+    }
+    ox.putImageData(id, 0, 0);
+    c.drawImage(oc, x, y, w, h);
+    drawn = true;
+  } catch(e) { /* cross-origin SVG – fall through */ }
+
+  // Approach B: destination-in compositing (no getImageData needed, works for SVG)
+  if (!drawn) {
+    const oc = document.createElement('canvas'); oc.width=pw; oc.height=ph;
+    const ox = oc.getContext('2d');
+    ox.fillStyle = tint;
+    ox.fillRect(0, 0, pw, ph);
+    ox.globalCompositeOperation = 'destination-in';
+    doDraw(ox, 0, 0, pw, ph);
+    c.drawImage(oc, x, y, w, h);
+  }
 }
 
-function makeTextFill(c, b, cx, cy, r) {
+function makeTextFill(c, b, cx, cy, r, halfSpanX) {
   if (b.fgGradient) {
     // linear-gradient(110.33deg, #F20505 12.89%, #0445C8 33.5%, #1FB9FF 73.77%)
     const ang = 110.33 * Math.PI / 180;
-    const span = r * 1.2;
-    const x1 = cx - Math.sin(ang) * span;
+    // Size gradient to text width so red always starts at the left edge of the text.
+    // halfSpanX = half the measured text width; if unknown, fall back to circle span.
+    const sinA = Math.sin(ang); // ≈ 0.9363
+    const span = halfSpanX ? halfSpanX / sinA : r * 1.2;
+    const x1 = cx - sinA * span;
     const y1 = cy + Math.cos(ang) * span;
-    const x2 = cx + Math.sin(ang) * span;
+    const x2 = cx + sinA * span;
     const y2 = cy - Math.cos(ang) * span;
     const g = c.createLinearGradient(x1, y1, x2, y2);
     g.addColorStop(0.1289, '#F20505');
@@ -1285,16 +1398,50 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
   const offset = hasIcon ? r*0.22 : 0;
   const fs1=Math.round(r*(hasIcon?.42:.58)), fs2=Math.round(r*(hasIcon?.32:.40));
   c.save();
-  c.fillStyle=makeTextFill(c,b,cx,cy,r);
   c.textAlign='center'; c.textBaseline='middle';
+
+  // Measure text width so gradient starts red at the text's left edge (not circle center)
+  let halfSpanX = null;
+  if (b.fgGradient) {
+    let maxHalf = 0;
+    if (t1) { c.font=`800 ${fs1}px ${S.fontName}`; maxHalf = Math.max(maxHalf, c.measureText(t1).width / 2); }
+    if (t2) { c.font=`600 ${fs2}px ${S.fontName}`; maxHalf = Math.max(maxHalf, c.measureText(t2).width / 2); }
+    if (maxHalf > 0) halfSpanX = maxHalf;
+  }
+
   if (t1&&t2) {
-    c.font=`800 ${fs1}px ${S.fontName}`; c.fillText(t1,cx,cy+offset-fs1*.45);
-    c.fillStyle=makeTextFill(c,b,cx,cy,r);
-    c.font=`600 ${fs2}px ${S.fontName}`; c.fillText(t2,cx,cy+offset+fs2*.70);
+    c.font=`800 ${fs1}px ${S.fontName}`;
+    c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    c.fillText(t1,cx,cy+offset-fs1*.45);
+    c.font=`600 ${fs2}px ${S.fontName}`;
+    c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    c.fillText(t2,cx,cy+offset+fs2*.70);
   } else {
-    c.font=`800 ${fs1}px ${S.fontName}`; c.fillText(t1||t2,cx,cy+offset);
+    c.font=`800 ${fs1}px ${S.fontName}`;
+    c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    c.fillText(t1||t2,cx,cy+offset);
   }
   c.restore();
+}
+
+function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
+  const img = b.iconImg;
+  const maxSize = r * (t1||t2 ? 0.52 : 0.65);
+  // Use tight bounds if detected (removes extra whitespace from PNG icons)
+  const bounds = b.iconBounds;
+  const nw = bounds ? bounds.w : (img.naturalWidth  || img.width  || maxSize);
+  const nh = bounds ? bounds.h : (img.naturalHeight || img.height || maxSize);
+  const sx = bounds?.x ?? 0, sy = bounds?.y ?? 0;
+  const scale = Math.min(maxSize / nw, maxSize / nh);
+  const iw = nw * scale;
+  const ih = nh * scale;
+  const baseY = t1||t2 ? cy - r*0.22 : cy;
+  const iconY = baseY + (b.iconOffsetY||0)*r;
+  // Tint: explicit palette choice, or auto-follow text colour
+  const tint = (b.iconTint !== undefined && b.iconTint !== null)
+    ? b.iconTint
+    : (b.fg || '#ffffff');
+  drawIconTinted(c, img, cx - iw/2, iconY - ih/2, iw, ih, tint, sx, sy, nw, nh);
 }
 
 function drawBadge(c,b,scX,scY) {
@@ -1310,12 +1457,7 @@ function drawBadge(c,b,scX,scY) {
 
   if (b.kind==='circle') {
     applyCircleFill(c,cx,cy,r,b.fill);
-    if (hasIcon && b.iconImg) {
-      const iconSize = r * (t1||t2 ? 0.52 : 0.65);
-      const baseY    = t1||t2 ? cy - r*0.22 : cy;
-      const iconY    = baseY + (b.iconOffsetY||0)*r;
-      drawIconTinted(c, b.iconImg, cx-iconSize/2, iconY-iconSize/2, iconSize, iconSize, b.iconTint);
-    }
+    if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
     drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
 
   } else if (b.kind==='image') {
@@ -1327,12 +1469,7 @@ function drawBadge(c,b,scX,scY) {
     }
     const hw=r, hh=r*(b.ar||1);
     c.drawImage(img,cx-hw,cy-hh,hw*2,hh*2);
-    if (hasIcon && b.iconImg) {
-      const iconSize = r * (t1||t2 ? 0.52 : 0.65);
-      const baseY    = t1||t2 ? cy - r*0.22 : cy;
-      const iconY    = baseY + (b.iconOffsetY||0)*r;
-      drawIconTinted(c, b.iconImg, cx-iconSize/2, iconY-iconSize/2, iconSize, iconSize, b.iconTint);
-    }
+    if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
     drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
   }
 }
