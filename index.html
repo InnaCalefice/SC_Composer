@@ -84,8 +84,8 @@ header .spacer { flex:1; }
 
 /* ── Properties ── */
 .props { width:268px; flex-shrink:0; background:var(--surf); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; padding:12px; gap:13px; }
-.prop-title { font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:#a0a8c8; margin:-2px -12px 4px; padding:5px 12px 5px 10px; background:rgba(255,255,255,0.04); border-left:3px solid #0028A5; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; }
-.prop-title::after { content:'▾'; font-size:10px; color:#666; transition:transform .2s; }
+.prop-title { font-size:12px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; color:#c8d0f0; margin:-2px -12px 6px; padding:7px 12px 7px 12px; background:rgba(255,255,255,0.07); border-left:4px solid #0028A5; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; }
+.prop-title::after { content:'▾'; font-size:14px; color:#aab; transition:transform .2s; }
 .prop-title.collapsed::after { transform:rotate(-90deg); }
 .prop-section.collapsed > *:not(.prop-title) { display:none !important; }
 .crop-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
@@ -109,7 +109,7 @@ header .spacer { flex:1; }
 .prop-label { font-size:13px; color:var(--text); flex-shrink:0; }
 .prop-val { font-size:12px; color:var(--accent); font-variant-numeric:tabular-nums; font-weight:600; }
 
-input[type="range"] { -webkit-appearance:none; width:100%; height:3px; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
+input[type="range"] { -webkit-appearance:none; width:100%; height:3px; border-radius:3px; background:var(--border); outline:none; cursor:pointer; margin-top:4px; }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--accent); cursor:pointer; }
 input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; }
 
@@ -255,7 +255,7 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
   <div class="props">
 
     <div class="prop-section">
-      <div class="prop-title">Produkt</div>
+      <div class="prop-title">Bild</div>
       <label class="product-zone" id="productZone">
         <input type="file" accept="image/*" id="productInput">
         <img id="productThumb" alt="">
@@ -344,6 +344,16 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
     <!-- RIBBON -->
     <div class="prop-section">
       <div class="prop-title">Ribbon</div>
+      <div class="prop-row" style="margin-bottom:6px;"><span class="prop-label">Form</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div id="formCircleBtn" title="Kreis" style="width:28px;height:28px;border-radius:50%;background:#0028A5;cursor:pointer;border:2px solid #6366f1;"></div>
+          <div id="formPillBtn" title="Pillenform" style="width:48px;height:28px;border-radius:14px;background:#0028A5;cursor:pointer;border:2px solid transparent;"></div>
+        </div>
+      </div>
+      <div id="pillAspectRow" style="display:none;">
+        <div class="prop-row"><span class="prop-label">Breite</span><span class="prop-val" id="pillAspectVal">2.0×</span></div>
+        <input type="range" id="pillAspectSlider" min="10" max="50" value="20">
+      </div>
       <div class="prop-row"><span class="prop-label">Größe</span><span class="prop-val" id="shapeSizeVal">100%</span></div>
       <input type="range" id="shapeSize" min="20" max="250" value="100">
     </div>
@@ -415,6 +425,10 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
         <span class="prop-label">Swisscom Stripe</span>
         <div class="toggle" id="stripeToggle"></div>
       </div>
+      <div class="prop-row" id="stripeYRow" style="display:none"><span class="prop-label">Position</span><span class="prop-val" id="stripeYVal">95%</span></div>
+      <input type="range" id="stripeYSlider" min="0" max="100" value="95" style="display:none">
+      <div class="prop-row" id="stripeAngleRow" style="display:none"><span class="prop-label">Winkel</span><span class="prop-val" id="stripeAngleVal">0°</span></div>
+      <input type="range" id="stripeAngleSlider" min="-30" max="30" value="0" style="display:none">
     </div>
 
     <div class="divider"></div>
@@ -555,6 +569,8 @@ const S = {
   label:   null,
   freistellen: false,   // {kind:'circle'|'image', fill?, fg?, img?, x,y, r, baseR, text1, text2}
   stripe:  false,
+  stripeY: 95,
+  stripeAngle: 0,
   selected: null,
   dragging: false,
   resizing: false,
@@ -726,7 +742,10 @@ function rebuildPalette() {
       applyCircleFill(c.getContext('2d'),30,30,30,cc.fill);
       wrap.appendChild(c);
     }
-    wrap.onclick=()=>addCircleBadge(cc);
+    wrap.onclick=()=>{
+      if (S.badge?.kind==='pill') addPillBadge(cc);
+      else addCircleBadge(cc);
+    };
     grid.appendChild(wrap);
   });
 }
@@ -784,6 +803,8 @@ function syncBadgeProps() {
   if (ipVal)    ipVal.textContent = iconPct + '%';
   // Icon colour palette active state
   if (typeof updateIconColorPalette === 'function') updateIconColorPalette();
+  // Form toggle buttons
+  if (typeof syncFormButtons === 'function') syncFormButtons();
 }
 
 
@@ -816,7 +837,62 @@ function addCircleBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+  S.selected='badge'; autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+}
+
+function addPillBadge(cc) {
+  pushUndo();
+  const prev = S.badge;
+  if (prev && prev.kind === 'pill') {
+    // Pill already on canvas — just update colour in-place
+    prev.colorId = cc.id;
+    prev.fill    = JSON.parse(JSON.stringify(cc.fill));
+    prev.fg      = cc.fg;
+  } else {
+    // Pill gets its own size — roughly 60% canvas width, 15% canvas height
+    const pillR  = Math.round(Math.min(CW,CH) * 0.10);
+    const aspect = prev?.kind==='pill' ? (prev.aspect||2.0) : 2.0;
+    const baseR  = prev?.kind==='pill' ? (prev.baseR||pillR) : pillR;
+    const hw     = baseR * aspect;
+    S.badge = {
+      kind: 'pill',
+      colorId: cc.id,
+      fill: JSON.parse(JSON.stringify(cc.fill)),
+      fg:   cc.fg,
+      fgGradient: false,
+      x: Math.max(hw+5, Math.min(CW-hw-5, prev?.kind==='pill' ? prev.x : CW/2)),
+      y: Math.max(baseR+5, Math.min(CH-baseR-5, prev?.kind==='pill' ? prev.y : CH/2)),
+      r: baseR,
+      baseR: baseR,
+      aspect: aspect,
+      text1: document.getElementById('txt1').value,
+      text2: document.getElementById('txt2').value,
+      iconUrl:    prev?.iconUrl,
+      iconImg:    prev?.iconImg,
+      iconBounds: prev?.iconBounds,
+    };
+  }
+  syncBadgeProps();
+  S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  syncFormButtons(); render();
+}
+
+function syncFormButtons() {
+  const circleBtn = document.getElementById('formCircleBtn');
+  const pillBtn   = document.getElementById('formPillBtn');
+  const pillRow   = document.getElementById('pillAspectRow');
+  if (!circleBtn || !pillBtn) return;
+  const isPill = S.badge?.kind === 'pill';
+  circleBtn.style.borderColor = isPill ? 'transparent' : '#6366f1';
+  pillBtn.style.borderColor   = isPill ? '#6366f1'     : 'transparent';
+  if (pillRow) pillRow.style.display = isPill ? 'block' : 'none';
+  if (isPill && S.badge) {
+    const asp = S.badge.aspect || 2.0;
+    const sl = document.getElementById('pillAspectSlider');
+    const vl = document.getElementById('pillAspectVal');
+    if (sl) sl.value = Math.round(asp * 10);
+    if (vl) vl.textContent = asp.toFixed(1) + '×';
+  }
 }
 
 // ────────────────────────────────────────────────────
@@ -1252,6 +1328,10 @@ function badgeBounds() {
     const hw=r, hh=r*(S.badge.ar||1);
     return {x:x-hw,y:y-hh,w:hw*2,h:hh*2};
   }
+  if (S.badge.kind==='pill') {
+    const hw=r*(S.badge.aspect||2.0);
+    return {x:x-hw,y:y-r,w:hw*2,h:r*2};
+  }
   return {x:x-r,y:y-r,w:r*2,h:r*2};
 }
 
@@ -1324,7 +1404,8 @@ function hitProduct(mx,my) {
 function hitBadge(mx,my) {
   if (!S.badge) return false;
   const b=badgeBounds();
-  if (S.badge.kind==='image') return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
+  if (S.badge.kind==='image'||S.badge.kind==='pill')
+    return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
   return Math.hypot(mx-S.badge.x,my-S.badge.y)<=S.badge.r*1.2;
 }
 
@@ -1362,25 +1443,31 @@ canvas.addEventListener('mousedown',e=>{
   }
   if (hitBadge(x,y)) {
     pushUndo();
-    S.selected='badge'; S.dragging=true;
+    S.selected='badge'; S.dragging=true; autoExpandSections('badge');
     S.dragStart={x,y,bx:S.badge.x,by:S.badge.y};
     render(); return;
   }
   if (hitLabel(x,y)) {
     pushUndo();
-    S.selected='label'; S.dragging=true;
+    S.selected='label'; S.dragging=true; autoExpandSections('label');
     S.dragStart={x,y,lx:S.label.x,ly:S.label.y};
     canvas.style.cursor='grabbing'; render(); return;
   }
   if (hitProduct2(x,y)) {
     pushUndo();
-    S.selected='product2'; S.dragging=true;
+    S.selected='product2'; S.dragging=true; autoExpandSections('product2');
     S.dragStart={x,y,px:S.product2.x,py:S.product2.y};
     canvas.style.cursor='grabbing'; render(); return;
   }
+  if (hitStripe(x,y)) {
+    pushUndo();
+    S.selected='stripe'; S.dragging=true; autoExpandSections('stripe');
+    S.dragStart={x,y,sy:S.stripeY};
+    canvas.style.cursor='ns-resize'; render(); return;
+  }
   if (hitProduct(x,y)) {
     pushUndo();
-    S.selected='product'; S.dragging=true;
+    S.selected='product'; S.dragging=true; autoExpandSections('product');
     S.dragStart={x,y,px:S.product.x,py:S.product.y};
     canvas.style.cursor='grabbing'; render(); return;
   }
@@ -1447,6 +1534,12 @@ canvas.addEventListener('mousemove',e=>{
     const dx=x-S.dragStart.x, dy=y-S.dragStart.y;
     if (S.selected==='product'){S.product.x=S.dragStart.px+dx;S.product.y=S.dragStart.py+dy;}
     if (S.selected==='product2'&&S.product2){S.product2.x=S.dragStart.px+dx;S.product2.y=S.dragStart.py+dy;}
+    if (S.selected==='stripe') {
+      const newY = Math.max(0, Math.min(100, S.dragStart.sy + (dy/CH*100)));
+      S.stripeY = newY;
+      document.getElementById('stripeYSlider').value=Math.round(newY);
+      document.getElementById('stripeYVal').textContent=Math.round(newY)+'%';
+    }
     if (S.selected==='badge') {
       const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
       S.badge.x = raw.x; S.badge.y = raw.y; snapGuides = raw.guides;
@@ -1468,6 +1561,7 @@ canvas.addEventListener('mousemove',e=>{
   if (ce2) { canvas.style.cursor=(ce2==='T'||ce2==='B')?'ns-resize':'ew-resize'; return; }
   const h=hitHandle(x,y);
   if (h) canvas.style.cursor=h+'-resize';
+  else if (hitStripe(x,y)) canvas.style.cursor='ns-resize';
   else if (hitBadge(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)) canvas.style.cursor='grab';
   else canvas.style.cursor='default';
 });
@@ -1504,6 +1598,11 @@ document.addEventListener('keydown',e=>{
     if (S.selected==='label'    && S.label)    { S.label.x  += dx; S.label.y  += dy; }
     if (S.selected==='product'  && S.product)  { S.product.x += dx; S.product.y += dy; }
     if (S.selected==='product2' && S.product2) { S.product2.x+= dx; S.product2.y+= dy; }
+    if (S.selected==='stripe' && S.stripe) {
+      S.stripeY=Math.max(0,Math.min(100, S.stripeY+(dy/CH*100)));
+      document.getElementById('stripeYSlider').value=Math.round(S.stripeY);
+      document.getElementById('stripeYVal').textContent=Math.round(S.stripeY)+'%';
+    }
     render();
   }
 
@@ -1620,6 +1719,13 @@ function hitProduct2(mx,my){
   return mx>=p.x&&mx<=p.x+p.w&&my>=p.y&&my<=p.y+p.h;
 }
 
+function hitStripe(mx,my){
+  if (!S.stripe) return false;
+  const sh=Math.max(4,Math.round(CH*.022));
+  const sy=Math.round((S.stripeY??95)/100*CH) - Math.round(sh/2);
+  return my>=sy-10&&my<=sy+sh+10;
+}
+
 // ── Crop sliders ──
 ['T','B','L','R'].forEach(side=>{
   document.getElementById('crop'+side).addEventListener('input',e=>{
@@ -1694,6 +1800,55 @@ document.getElementById('shapeSize').addEventListener('input',e=>{
   S.badge.r=S.badge.baseR*s;
   render();
 });
+
+// Pill form toggle buttons
+document.getElementById('formCircleBtn').addEventListener('click',()=>{
+  if (!S.badge || S.badge.kind==='circle') return;
+  // Switch pill → circle: keep position/size
+  pushUndo();
+  const prev = S.badge;
+  // Find matching color or use first corporate color
+  const cc = CORP_COLORS.find(c=>c.id===prev.colorId) || CORP_COLORS[0];
+  S.badge = {
+    kind:'circle', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
+    fgGradient:false, x:prev.x, y:prev.y, r:prev.r, baseR:prev.baseR,
+    text1:prev.text1, text2:prev.text2, iconUrl:prev.iconUrl, iconImg:prev.iconImg, iconBounds:prev.iconBounds,
+  };
+  syncFormButtons(); syncBadgeProps(); render();
+});
+
+document.getElementById('formPillBtn').addEventListener('click',()=>{
+  if (!S.badge || S.badge.kind==='pill') return;
+  // Switch circle → pill: use fresh pill size, centered
+  pushUndo();
+  const prev = S.badge;
+  const cc = CORP_COLORS.find(c=>c.id===prev.colorId) || CORP_COLORS[0];
+  const asp    = 2.0;
+  const baseR  = Math.round(Math.min(CW,CH) * 0.10);
+  const hw     = baseR * asp;
+  S.badge = {
+    kind:'pill', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
+    fgGradient:false,
+    x: Math.max(hw+5, Math.min(CW-hw-5, CW/2)),
+    y: Math.max(baseR+5, Math.min(CH-baseR-5, prev.y)),
+    r: baseR, baseR: baseR, aspect: asp,
+    text1:prev.text1, text2:prev.text2, iconUrl:prev.iconUrl, iconImg:prev.iconImg, iconBounds:prev.iconBounds,
+  };
+  syncFormButtons(); syncBadgeProps(); render();
+});
+
+// Pill aspect (width) slider
+const pillAspSl = document.getElementById('pillAspectSlider');
+if (pillAspSl) {
+  pillAspSl.addEventListener('input',e=>{
+    if (!S.badge || S.badge.kind!=='pill') return;
+    const asp = +e.target.value / 10;
+    S.badge.aspect = asp;
+    const vl = document.getElementById('pillAspectVal');
+    if (vl) vl.textContent = asp.toFixed(1)+'×';
+    render();
+  });
+}
 
 ['txt1','txt2'].forEach(id=>{
   document.getElementById(id).addEventListener('input',e=>{
@@ -1828,6 +1983,23 @@ document.getElementById('iconPosSlider').addEventListener('input', e => {
 document.getElementById('stripeToggle').addEventListener('click',()=>{
   S.stripe=!S.stripe;
   document.getElementById('stripeToggle').classList.toggle('on',S.stripe);
+  const sv=S.stripe?'':'none';
+  document.getElementById('stripeYRow').style.display=sv;
+  document.getElementById('stripeYSlider').style.display=sv;
+  document.getElementById('stripeAngleRow').style.display=sv;
+  document.getElementById('stripeAngleSlider').style.display=sv;
+  render();
+});
+
+document.getElementById('stripeYSlider').addEventListener('input',e=>{
+  S.stripeY=+e.target.value;
+  document.getElementById('stripeYVal').textContent=e.target.value+'%';
+  render();
+});
+
+document.getElementById('stripeAngleSlider').addEventListener('input',e=>{
+  S.stripeAngle=+e.target.value;
+  document.getElementById('stripeAngleVal').textContent=e.target.value+'°';
   render();
 });
 document.getElementById('shadowSlider').addEventListener('input',e=>{
@@ -2035,6 +2207,8 @@ function pushUndo() {
     productImg:    S.product?.img      || null,
     product2Img:   S.product2?.img     || null,
     stripe: S.stripe,
+    stripeY: S.stripeY,
+    stripeAngle: S.stripeAngle,
     bg:     S.bg,
     format: S.format,
   };
@@ -2055,6 +2229,17 @@ function applyUndo() {
   if (snap.product2) { snap.product2.img  = snap.product2Img;  S.product2 = snap.product2; }
   else               S.product2 = null;
   S.stripe = snap.stripe;
+  S.stripeY = snap.stripeY ?? 95;
+  S.stripeAngle = snap.stripeAngle ?? 0;
+  document.getElementById('stripeYSlider').value=Math.round(S.stripeY);
+  document.getElementById('stripeYVal').textContent=Math.round(S.stripeY)+'%';
+  document.getElementById('stripeAngleSlider').value=S.stripeAngle;
+  document.getElementById('stripeAngleVal').textContent=S.stripeAngle+'°';
+  const sv2=S.stripe?'':'none';
+  document.getElementById('stripeYRow').style.display=sv2;
+  document.getElementById('stripeYSlider').style.display=sv2;
+  document.getElementById('stripeAngleRow').style.display=sv2;
+  document.getElementById('stripeAngleSlider').style.display=sv2;
   S.bg     = snap.bg;
   S.selected = null;
   // Sync p1 sliders
@@ -2249,6 +2434,24 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
 
   drawBg(c,W,H);
 
+  // Stripe: above background, below product images
+  if (S.stripe) {
+    const sh=Math.max(4,Math.round(H*.022));
+    const cy=Math.round((S.stripeY??95)/100*H);
+    const angle=(S.stripeAngle??0)*Math.PI/180;
+    const diag=Math.sqrt(W*W+H*H)+4;
+    c.save();
+    c.beginPath(); c.rect(0,0,W,H); c.clip();
+    c.translate(W/2, cy);
+    c.rotate(angle);
+    const g=c.createLinearGradient(-diag/2,0,diag/2,0);
+    g.addColorStop(0.07,'#F20505');
+    g.addColorStop(0.29,'#0445C8');
+    g.addColorStop(0.72,'#1FB9FF');
+    c.fillStyle=g; c.fillRect(-diag/2,-sh/2,diag,sh);
+    c.restore();
+  }
+
   if (S.product) {
     const p=S.product;
     c.save(); c.globalAlpha=p.opacity;
@@ -2273,15 +2476,6 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
     if (br2!==100||con2!==100||sat2!==100) c.filter=`brightness(${br2}%) contrast(${con2}%) saturate(${sat2}%)`;
     c.drawImage(p.img, p.x*scX, p.y*scY, p.w*scX, p.h*scY);
     c.restore();
-  }
-
-  if (S.stripe) {
-    const sh=Math.max(4,Math.round(H*.022)), sy=H-sh;
-    const g=c.createLinearGradient(0,sy,W,sy);
-    g.addColorStop(0.07,'#F20505');
-    g.addColorStop(0.29,'#0445C8');
-    g.addColorStop(0.72,'#1FB9FF');
-    c.fillStyle=g; c.fillRect(0,sy,W,sh);
   }
 
   if (S.badge) drawBadge(c,S.badge,scX,scY);
@@ -2461,6 +2655,108 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
     : (b.fg || '#ffffff');
   drawIconTinted(c, img, cx - iw/2, iconCY - ih/2, iw, ih, tint, sx, sy, nw, nh);
 }
+// Truncate text with ellipsis to fit maxW
+function truncateText(c, text, maxW) {
+  if (c.measureText(text).width <= maxW) return text;
+  let lo = 0, hi = text.length;
+  const ell = c.measureText('…').width;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (c.measureText(text.slice(0, mid)).width + ell <= maxW) lo = mid;
+    else hi = mid - 1;
+  }
+  return text.slice(0, lo) + '…';
+}
+
+// Horizontal layout for pill badge: [icon] [text block]
+function drawPillContent(c, b, cx, cy, r, hw, t1, t2) {
+  const hasIcon = !!(b.iconImg);
+  const hasText = !!(t1 || t2);
+  if (!hasIcon && !hasText) return;
+
+  c.save();
+
+  // ── Re-apply pill clip so text never overflows ──
+  c.beginPath();
+  if (c.roundRect) {
+    c.roundRect(cx - hw, cy - r, hw * 2, r * 2, r);
+  } else {
+    c.arc(cx - hw + r, cy, r, Math.PI/2, -Math.PI/2);
+    c.arc(cx + hw - r, cy, r, -Math.PI/2, Math.PI/2);
+    c.closePath();
+  }
+  c.clip();
+
+  c.textBaseline = 'middle';
+  c.textAlign    = 'left';
+
+  const iSize = r * 0.95;
+  const gap   = r * 0.28;
+  const fs1   = Math.round(r * 0.45);
+  const fs2   = Math.round(r * 0.45);
+  const lineH = r * 0.62;
+
+  // Available horizontal space (inside rounded ends)
+  const innerL = cx - hw + r * 0.5;
+  const innerR = cx + hw - r * 0.5;
+  const innerW = innerR - innerL;
+
+  const iconBlockW = hasIcon ? iSize + gap : 0;
+  const maxTextW   = Math.max(20, innerW - iconBlockW);
+
+  // Measure & clamp text
+  let textW = 0;
+  let s1 = t1, s2 = t2;
+  if (t1) { c.font=`800 ${fs1}px ${S.fontName}`; s1 = truncateText(c, t1, maxTextW); textW = Math.max(textW, c.measureText(s1).width); }
+  if (t2) { c.font=`800 ${fs2}px ${S.fontName}`; s2 = truncateText(c, t2, maxTextW); textW = Math.max(textW, c.measureText(s2).width); }
+
+  const totalW = iconBlockW + textW;
+
+  // Center block inside pill (clamped to inner area)
+  let blockX = cx - totalW / 2;
+  blockX = Math.max(innerL, Math.min(innerR - totalW, blockX - r * 0.15));
+
+  // ── Draw icon ──
+  if (hasIcon) {
+    const img    = b.iconImg;
+    const bounds = b.iconBounds;
+    const nw = bounds ? bounds.w : (img.naturalWidth  || img.width  || 1);
+    const nh = bounds ? bounds.h : (img.naturalHeight || img.height || 1);
+    const sx = bounds?.x ?? 0, sy = bounds?.y ?? 0;
+    const scale = Math.min(iSize / nw, iSize / nh);
+    const iw = nw * scale, ih = nh * scale;
+    const tint = b.iconTint ?? b.fg ?? '#ffffff';
+    drawIconTinted(c, img, blockX + (iSize - iw) / 2, cy - ih / 2, iw, ih, tint || '#ffffff', sx, sy, nw, nh);
+  }
+
+  // ── Draw text ──
+  if (hasText) {
+    const textX = blockX + iconBlockW;
+    const fg    = b.fg || '#ffffff';
+    // measure text width for gradient centering
+    let maxTW = 0;
+    if (s1) { c.font=`800 ${fs1}px ${S.fontName}`; maxTW = Math.max(maxTW, c.measureText(s1).width); }
+    if (s2) { c.font=`800 ${fs2}px ${S.fontName}`; maxTW = Math.max(maxTW, c.measureText(s2).width); }
+    // Center of text block for gradient
+    const textCX = textX + maxTW / 2;
+    const halfSpan = maxTW / 2;
+    if (s1 && s2) {
+      c.font = `800 ${fs1}px ${S.fontName}`;
+      c.fillStyle = makeTextFill(c, b, textCX, cy, r, halfSpan);
+      c.fillText(s1, textX, cy - lineH / 2);
+      c.font = `800 ${fs2}px ${S.fontName}`;
+      c.fillStyle = makeTextFill(c, b, textCX, cy, r, halfSpan);
+      c.fillText(s2, textX, cy + lineH / 2);
+    } else {
+      c.font = `800 ${fs1}px ${S.fontName}`;
+      c.fillStyle = makeTextFill(c, b, textCX, cy, r, halfSpan);
+      c.fillText(s1 || s2, textX, cy);
+    }
+  }
+
+  c.restore();
+}
+
 function drawBadge(c,b,scX,scY) {
   const cx=b.x*scX, cy=b.y*scY, r=b.r*Math.min(scX,scY);
   const t1=b.text1||'', t2=b.text2||'';
@@ -2476,6 +2772,62 @@ function drawBadge(c,b,scX,scY) {
     applyCircleFill(c,cx,cy,r,b.fill);
     if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
     drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+
+  } else if (b.kind==='pill') {
+    const hw=r*(b.aspect||2.0);
+    // Draw pill using clip path for clean rendering
+    c.save();
+    c.beginPath();
+    if (c.roundRect) {
+      c.roundRect(cx-hw, cy-r, hw*2, r*2, r);
+    } else {
+      // Fallback
+      const d=r;
+      c.moveTo(cx-hw+d, cy-r);
+      c.lineTo(cx+hw-d, cy-r);
+      c.quadraticCurveTo(cx+hw, cy-r, cx+hw, cy-r+d);
+      c.lineTo(cx+hw, cy+r-d);
+      c.quadraticCurveTo(cx+hw, cy+r, cx+hw-d, cy+r);
+      c.lineTo(cx-hw+d, cy+r);
+      c.quadraticCurveTo(cx-hw, cy+r, cx-hw, cy+r-d);
+      c.lineTo(cx-hw, cy-r+d);
+      c.quadraticCurveTo(cx-hw, cy-r, cx-hw+d, cy-r);
+      c.closePath();
+    }
+    c.clip();
+    // Fill
+    if (b.fill?.type==='solid') {
+      c.fillStyle=b.fill.color;
+      c.fillRect(cx-hw, cy-r, hw*2, r*2);
+    } else if (b.fill?.type==='linear') {
+      const ang=((b.fill.angle||0)+90)*Math.PI/180;
+      const g=c.createLinearGradient(
+        cx+Math.cos(ang+Math.PI)*hw, cy+Math.sin(ang+Math.PI)*r,
+        cx+Math.cos(ang)*hw,         cy+Math.sin(ang)*r
+      );
+      g.addColorStop(0,b.fill.a||b.fill.stops?.[0]?.c||'#0028A5');
+      g.addColorStop(1,b.fill.b||b.fill.stops?.[1]?.c||'#1FB9FF');
+      c.fillStyle=g;
+      c.fillRect(cx-hw, cy-r, hw*2, r*2);
+    } else if (b.fill?.type==='blob') {
+      // Base colour + screen-blend spots (same as circle)
+      c.fillStyle=b.fill.base||'#0028A5';
+      c.fillRect(cx-hw, cy-r, hw*2, r*2);
+      const prev=c.globalCompositeOperation;
+      c.globalCompositeOperation='screen';
+      for (const sp of (b.fill.spots||[])) {
+        const sx=cx-hw+sp.x*hw*2, sy=cy-r+sp.y*r*2, sr=sp.r*Math.max(hw,r)*2;
+        const grd=c.createRadialGradient(sx,sy,0,sx,sy,sr);
+        grd.addColorStop(0,sp.col); grd.addColorStop(1,'rgba(0,0,0,0)');
+        c.fillStyle=grd; c.fillRect(cx-hw, cy-r, hw*2, r*2);
+      }
+      c.globalCompositeOperation=prev;
+    } else {
+      c.fillStyle=b.fill?.color||'#0028A5';
+      c.fillRect(cx-hw, cy-r, hw*2, r*2);
+    }
+    c.restore();
+    drawPillContent(c,b,cx,cy,r,r*(b.aspect||2.0),t1,t2);
 
   } else if (b.kind==='image') {
     const img=imgCache[b.shapeId];
@@ -2689,6 +3041,7 @@ S.label.text1 = document.getElementById('labelTxt1').value;
 S.label.text2 = document.getElementById('labelTxt2').value;
 S.label.color = document.getElementById('labelColor').value;
 S.selected = 'label';
+autoExpandSections('label');
 syncLabelControls();
 render();
 };
@@ -2729,17 +3082,24 @@ const rect = btn.getBoundingClientRect();
 picker.style.top = (rect.bottom + 4 + window.scrollY) + 'px';
 picker.style.left = (rect.left + window.scrollX) + 'px';
 (S.iconLib || []).forEach(ic => {
+  const cell = document.createElement('div');
+  cell.title = ic.name;
+  cell.style.cssText = 'width:36px;height:36px;background:#22224a;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .1s;';
+  cell.onmouseenter = () => cell.style.background = '#3a3a6a';
+  cell.onmouseleave = () => cell.style.background = '#22224a';
   const img = document.createElement('img');
-  img.src = ic.dataUrl; img.title = ic.name;
-  img.style.cssText = 'width:32px;height:32px;object-fit:contain;cursor:pointer;border-radius:4px;background:#22224a;padding:3px;filter:brightness(0) invert(1);';
-  img.onclick = () => {
+  img.src = ic.dataUrl;
+  img.style.cssText = 'width:24px;height:24px;object-fit:contain;filter:brightness(0) invert(1);display:block;';
+  img.onerror = () => { img.style.display='none'; };
+  cell.appendChild(img);
+  cell.onclick = () => {
     const lb = getOrCreateLabel();
     lb.iconUrl = ic.dataUrl;
     const im = new Image(); im.onload = () => { lb.iconImg = im; syncLabelControls(); render(); };
     im.src = ic.dataUrl;
     picker.remove();
   };
-  picker.appendChild(img);
+  picker.appendChild(cell);
 });
 if (!(S.iconLib||[]).length) {
   picker.style.gridTemplateColumns = '1fr';
@@ -2905,6 +3265,35 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // Check access on load (deferred)
 setTimeout(checkSdxAccess, 600);
 
+
+
+// ── Auto-expand sections based on canvas selection ────────────────────
+const SECTION_MAP = {
+  'product':  ['Bild', 'Bild-Filter', 'Crop'],
+  'product2': ['Zweites Bild'],
+  'badge':    ['Ribbon', 'Icon', 'Text'],
+  'label':    ['Label (frei platzierbar)'],
+  'stripe':   ['Brand & Effekte'],
+};
+// Always keep these sections expanded
+const ALWAYS_OPEN = ['Bild', 'Label'];
+
+let _lastAutoSel = undefined;
+function autoExpandSections(sel) {
+  if (sel === _lastAutoSel) return;
+  _lastAutoSel = sel;
+  if (!sel) return;
+
+  const toExpand = [...(SECTION_MAP[sel] || []), ...ALWAYS_OPEN];
+  document.querySelectorAll('.prop-section').forEach(section => {
+    const titleEl = section.querySelector('.prop-title');
+    if (!titleEl) return;
+    const text = titleEl.textContent.replace(/[▾▸◂]/g,'').trim();
+    if (text.startsWith('Export')) return;
+    const should = toExpand.some(t => text.includes(t));
+    section.classList.toggle('collapsed', !should);
+  });
+}
 
 // ── Collapsible prop sections ─────────────────────────────────────────
 document.querySelectorAll('.prop-title').forEach(title => {
