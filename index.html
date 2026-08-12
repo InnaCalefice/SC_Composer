@@ -56,7 +56,7 @@ header .spacer { flex:1; }
 
 /* Color palette (4-col circles) */
 .palette-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
-.pal-swatch { aspect-ratio:1; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; overflow:hidden; transition:all .15s; position:relative; }
+.pal-swatch { aspect-ratio:1; border-radius:50%; border:2px solid var(--border); cursor:pointer; overflow:hidden; transition:all .15s; position:relative; }
 .pal-swatch:hover { transform:scale(1.1); border-color:var(--accent); }
 .pal-swatch.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(99,102,241,.35); }
 .pal-swatch canvas { width:100%; height:100%; display:block; border-radius:50%; }
@@ -83,10 +83,10 @@ header .spacer { flex:1; }
 #mainCanvas { border-radius:10px; box-shadow:0 0 0 1px var(--border),0 20px 60px rgba(0,0,0,.7); user-select:none; -webkit-user-drag:none; cursor:default; max-width:100%; max-height:calc(100% - 55px); }
 
 /* ── Properties ── */
-.props { width:268px; flex-shrink:0; background:var(--surf); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; padding:12px; gap:13px; }
+.props { width:292px; flex-shrink:0; background:var(--surf); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; padding:14px; gap:14px; }
 .prop-title { font-size:12px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; color:#c8d0f0; margin:-2px -12px 6px; padding:7px 12px 7px 12px; background:rgba(255,255,255,0.07); border-left:4px solid #0028A5; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; }
-.prop-title::after { content:'▾'; font-size:14px; color:#aab; transition:transform .2s; }
-.prop-title.collapsed::after { transform:rotate(-90deg); }
+.prop-title::after { content:'▾'; font-size:17px; color:#bbc; transition:transform .2s; }
+.prop-section.collapsed .prop-title::after { transform:rotate(-90deg); }
 .prop-section.collapsed > *:not(.prop-title) { display:none !important; }
 .crop-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
 .crop-col { display:flex; flex-direction:column; gap:2px; }
@@ -94,24 +94,24 @@ header .spacer { flex:1; }
 [data-tip] { position:relative; }
 [data-tip]::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 5px); left:50%; transform:translateX(-50%); background:#1a1a2e; color:#e0e0f0; font-size:10px; white-space:nowrap; padding:3px 7px; border-radius:4px; border:1px solid #333; pointer-events:none; opacity:0; transition:opacity .15s; z-index:100; }
 [data-tip]:hover::after { opacity:1; }
-.prop-section { display:flex; flex-direction:column; gap:7px; }
+.prop-section { display:flex; flex-direction:column; gap:8px; }
 
 .product-zone { border:2px dashed #0028A5; border-radius:10px; padding:16px 11px; text-align:center; cursor:pointer; position:relative; transition:all .15s; color:var(--text); font-size:12px; line-height:1.6; background:rgba(0,40,165,0.07); }
 .product-zone:hover { border-color:var(--accent); background:rgba(99,102,241,0.1); }
 .product-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 .product-zone img { width:100%; height:80px; object-fit:contain; margin-bottom:5px; border-radius:4px; display:none; background:repeating-conic-gradient(#181828 0% 25%,#0f0f1e 0% 50%) / 8px 8px; }
 
-.pi { width:100%; padding:7px 9px; background:var(--surf2); border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:12px; outline:none; transition:border-color .15s; }
+.pi { width:100%; padding:8px 10px; background:var(--surf2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:12.5px; outline:none; transition:border-color .15s; } .pi:focus { border-color:var(--accent); }
 .pi:focus { border-color:var(--accent); }
 .pi::placeholder { color:var(--text2); }
 
-.prop-row { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.prop-row { display:flex; align-items:center; justify-content:space-between; gap:6px; min-height:20px; }
 .prop-label { font-size:13px; color:var(--text); flex-shrink:0; }
 .prop-val { font-size:12px; color:var(--accent); font-variant-numeric:tabular-nums; font-weight:600; }
 
-input[type="range"] { -webkit-appearance:none; width:100%; height:3px; border-radius:3px; background:var(--border); outline:none; cursor:pointer; margin-top:4px; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--accent); cursor:pointer; }
-input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; }
+input[type="range"] { -webkit-appearance:none; width:100%; height:4px; border-radius:4px; background:var(--border); outline:none; cursor:pointer; margin-top:6px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 0 3px rgba(99,102,241,.18); transition:box-shadow .15s; }
+input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; }
 
 .toggle-row { display:flex; align-items:center; justify-content:space-between; }
 .toggle { width:30px; height:16px; border-radius:8px; background:var(--border); cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
@@ -193,6 +193,12 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
 
       <div class="lib-divider"></div>
 
+      <!-- AI Labels -->
+      <div class="lib-label">✦ AI Labels</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;" id="aiLabelGrid"></div>
+
+      <div class="lib-divider"></div>
+
       <!-- Custom shape upload -->
       <div class="lib-label">Eigene Ribbons</div>
       <div class="lib-grid" id="customShapeGrid"></div>
@@ -219,6 +225,7 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
       </div>
       <div id="sdxUnavail" style="display:none;font-size:10px;color:#888;padding:6px;background:rgba(255,255,255,0.04);border-radius:6px;text-align:center;">
         Nur im Swisscom-Netzwerk verfügbar
+        <br><button id="sdxRetryBtn" onclick="sdxAvailable=null;checkSdxAccess();" style="margin-top:6px;padding:3px 10px;border:1px solid #444;background:#2a2a3a;color:#aab;border-radius:5px;font-size:10px;cursor:pointer;">↺ Verbindung prüfen</button>
       </div>
       <div id="sdxAvail" style="display:none;">
         <input class="pi" id="sdxSearch" placeholder="Icon suchen…" style="margin-bottom:6px;">
@@ -345,14 +352,23 @@ input[type="range"]::-moz-range-thumb { width:13px; height:13px; border-radius:5
     <div class="prop-section">
       <div class="prop-title">Ribbon</div>
       <div class="prop-row" style="margin-bottom:6px;"><span class="prop-label">Form</span>
-        <div style="display:flex;gap:6px;align-items:center;">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
           <div id="formCircleBtn" title="Kreis" style="width:28px;height:28px;border-radius:50%;background:#0028A5;cursor:pointer;border:2px solid #6366f1;"></div>
-          <div id="formPillBtn" title="Pillenform" style="width:48px;height:28px;border-radius:14px;background:#0028A5;cursor:pointer;border:2px solid transparent;"></div>
+          <div id="formStickerBtn" title="Organische Form" style="width:44px;height:26px;border-radius:8px;background:#0028A5;cursor:pointer;border:2px solid transparent;"></div>
+          <label title="Eigene SVG hochladen" style="width:36px;height:26px;border-radius:6px;background:#22224a;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#aab;letter-spacing:.4px;">
+            SVG<input type="file" id="svgShapeInput" accept=".svg,image/svg+xml" style="display:none">
+          </label>
+          <button id="svgShapeClear" style="display:none;padding:2px 6px;border:none;background:#3a1a1a;color:#e06060;border-radius:5px;font-size:11px;cursor:pointer;">✕</button>
         </div>
       </div>
-      <div id="pillAspectRow" style="display:none;">
-        <div class="prop-row"><span class="prop-label">Breite</span><span class="prop-val" id="pillAspectVal">2.0×</span></div>
-        <input type="range" id="pillAspectSlider" min="10" max="50" value="20">
+      <!-- Built-in SVG shape library -->
+      <div class="prop-row" style="margin-bottom:4px;"><span class="prop-label">Vorlagen</span></div>
+      <div id="builtinShapeGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;"></div>
+      <div id="stickerRows" style="display:none;">
+        <div class="prop-row"><span class="prop-label">Breite</span><span class="prop-val" id="stickerAspectVal">2.5×</span></div>
+        <input type="range" id="stickerAspectSlider" min="10" max="60" value="25">
+        <div id="stickerCornerRow" class="prop-row" style="margin-top:6px;"><span class="prop-label">Eckenradius</span><span class="prop-val" id="stickerCornerVal">38%</span></div>
+        <input id="stickerCornerSlider" type="range" min="5" max="98" value="38">
       </div>
       <div class="prop-row"><span class="prop-label">Größe</span><span class="prop-val" id="shapeSizeVal">100%</span></div>
       <input type="range" id="shapeSize" min="20" max="250" value="100">
@@ -743,7 +759,7 @@ function rebuildPalette() {
       wrap.appendChild(c);
     }
     wrap.onclick=()=>{
-      if (S.badge?.kind==='pill') addPillBadge(cc);
+      if (S.badge?.kind==='sticker') addStickerBadge(cc);
       else addCircleBadge(cc);
     };
     grid.appendChild(wrap);
@@ -805,6 +821,8 @@ function syncBadgeProps() {
   if (typeof updateIconColorPalette === 'function') updateIconColorPalette();
   // Form toggle buttons
   if (typeof syncFormButtons === 'function') syncFormButtons();
+  if (typeof rebuildBuiltinShapes === 'function') rebuildBuiltinShapes();
+  if (typeof rebuildAiLabels === 'function') rebuildAiLabels();
 }
 
 
@@ -877,23 +895,212 @@ function addPillBadge(cc) {
   syncFormButtons(); render();
 }
 
+function addStickerBadge(cc) {
+  pushUndo();
+  const prev = S.badge;
+  if (prev && prev.kind === 'sticker') {
+    prev.colorId = cc.id;
+    prev.fill    = JSON.parse(JSON.stringify(cc.fill));
+    prev.fg      = cc.fg;
+  } else {
+    const baseR  = Math.round(Math.min(CW,CH) * 0.10);
+    const aspect = prev?.kind==='sticker' ? (prev.aspect||2.5) : 2.5;
+    const corner = prev?.kind==='sticker' ? (prev.cornerFrac||0.42) : 0.42;
+    const hw     = baseR * aspect;
+    S.badge = {
+      kind: 'sticker',
+      colorId: cc.id,
+      fill: JSON.parse(JSON.stringify(cc.fill)),
+      fg:   cc.fg,
+      fgGradient: false,
+      x: Math.max(hw+5, Math.min(CW-hw-5, prev?.x ?? CW/2)),
+      y: Math.max(baseR+5, Math.min(CH-baseR-5, prev?.y ?? CH/2)),
+      r: baseR, baseR: baseR, aspect: aspect, cornerFrac: corner||0.42,
+      text1: document.getElementById('txt1').value,
+      text2: document.getElementById('txt2').value,
+      iconUrl:    prev?.iconUrl,
+      iconImg:    prev?.iconImg,
+      iconBounds: prev?.iconBounds,
+    };
+  }
+  syncBadgeProps();
+  S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  syncFormButtons(); render();
+}
+
 function syncFormButtons() {
-  const circleBtn = document.getElementById('formCircleBtn');
-  const pillBtn   = document.getElementById('formPillBtn');
-  const pillRow   = document.getElementById('pillAspectRow');
-  if (!circleBtn || !pillBtn) return;
-  const isPill = S.badge?.kind === 'pill';
-  circleBtn.style.borderColor = isPill ? 'transparent' : '#6366f1';
-  pillBtn.style.borderColor   = isPill ? '#6366f1'     : 'transparent';
-  if (pillRow) pillRow.style.display = isPill ? 'block' : 'none';
-  if (isPill && S.badge) {
-    const asp = S.badge.aspect || 2.0;
-    const sl = document.getElementById('pillAspectSlider');
-    const vl = document.getElementById('pillAspectVal');
-    if (sl) sl.value = Math.round(asp * 10);
-    if (vl) vl.textContent = asp.toFixed(1) + '×';
+  const circleBtn  = document.getElementById('formCircleBtn');
+  const stickerBtn = document.getElementById('formStickerBtn');
+  const stickerRows= document.getElementById('stickerRows');
+  if (!circleBtn) return;
+  const kind = S.badge?.kind || 'circle';
+  circleBtn.style.borderColor  = kind==='circle'  ? '#6366f1' : 'transparent';
+  if (stickerBtn) stickerBtn.style.borderColor = kind==='sticker' ? '#6366f1' : 'transparent';
+  if (stickerRows) stickerRows.style.display = kind==='sticker' ? 'block' : 'none';
+  const svgClear = document.getElementById('svgShapeClear');
+  if (svgClear) svgClear.style.display = kind==='svgshape' ? 'inline-block' : 'none';
+  if (kind==='sticker' && S.badge) {
+    const asp = S.badge.aspect || 2.5;
+    const cr  = S.badge.cornerFrac || 0.30;
+    const asl = document.getElementById('stickerAspectSlider');
+    const avl = document.getElementById('stickerAspectVal');
+    const csl = document.getElementById('stickerCornerSlider');
+    const cvl = document.getElementById('stickerCornerVal');
+    if (asl) asl.value = Math.round(asp * 10);
+    if (avl) avl.textContent = asp.toFixed(1) + '×';
+    if (csl) csl.value = Math.round(cr * 100);
+    if (csl) csl.value = Math.round(cr * 100); if (cvl) cvl.textContent = Math.round(cr * 100) + '%';
   }
 }
+
+// ────────────────────────────────────────────────────
+// BUILT-IN BADGE SHAPES (SVG, eingebettet)
+// ────────────────────────────────────────────────────
+function makeSvgDataUrl(svgStr) {
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+}
+
+const BUILTIN_SHAPES = [
+  {id:'bs-sw-xs', label:'Mini', ar:1.500, svg:`<svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 0 L90 0 C120 0 120 17.912 120 40.0 C120 62.088 120 80 90 80 L30 80 C0 80 0 62.088 0 40.0 C0 17.912 0 0 30 0 Z" fill="white"/></svg>`},
+  {id:'bs-sw-s', label:'Small', ar:2.000, svg:`<svg width="160" height="80" viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40 0 L120 0 C160 0 160 17.912 160 40.0 C160 62.088 160 80 120 80 L40 80 C0 80 0 62.088 0 40.0 C0 17.912 0 0 40 0 Z" fill="white"/></svg>`},
+  {id:'bs-sw-m', label:'Medium', ar:2.500, svg:`<svg width="200" height="80" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40 0 L160 0 C200 0 200 17.912 200 40.0 C200 62.088 200 80 160 80 L40 80 C0 80 0 62.088 0 40.0 C0 17.912 0 0 40 0 Z" fill="white"/></svg>`},
+  {id:'bs-sw-l', label:'Large', ar:3.000, svg:`<svg width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40 0 L200 0 C240 0 240 17.912 240 40.0 C240 62.088 240 80 200 80 L40 80 C0 80 0 62.088 0 40.0 C0 17.912 0 0 40 0 Z" fill="white"/></svg>`},
+];
+
+// Preload all built-in shape images
+BUILTIN_SHAPES.forEach(s => {
+  s.dataUrl = makeSvgDataUrl(s.svg);
+  const img = new Image(); img.src = s.dataUrl;
+  img.onload = () => { s.img = img; };
+  s.img = img; // assign even before load for synchronous access
+});
+
+function applyBuiltinShape(shape) {
+  pushUndo();
+  const prev = S.badge;
+  const cc = CORP_COLORS.find(c => c.id === prev?.colorId) || CORP_COLORS[0];
+  const baseR = Math.round(Math.min(CW, CH) * 0.12);
+  S.badge = {
+    kind: 'svgshape',
+    colorId: cc.id,
+    fill: JSON.parse(JSON.stringify(cc.fill)),
+    fg: cc.fg,
+    fgGradient: false,
+    svgUrl: shape.dataUrl,
+    svgImg: shape.img,
+    svgAr: shape.ar,
+    aspect: shape.ar,
+    builtinId: shape.id,
+    x: prev?.x ?? CW / 2,
+    y: prev?.y ?? CH / 2,
+    r: baseR, baseR: baseR,
+    text1: document.getElementById('txt1').value,
+    text2: document.getElementById('txt2').value,
+    iconUrl: prev?.iconUrl, iconImg: prev?.iconImg, iconBounds: prev?.iconBounds,
+  };
+  document.getElementById('svgShapeClear').style.display = 'inline-block';
+  syncFormButtons(); syncBadgeProps(); render();
+}
+
+function rebuildBuiltinShapes() {
+  const grid = document.getElementById('builtinShapeGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  BUILTIN_SHAPES.forEach(shape => {
+    const cell = document.createElement('div');
+    const isActive = S.badge?.kind === 'svgshape' && S.badge?.builtinId === shape.id;
+    cell.style.cssText = `background:#22224a;border-radius:5px;padding:3px;cursor:pointer;border:2px solid ${isActive?'#6366f1':'transparent'};transition:border-color .1s;display:flex;flex-direction:column;align-items:center;gap:2px;`;
+    cell.title = shape.label;
+    // Mini SVG preview
+    const preview = document.createElement('div');
+    const ar = shape.ar;
+    const pw = 48, ph = Math.round(pw / ar);
+    preview.style.cssText = `width:${pw}px;height:${Math.min(ph,32)}px;display:flex;align-items:center;justify-content:center;`;
+    const img = document.createElement('img');
+    // White shape on dark bg — invert
+    img.src = shape.dataUrl;
+    img.style.cssText = `max-width:${pw}px;max-height:32px;object-fit:contain;filter:brightness(0) invert(1);opacity:.7;`;
+    preview.appendChild(img);
+    const lbl = document.createElement('div');
+    lbl.textContent = shape.label;
+    lbl.style.cssText = 'font-size:8px;color:#8890b0;letter-spacing:.3px;text-align:center;';
+    cell.appendChild(preview);
+    cell.appendChild(lbl);
+    cell.onmouseenter = () => { if (!isActive) cell.style.borderColor='#4a4f7a'; };
+    cell.onmouseleave = () => { if (!isActive) cell.style.borderColor='transparent'; };
+    cell.onclick = () => { applyBuiltinShape(shape); rebuildBuiltinShapes(); };
+    grid.appendChild(cell);
+  });
+}
+
+
+// ────────────────────────────────────────────────────
+// AI LABELS (eingebettet)
+// ────────────────────────────────────────────────────
+const AI_LABELS = [
+  {id:'ai-pos', label:'Positive', ar:2.3929, svg:`<svg width="67" height="28" viewBox="0 0 67 28" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="67" height="28" rx="12" fill="#001155"/> <path d="M20.005 14.3795L22.888 13.313C23.0775 13.243 23.2265 13.094 23.297 12.904L24.3635 10.021C24.408 9.90001 24.5235 9.82001 24.652 9.82001C24.7805 9.82001 24.896 9.90001 24.9405 10.021L26.007 12.904C26.077 13.0935 26.226 13.2425 26.416 13.313L29.299 14.3795C29.42 14.424 29.5 14.5395 29.5 14.668C29.5 14.7965 29.42 14.912 29.299 14.9565L26.416 16.023C26.2265 16.093 26.0775 16.242 26.007 16.432L24.9405 19.315C24.896 19.436 24.7805 19.516 24.652 19.516C24.5235 19.516 24.408 19.436 24.3635 19.315L23.297 16.432C23.227 16.2425 23.078 16.0935 22.888 16.023L20.005 14.9565C19.884 14.912 19.804 14.7965 19.804 14.668C19.804 14.5395 19.884 14.424 20.005 14.3795Z" fill="white"/> <path d="M18.701 10.5355L19.991 10.058C20.0295 10.044 20.0595 10.014 20.0735 9.97551L20.551 8.68501C20.5955 8.56401 20.711 8.48401 20.8395 8.48401C20.968 8.48401 21.0835 8.56401 21.128 8.68501L21.6055 9.97551C21.6195 10.014 21.6495 10.044 21.688 10.058L22.9785 10.5355C23.0995 10.58 23.1795 10.6955 23.1795 10.824C23.1795 10.9525 23.0995 11.068 22.9785 11.1125L21.688 11.59C21.6495 11.604 21.6195 11.6345 21.6055 11.6725L21.128 12.963C21.0835 13.084 20.968 13.164 20.8395 13.164C20.711 13.164 20.5955 13.084 20.551 12.963L20.0735 11.673C20.0595 11.6345 20.0295 11.6045 19.991 11.5905L18.701 11.113C18.58 11.0685 18.5 10.953 18.5 10.8245C18.5 10.696 18.58 10.58 18.701 10.5355Z" fill="white"/> <path d="M41.328 11.56C41.2427 11.2933 41.1573 11.0427 41.072 10.808C40.9973 10.5627 40.9333 10.3227 40.88 10.088H40.848C40.7413 10.536 40.5973 11.0213 40.416 11.544L39.12 15.224H42.624L41.328 11.56ZM43.888 19L43.072 16.616H38.688L37.856 19H36.096L39.936 8.2H41.936L45.824 19H43.888ZM47.1699 19V8.2H48.9139V19H47.1699Z" fill="white"/> </svg>`},
+  {id:'ai-neg', label:'Negative', ar:2.3929, svg:`<svg width="67" height="28" viewBox="0 0 67 28" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="67" height="28" rx="12" fill="white"/> <path d="M20.005 14.3795L22.888 13.313C23.0775 13.243 23.2265 13.094 23.297 12.904L24.3635 10.021C24.408 9.90001 24.5235 9.82001 24.652 9.82001C24.7805 9.82001 24.896 9.90001 24.9405 10.021L26.007 12.904C26.077 13.0935 26.226 13.2425 26.416 13.313L29.299 14.3795C29.42 14.424 29.5 14.5395 29.5 14.668C29.5 14.7965 29.42 14.912 29.299 14.9565L26.416 16.023C26.2265 16.093 26.0775 16.242 26.007 16.432L24.9405 19.315C24.896 19.436 24.7805 19.516 24.652 19.516C24.5235 19.516 24.408 19.436 24.3635 19.315L23.297 16.432C23.227 16.2425 23.078 16.0935 22.888 16.023L20.005 14.9565C19.884 14.912 19.804 14.7965 19.804 14.668C19.804 14.5395 19.884 14.424 20.005 14.3795Z" fill="#001155"/> <path d="M18.701 10.5355L19.991 10.058C20.0295 10.044 20.0595 10.014 20.0735 9.97551L20.551 8.68501C20.5955 8.56401 20.711 8.48401 20.8395 8.48401C20.968 8.48401 21.0835 8.56401 21.128 8.68501L21.6055 9.97551C21.6195 10.014 21.6495 10.044 21.688 10.058L22.9785 10.5355C23.0995 10.58 23.1795 10.6955 23.1795 10.824C23.1795 10.9525 23.0995 11.068 22.9785 11.1125L21.688 11.59C21.6495 11.604 21.6195 11.6345 21.6055 11.6725L21.128 12.963C21.0835 13.084 20.968 13.164 20.8395 13.164C20.711 13.164 20.5955 13.084 20.551 12.963L20.0735 11.673C20.0595 11.6345 20.0295 11.6045 19.991 11.5905L18.701 11.113C18.58 11.0685 18.5 10.953 18.5 10.8245C18.5 10.696 18.58 10.58 18.701 10.5355Z" fill="#001155"/> <path d="M41.328 11.56C41.2427 11.2933 41.1573 11.0427 41.072 10.808C40.9973 10.5627 40.9333 10.3227 40.88 10.088H40.848C40.7413 10.536 40.5973 11.0213 40.416 11.544L39.12 15.224H42.624L41.328 11.56ZM43.888 19L43.072 16.616H38.688L37.856 19H36.096L39.936 8.2H41.936L45.824 19H43.888ZM47.1699 19V8.2H48.9139V19H47.1699Z" fill="#001155"/> </svg>`},
+  {id:'ai-trans-pos', label:'Transp. Hell', ar:2.3929, svg:`<svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 67 28"> <defs> <style> .st0 { fill: none; stroke: #fff; stroke-miterlimit: 10; } .st1 { opacity: .1; } .st1, .st2 { fill: #fff; } </style> </defs> <rect class="st1" width="67" height="28" rx="12" ry="12"/> <path class="st2" d="M20,14.38l2.88-1.07c.19-.07.34-.22.41-.41l1.07-2.88c.04-.12.16-.2.29-.2s.24.08.29.2l1.07,2.88c.07.19.22.34.41.41l2.88,1.07c.12.04.2.16.2.29s-.08.24-.2.29l-2.88,1.07c-.19.07-.34.22-.41.41l-1.07,2.88c-.04.12-.16.2-.29.2s-.24-.08-.29-.2l-1.07-2.88c-.07-.19-.22-.34-.41-.41l-2.88-1.07c-.12-.04-.2-.16-.2-.29s.08-.24.2-.29Z"/> <path class="st2" d="M18.7,10.54l1.29-.48s.07-.04.08-.08l.48-1.29c.04-.12.16-.2.29-.2s.24.08.29.2l.48,1.29s.04.07.08.08l1.29.48c.12.04.2.16.2.29s-.08.24-.2.29l-1.29.48s-.07.04-.08.08l-.48,1.29c-.04.12-.16.2-.29.2s-.24-.08-.29-.2l-.48-1.29s-.04-.07-.08-.08l-1.29-.48c-.12-.04-.2-.16-.2-.29s.08-.24.2-.29Z"/> <path class="st2" d="M41.33,11.56c-.09-.27-.17-.52-.26-.75-.07-.25-.14-.49-.19-.72h-.03c-.11.45-.25.93-.43,1.46l-1.3,3.68h3.5l-1.3-3.66ZM43.89,19l-.82-2.38h-4.38l-.83,2.38h-1.76l3.84-10.8h2l3.89,10.8h-1.94ZM47.17,19v-10.8h1.74v10.8h-1.74Z"/> <rect class="st0" x=".5" y=".5" width="66" height="27" rx="11.7" ry="11.7"/> </svg>`},
+  {id:'ai-trans-neg', label:'Transp. Dunkel', ar:2.3929, svg:`<svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 67 28"> <defs> <style> .st0 { fill: none; stroke: #015; stroke-miterlimit: 10; } .st1 { fill: #015; } .st2 { fill: #fff; isolation: isolate; opacity: .1; } </style> </defs> <rect class="st2" width="67" height="28" rx="12" ry="12"/> <path class="st1" d="M20,14.38l2.88-1.07c.19-.07.34-.22.41-.41l1.07-2.88c.04-.12.16-.2.29-.2s.24.08.29.2l1.07,2.88c.07.19.22.34.41.41l2.88,1.07c.12.04.2.16.2.29s-.08.24-.2.29l-2.88,1.07c-.19.07-.34.22-.41.41l-1.07,2.88c-.04.12-.16.2-.29.2s-.24-.08-.29-.2l-1.07-2.88c-.07-.19-.22-.34-.41-.41l-2.88-1.07c-.12-.04-.2-.16-.2-.29s.08-.24.2-.29Z"/> <path class="st1" d="M18.7,10.54l1.29-.48s.07-.04.08-.08l.48-1.29c.04-.12.16-.2.29-.2s.24.08.29.2l.48,1.29s.04.07.08.08l1.29.48c.12.04.2.16.2.29s-.08.24-.2.29l-1.29.48s-.07.04-.08.08l-.48,1.29c-.04.12-.16.2-.29.2s-.24-.08-.29-.2l-.48-1.29s-.04-.07-.08-.08l-1.29-.48c-.12-.04-.2-.16-.2-.29s.08-.24.2-.29Z"/> <rect class="st0" x=".5" y=".5" width="66" height="27" rx="11.7" ry="11.7"/> <path class="st1" d="M41.84,11.9c-.09-.27-.17-.52-.26-.75-.07-.25-.14-.49-.19-.72h-.03c-.11.45-.25.93-.43,1.46l-1.3,3.68h3.5l-1.3-3.66h0ZM44.4,19.34l-.82-2.38h-4.38l-.83,2.38h-1.76l3.84-10.8h2l3.89,10.8h-1.94ZM47.68,19.34v-10.8h1.74v10.8h-1.74Z"/> </svg>`},
+];
+
+// Preload AI label images
+AI_LABELS.forEach(al => {
+  al.dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(al.svg);
+  al.img = new Image();
+  al.img.src = al.dataUrl;
+});
+
+function applyAiLabel(al) {
+  pushUndo();
+  const prev = S.badge;
+  const baseR = Math.round(Math.min(CW,CH) * 0.08);
+  S.badge = {
+    kind: 'svgshape',
+    builtinId: al.id,
+    svgUrl: al.dataUrl,
+    svgImg: al.img,
+    svgAr: al.ar,
+    aspect: al.ar,
+    // No fill masking — draw SVG as-is (aiLabel flag)
+    aiLabel: true,
+    x: prev?.x ?? CW * 0.5,
+    y: prev?.y ?? Math.round(Math.min(CW,CH) * 0.12),
+    r: baseR, baseR: baseR,
+    text1: '', text2: '',
+  };
+  S.selected = 'badge';
+  autoExpandSections('badge');
+  syncFormButtons(); syncBadgeProps(); render();
+}
+
+function rebuildAiLabels() {
+  const grid = document.getElementById('aiLabelGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  AI_LABELS.forEach(al => {
+    const wrap = document.createElement('div');
+    const isActive = S.badge?.shapeId === al.id;
+    const bg = (al.id === 'ai-neg') ? '#f0f0f8' : '#22224a';
+    const border = isActive ? '#6366f1' : 'transparent';
+    wrap.style.cssText = 'background:' + bg + ';border-radius:6px;padding:5px;cursor:pointer;border:2px solid ' + border + ';transition:border-color .1s;';
+    wrap.title = al.label;
+    const img = document.createElement('img');
+    img.src = al.dataUrl;
+    img.style.cssText = 'width:100%;height:auto;display:block;border-radius:3px;';
+    wrap.appendChild(img);
+    const lbl = document.createElement('div');
+    lbl.textContent = al.label;
+    lbl.style.cssText = 'font-size:8px;color:#8890b0;text-align:center;margin-top:3px;';
+    wrap.appendChild(lbl);
+    wrap.onmouseenter = () => { if (!isActive) wrap.style.borderColor = '#4a4f7a'; };
+    wrap.onmouseleave = () => { if (!isActive) wrap.style.borderColor = 'transparent'; };
+    wrap.onclick = () => { applyAiLabel(al); rebuildAiLabels(); };
+    grid.appendChild(wrap);
+  });
+}
+
+// ────
 
 // ────────────────────────────────────────────────────
 // SWISSCOM ICONS (embedded from Frontify)
@@ -1332,6 +1539,15 @@ function badgeBounds() {
     const hw=r*(S.badge.aspect||2.0);
     return {x:x-hw,y:y-r,w:hw*2,h:r*2};
   }
+  if (S.badge.kind==='sticker') {
+    const hw=r*(S.badge.aspect||2.5);
+    return {x:x-hw,y:y-r,w:hw*2,h:r*2};
+  }
+  if (S.badge.kind==='svgshape') {
+    const ar=S.badge.aspect||S.badge.svgAr||1;
+    const hw=r*ar, hh=r;
+    return {x:x-hw,y:y-hh,w:hw*2,h:hh*2};
+  }
   return {x:x-r,y:y-r,w:r*2,h:r*2};
 }
 
@@ -1404,7 +1620,7 @@ function hitProduct(mx,my) {
 function hitBadge(mx,my) {
   if (!S.badge) return false;
   const b=badgeBounds();
-  if (S.badge.kind==='image'||S.badge.kind==='pill')
+  if (S.badge.kind==='image'||S.badge.kind==='pill'||S.badge.kind==='sticker'||S.badge.kind==='svgshape')
     return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
   return Math.hypot(mx-S.badge.x,my-S.badge.y)<=S.badge.r*1.2;
 }
@@ -1803,52 +2019,125 @@ document.getElementById('shapeSize').addEventListener('input',e=>{
 
 // Pill form toggle buttons
 document.getElementById('formCircleBtn').addEventListener('click',()=>{
-  if (!S.badge || S.badge.kind==='circle') return;
-  // Switch pill → circle: keep position/size
+  if (S.badge?.kind==='circle') return;
   pushUndo();
   const prev = S.badge;
-  // Find matching color or use first corporate color
-  const cc = CORP_COLORS.find(c=>c.id===prev.colorId) || CORP_COLORS[0];
+  const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
+  const baseR = prev?.baseR || Math.round(Math.min(CW,CH)*.17);
   S.badge = {
     kind:'circle', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
-    fgGradient:false, x:prev.x, y:prev.y, r:prev.r, baseR:prev.baseR,
-    text1:prev.text1, text2:prev.text2, iconUrl:prev.iconUrl, iconImg:prev.iconImg, iconBounds:prev.iconBounds,
+    fgGradient:false,
+    x: prev?.x ?? CW-baseR-25, y: prev?.y ?? baseR+18,
+    r: baseR, baseR: baseR,
+    text1: document.getElementById('txt1').value,
+    text2: document.getElementById('txt2').value,
+    iconUrl:prev?.iconUrl, iconImg:prev?.iconImg, iconBounds:prev?.iconBounds,
   };
   syncFormButtons(); syncBadgeProps(); render();
 });
 
-document.getElementById('formPillBtn').addEventListener('click',()=>{
-  if (!S.badge || S.badge.kind==='pill') return;
-  // Switch circle → pill: use fresh pill size, centered
+document.getElementById('formStickerBtn').addEventListener('click',()=>{
+  if (S.badge?.kind==='sticker') return;
   pushUndo();
   const prev = S.badge;
-  const cc = CORP_COLORS.find(c=>c.id===prev.colorId) || CORP_COLORS[0];
-  const asp    = 2.0;
-  const baseR  = Math.round(Math.min(CW,CH) * 0.10);
-  const hw     = baseR * asp;
+  const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
+  const asp   = 2.5;
+  const baseR = Math.round(Math.min(CW,CH) * 0.10);
+  const hw    = baseR * asp;
   S.badge = {
-    kind:'pill', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
+    kind:'sticker', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
     fgGradient:false,
-    x: Math.max(hw+5, Math.min(CW-hw-5, CW/2)),
-    y: Math.max(baseR+5, Math.min(CH-baseR-5, prev.y)),
-    r: baseR, baseR: baseR, aspect: asp,
-    text1:prev.text1, text2:prev.text2, iconUrl:prev.iconUrl, iconImg:prev.iconImg, iconBounds:prev.iconBounds,
+    x: Math.max(hw+5, Math.min(CW-hw-5, prev?.x ?? CW/2)),
+    y: Math.max(baseR+5, Math.min(CH-baseR-5, prev?.y ?? CH/2)),
+    r: baseR, baseR: baseR, aspect: asp, cornerFrac: 0.42,
+    text1: document.getElementById('txt1').value,
+    text2: document.getElementById('txt2').value,
+    iconUrl:prev?.iconUrl, iconImg:prev?.iconImg, iconBounds:prev?.iconBounds,
   };
   syncFormButtons(); syncBadgeProps(); render();
 });
 
-// Pill aspect (width) slider
-const pillAspSl = document.getElementById('pillAspectSlider');
-if (pillAspSl) {
-  pillAspSl.addEventListener('input',e=>{
-    if (!S.badge || S.badge.kind!=='pill') return;
-    const asp = +e.target.value / 10;
-    S.badge.aspect = asp;
-    const vl = document.getElementById('pillAspectVal');
-    if (vl) vl.textContent = asp.toFixed(1)+'×';
-    render();
-  });
-}
+// SVG shape upload → badge kind='svgshape'
+document.getElementById('svgShapeInput').addEventListener('change', e=>{
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const svgText = ev.target.result;
+    // Parse aspect ratio from raw SVG text — reliable across all SVGs
+    let ar = 1;
+    const vbMatch = svgText.match(/viewBox=["'\s]*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+    if (vbMatch) {
+      const w=parseFloat(vbMatch[3]), h=parseFloat(vbMatch[4]);
+      if (h>0) ar=w/h;
+    } else {
+      const wm=svgText.match(/width=["']([\d.]+)/), hm=svgText.match(/height=["']([\d.]+)/);
+      if (wm && hm && parseFloat(hm[1])>0) ar=parseFloat(wm[1])/parseFloat(hm[1]);
+    }
+    const blob = new Blob([svgText], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      pushUndo();
+      // Use naturalWidth/naturalHeight if available and sensible
+      if (img.naturalWidth>0 && img.naturalHeight>0)
+        ar = img.naturalWidth / img.naturalHeight;
+      const prev = S.badge;
+      const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
+      const baseR = Math.round(Math.min(CW,CH)*0.12);
+      S.badge = {
+        kind:'svgshape', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
+        fgGradient:false,
+        svgUrl:url, svgImg:img, svgAr:ar,
+        x: prev?.x ?? CW/2, y: prev?.y ?? CH/2,
+        r: baseR, baseR: baseR, aspect: ar,
+        text1: document.getElementById('txt1').value,
+        text2: document.getElementById('txt2').value,
+        iconUrl:prev?.iconUrl, iconImg:prev?.iconImg, iconBounds:prev?.iconBounds,
+      };
+      document.getElementById('svgShapeClear').style.display='inline-block';
+      syncFormButtons(); syncBadgeProps(); render();
+    };
+    img.src = url;
+  };
+  reader.readAsText(file);
+  e.target.value='';
+});
+
+document.getElementById('svgShapeClear').addEventListener('click',()=>{
+  if (!S.badge || S.badge.kind!=='svgshape') return;
+  pushUndo();
+  // Switch back to sticker
+  const prev = S.badge;
+  const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
+  const asp=2.5, baseR=Math.round(Math.min(CW,CH)*0.10), hw=baseR*asp;
+  S.badge = {
+    kind:'sticker', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
+    fgGradient:false,
+    x:Math.max(hw+5,Math.min(CW-hw-5,prev.x)), y:Math.max(baseR+5,Math.min(CH-baseR-5,prev.y)),
+    r:baseR, baseR:baseR, aspect:asp, cornerFrac:0.42,
+    text1:prev.text1, text2:prev.text2, iconUrl:prev.iconUrl, iconImg:prev.iconImg, iconBounds:prev.iconBounds,
+  };
+  document.getElementById('svgShapeClear').style.display='none';
+  syncFormButtons(); syncBadgeProps(); render();
+});
+
+document.getElementById('stickerAspectSlider').addEventListener('input',e=>{
+  if (!S.badge || (S.badge.kind!=='sticker'&&S.badge.kind!=='svgshape')) return;
+  const asp = +e.target.value / 10;
+  S.badge.aspect = asp;
+  const vl = document.getElementById('stickerAspectVal');
+  if (vl) vl.textContent = asp.toFixed(1)+'×';
+  render();
+});
+
+document.getElementById('stickerCornerSlider').addEventListener('input',e=>{
+  if (!S.badge || S.badge.kind!=='sticker') return;
+  const cr = +e.target.value / 100;
+  S.badge.cornerFrac = cr;
+  const vl = document.getElementById('stickerCornerVal');
+  if (vl) vl.textContent = Math.round(cr*100)+'%';
+  render();
+});
 
 ['txt1','txt2'].forEach(id=>{
   document.getElementById(id).addEventListener('input',e=>{
@@ -2773,6 +3062,51 @@ function drawBadge(c,b,scX,scY) {
     if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
     drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
 
+  } else if (b.kind==='sticker') {
+    const hw=r*(b.aspect||2.5);
+    const cr=r*(b.cornerFrac||0.38);  // corner radius as fraction of half-height
+    c.save();
+    c.beginPath();
+    if (c.roundRect) {
+      c.roundRect(cx-hw, cy-r, hw*2, r*2, cr);
+    } else {
+      const d=cr;
+      c.moveTo(cx-hw+d,cy-r); c.lineTo(cx+hw-d,cy-r);
+      c.arcTo(cx+hw,cy-r,cx+hw,cy-r+d,d);
+      c.lineTo(cx+hw,cy+r-d);
+      c.arcTo(cx+hw,cy+r,cx+hw-d,cy+r,d);
+      c.lineTo(cx-hw+d,cy+r);
+      c.arcTo(cx-hw,cy+r,cx-hw,cy+r-d,d);
+      c.lineTo(cx-hw,cy-r+d);
+      c.arcTo(cx-hw,cy-r,cx-hw+d,cy-r,d);
+      c.closePath();
+    }
+    c.clip();
+    if (b.fill?.type==='solid') {
+      c.fillStyle=b.fill.color; c.fillRect(cx-hw, cy-r, hw*2, r*2);
+    } else if (b.fill?.type==='linear') {
+      const ang=((b.fill.angle||0)+90)*Math.PI/180;
+      const g=c.createLinearGradient(
+        cx+Math.cos(ang+Math.PI)*hw, cy+Math.sin(ang+Math.PI)*r,
+        cx+Math.cos(ang)*hw,         cy+Math.sin(ang)*r
+      );
+      g.addColorStop(0,b.fill.a||b.fill.stops?.[0]?.c||'#0028A5');
+      g.addColorStop(1,b.fill.b||b.fill.stops?.[1]?.c||'#1FB9FF');
+      c.fillStyle=g; c.fillRect(cx-hw, cy-r, hw*2, r*2);
+    } else if (b.fill?.type==='blob') {
+      c.fillStyle=b.fill.base||'#0028A5'; c.fillRect(cx-hw, cy-r, hw*2, r*2);
+      const prev=c.globalCompositeOperation; c.globalCompositeOperation='screen';
+      for (const sp of (b.fill.spots||[])) {
+        const sx=cx-hw+sp.x*hw*2, sy=cy-r+sp.y*r*2, sr=sp.r*Math.max(hw,r)*2;
+        const grd=c.createRadialGradient(sx,sy,0,sx,sy,sr);
+        grd.addColorStop(0,sp.col); grd.addColorStop(1,'rgba(0,0,0,0)');
+        c.fillStyle=grd; c.fillRect(cx-hw, cy-r, hw*2, r*2);
+      }
+      c.globalCompositeOperation=prev;
+    } else { c.fillStyle=b.fill?.color||'#0028A5'; c.fillRect(cx-hw, cy-r, hw*2, r*2); }
+    c.restore();
+    drawPillContent(c,b,cx,cy,r,hw,t1,t2);
+
   } else if (b.kind==='pill') {
     const hw=r*(b.aspect||2.0);
     // Draw pill using clip path for clean rendering
@@ -2828,6 +3162,50 @@ function drawBadge(c,b,scX,scY) {
     }
     c.restore();
     drawPillContent(c,b,cx,cy,r,r*(b.aspect||2.0),t1,t2);
+
+  } else if (b.kind==='svgshape') {
+    const ar=b.aspect||b.svgAr||1;
+    const hw=r*ar, hh=r;
+    if (b.svgImg && b.aiLabel) {
+      // AI Label: draw SVG as-is without color masking
+      c.drawImage(b.svgImg, cx-hw, cy-hh, hw*2, hh*2);
+    } else if (b.svgImg) {
+      // Render fill color onto offscreen canvas, then mask with SVG shape
+      const W=Math.max(2,Math.round(hw*2)), H=Math.max(2,Math.round(hh*2));
+      const ofc=document.createElement('canvas'); ofc.width=W; ofc.height=H;
+      const oct=ofc.getContext('2d');
+      // Draw fill
+      if (b.fill?.type==='solid') {
+        oct.fillStyle=b.fill.color; oct.fillRect(0,0,W,H);
+      } else if (b.fill?.type==='linear') {
+        const ang=((b.fill.angle||0)+90)*Math.PI/180;
+        const g=oct.createLinearGradient(
+          W/2+Math.cos(ang+Math.PI)*W/2, H/2+Math.sin(ang+Math.PI)*H/2,
+          W/2+Math.cos(ang)*W/2,         H/2+Math.sin(ang)*H/2
+        );
+        g.addColorStop(0,b.fill.a||b.fill.stops?.[0]?.c||'#0028A5');
+        g.addColorStop(1,b.fill.b||b.fill.stops?.[1]?.c||'#1FB9FF');
+        oct.fillStyle=g; oct.fillRect(0,0,W,H);
+      } else if (b.fill?.type==='blob') {
+        oct.fillStyle=b.fill.base||'#0028A5'; oct.fillRect(0,0,W,H);
+        const pv=oct.globalCompositeOperation; oct.globalCompositeOperation='screen';
+        for (const sp of (b.fill.spots||[])) {
+          const sx=sp.x*W, sy=sp.y*H, sr=sp.r*Math.max(W,H)*2;
+          const grd=oct.createRadialGradient(sx,sy,0,sx,sy,sr);
+          grd.addColorStop(0,sp.col); grd.addColorStop(1,'rgba(0,0,0,0)');
+          oct.fillStyle=grd; oct.fillRect(0,0,W,H);
+        }
+        oct.globalCompositeOperation=pv;
+      } else {
+        oct.fillStyle=b.fill?.color||'#0028A5'; oct.fillRect(0,0,W,H);
+      }
+      // Use SVG as alpha mask
+      oct.globalCompositeOperation='destination-in';
+      oct.drawImage(b.svgImg,0,0,W,H);
+      c.drawImage(ofc,cx-hw,cy-hh,W,H);
+    }
+    if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
+    drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
 
   } else if (b.kind==='image') {
     const img=imgCache[b.shapeId];
@@ -3075,7 +3453,7 @@ let existing = document.getElementById('labelIconPicker');
 if (existing) { existing.remove(); return; }
 const picker = document.createElement('div');
 picker.id = 'labelIconPicker';
-picker.style.cssText = 'position:absolute;z-index:999;background:#1a1a2e;border:1px solid #333;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;max-height:180px;overflow-y:auto;width:160px;';
+picker.style.cssText = 'position:absolute;z-index:999;background:#1a1a2e;border:1px solid #333;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:180px;overflow-y:auto;width:160px;';
 // position near button
 const btn = document.getElementById('labelIconPick');
 const rect = btn.getBoundingClientRect();
@@ -3140,26 +3518,37 @@ const SDX_ICONS = [
 
 let sdxAvailable = null; // null=unknown, true, false
 
+const SDX_CANDIDATES = [
+  'https://sdx.scsstatic.ch/v2.30.0/icons/sdx-icon-',
+  'https://sdx.scsstatic.ch/v2/icons/sdx-icon-',
+  'https://sdx.scsstatic.ch/icons/sdx-icon-',
+];
+
 function checkSdxAccess() {
-  // Use img load as CORS-free probe
-  const probe = new Image();
-  const timer = setTimeout(() => {
-    probe.src = '';
-    sdxAvailable = false;
-    updateSdxUI();
-  }, 5000);
-  probe.onload = () => {
-    clearTimeout(timer);
-    sdxAvailable = true;
-    updateSdxUI();
-  };
-  probe.onerror = () => {
-    clearTimeout(timer);
-    sdxAvailable = false;
-    updateSdxUI();
-  };
-  probe.src = SDX_BASE + 'alert.svg?' + Date.now();
+  // Try candidate URLs in sequence
+  let idx = 0;
+  function tryNext() {
+    if (idx >= SDX_CANDIDATES.length) {
+      sdxAvailable = false;
+      updateSdxUI();
+      return;
+    }
+    const base = SDX_CANDIDATES[idx++];
+    const probe = new Image();
+    const timer = setTimeout(() => { probe.src=''; tryNext(); }, 10000);
+    probe.onload = () => {
+      clearTimeout(timer);
+      // Override SDX_BASE with the working URL
+      SDX_BASE_WORKING = base;
+      sdxAvailable = true;
+      updateSdxUI();
+    };
+    probe.onerror = () => { clearTimeout(timer); tryNext(); };
+    probe.src = base + 'alert.svg?' + Date.now();
+  }
+  tryNext();
 }
+let SDX_BASE_WORKING = SDX_CANDIDATES[0];
 
 function updateSdxUI(filter='') {
   const avail  = document.getElementById('sdxAvail');
@@ -3183,7 +3572,7 @@ function updateSdxUI(filter='') {
   const filtered = q ? SDX_ICONS.filter(n => n.includes(q)) : SDX_ICONS;
   grid.innerHTML = '';
   filtered.forEach(name => {
-    const url = SDX_BASE + name + '.svg';
+    const url = (typeof SDX_BASE_WORKING!=='undefined'?SDX_BASE_WORKING:SDX_BASE) + name + '.svg';
     const wrap = document.createElement('div');
     wrap.className = 'shape-thumb';
     wrap.setAttribute('data-tip', name);
@@ -3323,6 +3712,7 @@ rebuildBgGrid();
 rebuildPalette();
 rebuildFtIcons();
 rebuildCustomShapes();
+rebuildAiLabels();
 
 // Restore saved export settings
 (()=>{
