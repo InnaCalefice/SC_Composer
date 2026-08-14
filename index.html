@@ -197,6 +197,33 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <div class="lib-label">✦ AI Labels</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;" id="aiLabelGrid"></div>
 
+      <!-- AI Label Positioning (inline, shown when label is active) -->
+      <div id="aiPosInline" style="display:none;margin-top:10px;padding:8px 6px;background:#16162a;border-radius:8px;border:1px solid #2a2a4a;">
+        <div style="font-size:10px;font-weight:700;color:#7c84f0;letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px;">Platzierung</div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <!-- 3×3 position grid -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:84px;flex-shrink:0;">
+            <button class="corner-btn" data-corner="tl" title="Oben links"   style="height:26px;border:1.5px solid #3a3a5a;border-radius:5px;background:#1a1a2e;color:#bbb;font-size:12px;cursor:pointer;">↖</button>
+            <div style="height:26px;border:1px solid #252535;border-radius:5px;background:#0e0e1e;"></div>
+            <button class="corner-btn" data-corner="tr" title="Oben rechts"  style="height:26px;border:1.5px solid #3a3a5a;border-radius:5px;background:#1a1a2e;color:#bbb;font-size:12px;cursor:pointer;">↗</button>
+            <div style="height:26px;border:1px solid #252535;border-radius:5px;background:#0e0e1e;"></div>
+            <div style="height:26px;border:1px solid #252535;border-radius:5px;background:#0e0e1e;display:flex;align-items:center;justify-content:center;"><div style="width:4px;height:4px;border-radius:50%;background:#3a3a5a;"></div></div>
+            <div style="height:26px;border:1px solid #252535;border-radius:5px;background:#0e0e1e;"></div>
+            <button class="corner-btn" data-corner="bl" title="Unten links"  style="height:26px;border:1.5px solid #3a3a5a;border-radius:5px;background:#1a1a2e;color:#bbb;font-size:12px;cursor:pointer;">↙</button>
+            <div style="height:26px;border:1px solid #252535;border-radius:5px;background:#0e0e1e;"></div>
+            <button class="corner-btn" data-corner="br" title="Unten rechts" style="height:26px;border:1.5px solid #3a3a5a;border-radius:5px;background:#1a1a2e;color:#bbb;font-size:12px;cursor:pointer;">↘</button>
+          </div>
+          <!-- Margin slider -->
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:10px;color:#8888aa;">Abstand</span>
+              <span style="font-size:10px;color:#7c84f0;font-weight:700;" id="aiMarginVal">3%</span>
+            </div>
+            <input type="range" id="aiMarginSlider" min="0" max="15" value="3" style="width:100%;">
+          </div>
+        </div>
+      </div>
+
       <div class="lib-divider"></div>
 
       <!-- Custom shape upload -->
@@ -373,6 +400,7 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <div class="prop-row"><span class="prop-label">Größe</span><span class="prop-val" id="shapeSizeVal">100%</span></div>
       <input type="range" id="shapeSize" min="20" max="250" value="100">
     </div>
+
 
     <div class="divider"></div>
 
@@ -823,6 +851,7 @@ function syncBadgeProps() {
   if (typeof syncFormButtons === 'function') syncFormButtons();
   if (typeof rebuildBuiltinShapes === 'function') rebuildBuiltinShapes();
   if (typeof rebuildAiLabels === 'function') rebuildAiLabels();
+  if (typeof syncAiPosSection === 'function') syncAiPosSection();
 }
 
 
@@ -1051,10 +1080,74 @@ AI_LABELS.forEach(al => {
   al.img.src = al.dataUrl;
 });
 
+// ── AI Label size: Swisscom brand guidelines ──────────────────────────────────
+// Min label width: clamp(CW × 8%, 56px, 112px)  (from Brandcenter size table)
+function computeAiLabelBaseR(labelAr) {
+  // Swisscom brand: recommended label width = CW × 12%, floor 60px
+  const labelWidth = Math.max(60, Math.round(CW * 0.12));
+  return Math.round(labelWidth / (2 * (labelAr || 2.3929)));
+}
+
+// ── AI Label corner snapping ──────────────────────────────────────────────────
+// margin: fraction of min(CW,CH)
+function snapAiLabelToCorner(corner, marginFrac) {
+  if (!S.badge || !S.badge.aiLabel) return;
+  const b = S.badge;
+  const frac = marginFrac ?? b.aiMargin ?? 0.03;
+  b.aiMargin = frac;
+  b.aiCorner = corner ?? b.aiCorner ?? 'bl';
+  const hw = b.r * (b.aspect || b.svgAr || 1);
+  const hh = b.r;
+  // Use CW for horizontal margin, CH for vertical margin
+  const mgX = Math.round(CW * frac);
+  const mgY = Math.round(CH * frac);
+  const c = b.aiCorner;
+  b.x = (c==='tl'||c==='bl') ? hw + mgX : CW - hw - mgX;
+  b.y = (c==='tl'||c==='tr') ? hh + mgY : CH - hh - mgY;
+  render();
+}
+
+function syncAiPosSection() {
+  const inline = document.getElementById('aiPosInline');
+  const isAi = !!(S.badge?.aiLabel);
+  if (inline) inline.style.display = isAi ? '' : 'none';
+  if (!isAi) return;
+  // Sync margin slider
+  const mg = S.badge.aiMargin ?? 0.03;
+  const sl = document.getElementById('aiMarginSlider');
+  const vl = document.getElementById('aiMarginVal');
+  if (sl) sl.value = Math.round(mg * 100);
+  if (vl) vl.textContent = Math.round(mg * 100) + '%';
+  // Sync corner active state
+  document.querySelectorAll('.corner-btn').forEach(btn => {
+    const active = btn.dataset.corner === (S.badge.aiCorner || 'bl');
+    btn.style.borderColor = active ? '#6366f1' : '#3a3a5a';
+    btn.style.background  = active ? '#2a2a5a' : '#1a1a2e';
+    btn.style.color       = active ? '#fff'    : '#bbb';
+  });
+}
+
 function applyAiLabel(al) {
   pushUndo();
   const prev = S.badge;
-  const baseR = Math.round(Math.min(CW,CH) * 0.08);
+  // Size: use brand guideline minimum (clamp(CW×8%, 56, 112) / (2×ar))
+  // If switching label variant, keep existing size; otherwise compute fresh
+  const baseR = prev?.aiLabel ? prev.baseR : computeAiLabelBaseR(al.ar);
+  // Default: bottom-left corner, 3% margin (Swisscom brand guideline)
+  const mg = prev?.aiMargin ?? 0.03;
+  const corner = prev?.aiCorner ?? 'bl';
+  const hw = baseR * al.ar;
+  const hh = baseR;
+  const mgX = Math.round(CW * mg);
+  const mgY = Math.round(CH * mg);
+  let dx, dy;
+  if (prev?.aiLabel) {
+    // Keep existing position
+    dx = prev.x; dy = prev.y;
+  } else {
+    dx = (corner==='tl'||corner==='bl') ? hw + mgX : CW - hw - mgX;
+    dy = (corner==='tl'||corner==='tr') ? hh + mgY : CH - hh - mgY;
+  }
   S.badge = {
     kind: 'svgshape',
     builtinId: al.id,
@@ -1062,10 +1155,10 @@ function applyAiLabel(al) {
     svgImg: al.img,
     svgAr: al.ar,
     aspect: al.ar,
-    // No fill masking — draw SVG as-is (aiLabel flag)
     aiLabel: true,
-    x: prev?.x ?? CW * 0.5,
-    y: prev?.y ?? Math.round(Math.min(CW,CH) * 0.12),
+    aiCorner: corner,
+    aiMargin: mg,
+    x: dx, y: dy,
     r: baseR, baseR: baseR,
     text1: '', text2: '',
   };
@@ -2014,6 +2107,8 @@ document.getElementById('shapeSize').addEventListener('input',e=>{
   const s=+e.target.value/100;
   document.getElementById('shapeSizeVal').textContent=e.target.value+'%';
   S.badge.r=S.badge.baseR*s;
+  // Re-snap to corner after resize
+  if (S.badge.aiLabel && S.badge.aiCorner) snapAiLabelToCorner(null, null);
   render();
 });
 
@@ -2137,6 +2232,24 @@ document.getElementById('stickerCornerSlider').addEventListener('input',e=>{
   const vl = document.getElementById('stickerCornerVal');
   if (vl) vl.textContent = Math.round(cr*100)+'%';
   render();
+});
+
+// ── AI Label: corner buttons ─────────────────────────────────────────────────
+document.querySelectorAll('.corner-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!S.badge?.aiLabel) return;
+    pushUndo();
+    snapAiLabelToCorner(btn.dataset.corner, null);
+    syncAiPosSection();
+  });
+});
+
+document.getElementById('aiMarginSlider').addEventListener('input', e => {
+  if (!S.badge?.aiLabel) return;
+  const mg = +e.target.value / 100;
+  const vl = document.getElementById('aiMarginVal');
+  if (vl) vl.textContent = e.target.value + '%';
+  snapAiLabelToCorner(null, mg);
 });
 
 ['txt1','txt2'].forEach(id=>{
@@ -3492,7 +3605,7 @@ setTimeout(() => document.addEventListener('click', function h(e){ if(!picker.co
 // ────────────────────────────────────────────────────
 // SDX ICON LIBRARY
 // ────────────────────────────────────────────────────
-const SDX_BASE = 'https://sdx.scsstatic.ch/v2.30.0/icons/sdx-icon-';
+// Icon names (alphabetical) — used for both v2 and v3
 const SDX_ICONS = [
   "account","alert","arrow-down","arrow-left","arrow-right","arrow-up",
   "attachment","battery","bell","bluetooth","bookmark","bullet-list",
@@ -3516,16 +3629,26 @@ const SDX_ICONS = [
   "video","volume","warning","wifi","world","zoom-in","zoom-out"
 ];
 
-let sdxAvailable = null; // null=unknown, true, false
-
+// Candidate URLs — v3 first (new format: NNN-name.svg), v2 fallback (sdx-icon-name.svg)
 const SDX_CANDIDATES = [
-  'https://sdx.scsstatic.ch/v2.30.0/icons/sdx-icon-',
-  'https://sdx.scsstatic.ch/v2/icons/sdx-icon-',
-  'https://sdx.scsstatic.ch/icons/sdx-icon-',
+  { base: 'https://sdx.scsstatic.ch/v3.22.0/icons/', v3: true,  probe: '001-account.svg' },
+  { base: 'https://sdx.scsstatic.ch/v2.30.0/icons/', v3: false, probe: 'sdx-icon-alert.svg' },
+  { base: 'https://sdx.scsstatic.ch/v2/icons/',       v3: false, probe: 'sdx-icon-alert.svg' },
 ];
 
+let sdxAvailable = null; // null=unknown, true, false
+let SDX_BASE_WORKING = SDX_CANDIDATES[0].base;
+let SDX_V3 = true; // current candidate uses v3 naming?
+
+// Build icon URL based on detected version
+function sdxIconUrl(name, index) {
+  if (SDX_V3) {
+    return SDX_BASE_WORKING + String(index + 1).padStart(3, '0') + '-' + name + '.svg';
+  }
+  return SDX_BASE_WORKING + 'sdx-icon-' + name + '.svg';
+}
+
 function checkSdxAccess() {
-  // Try candidate URLs in sequence
   let idx = 0;
   function tryNext() {
     if (idx >= SDX_CANDIDATES.length) {
@@ -3533,22 +3656,21 @@ function checkSdxAccess() {
       updateSdxUI();
       return;
     }
-    const base = SDX_CANDIDATES[idx++];
+    const cand = SDX_CANDIDATES[idx++];
     const probe = new Image();
-    const timer = setTimeout(() => { probe.src=''; tryNext(); }, 10000);
+    const timer = setTimeout(() => { probe.src = ''; tryNext(); }, 8000);
     probe.onload = () => {
       clearTimeout(timer);
-      // Override SDX_BASE with the working URL
-      SDX_BASE_WORKING = base;
+      SDX_BASE_WORKING = cand.base;
+      SDX_V3 = cand.v3;
       sdxAvailable = true;
       updateSdxUI();
     };
     probe.onerror = () => { clearTimeout(timer); tryNext(); };
-    probe.src = base + 'alert.svg?' + Date.now();
+    probe.src = cand.base + cand.probe + '?' + Date.now();
   }
   tryNext();
 }
-let SDX_BASE_WORKING = SDX_CANDIDATES[0];
 
 function updateSdxUI(filter='') {
   const avail  = document.getElementById('sdxAvail');
@@ -3571,8 +3693,10 @@ function updateSdxUI(filter='') {
   const q = filter.toLowerCase().trim();
   const filtered = q ? SDX_ICONS.filter(n => n.includes(q)) : SDX_ICONS;
   grid.innerHTML = '';
-  filtered.forEach(name => {
-    const url = (typeof SDX_BASE_WORKING!=='undefined'?SDX_BASE_WORKING:SDX_BASE) + name + '.svg';
+  filtered.forEach((name, i) => {
+    // Resolve actual index in full SDX_ICONS list for correct v3 numbering
+    const fullIdx = SDX_ICONS.indexOf(name);
+    const url = sdxIconUrl(name, fullIdx >= 0 ? fullIdx : i);
     const wrap = document.createElement('div');
     wrap.className = 'shape-thumb';
     wrap.setAttribute('data-tip', name);
