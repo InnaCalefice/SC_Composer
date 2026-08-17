@@ -157,13 +157,15 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 <header>
   <div class="logo">
     <div class="logo-stripe"></div>
-    Swisscom Composer
+    SC Composer
+    <span style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#fff;background:#E4003A;padding:2px 6px;border-radius:4px;text-transform:uppercase;margin-left:2px;">Alpha</span>
   </div>
   <div class="spacer"></div>
   <button class="hbtn" id="undoBtn" disabled style="opacity:.35" title="Rückgängig (Ctrl+Z)">↩ Undo</button>
   <button class="hbtn" id="resetBtn" title="Alles zurücksetzen">🗑 Reset</button>
   <button class="hbtn" id="apiBtn">🔑 remove.bg Key</button>
   <button class="hbtn" id="fontBtn">🔤 Font laden</button>
+  <button class="hbtn" id="headerExportBtn" title="Bild exportieren" style="background:linear-gradient(135deg,#E4003A,#c8002f);color:#fff;border-color:transparent;font-weight:700;letter-spacing:.3px;">↓ Export</button>
 </header>
 
 <div class="app">
@@ -296,9 +298,14 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
         <img id="productThumb" alt="">
         <span id="productHint">📦 Hochladen<br><span style="font-size:10px;opacity:.55">Hintergrund wird entfernt</span></span>
       </label>
-      <div style="display:flex;gap:4px;margin:5px 0 3px;">
-        <input id="productUrlInput" class="pi" placeholder="Bild-URL einfügen…" style="flex:1;font-size:11px;min-width:0;">
-        <button id="productUrlBtn" title="Bild von URL laden" style="white-space:nowrap;padding:4px 8px;border:none;border-radius:6px;background:#0028A5;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0;">↓ Laden</button>
+      <div style="margin:4px 0 2px;">
+        <button id="urlToggle" style="background:none;border:none;color:#666;font-size:10.5px;cursor:pointer;padding:0;text-align:left;display:flex;align-items:center;gap:3px;">
+          <span id="urlToggleArrow" style="font-size:9px;transition:transform .15s;">▶</span> von URL laden
+        </button>
+        <div id="urlRow" style="display:none;gap:4px;margin-top:4px;align-items:center;">
+          <input id="productUrlInput" class="pi" placeholder="Bild-URL einfügen…" style="flex:1;font-size:11px;min-width:0;">
+          <button id="productUrlBtn" title="Bild von URL laden" style="white-space:nowrap;padding:4px 8px;border:none;border-radius:6px;background:#0028A5;color:#fff;font-size:11px;cursor:pointer;flex-shrink:0;">↓</button>
+        </div>
       </div>
       <div class="toggle-row" style="margin:5px 0 2px;">
         <span class="prop-label">Freistellen</span>
@@ -315,17 +322,23 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <input type="range" id="opacSlider" min="0" max="100" value="100">
       <div class="prop-row"><span class="prop-label">Schatten</span><span class="prop-val" id="shadowVal">0%</span></div>
       <input type="range" id="shadowSlider" min="0" max="100" value="0">
-    </div>
-
-    <div class="prop-section collapsed">
-      <div class="prop-title">Bild-Filter</div>
-      <div class="prop-row"><span class="prop-label">Helligkeit</span><span class="prop-val" id="filterBrVal">100%</span></div>
-      <input type="range" id="filterBr" min="0" max="200" value="100">
-      <div class="prop-row"><span class="prop-label">Kontrast</span><span class="prop-val" id="filterConVal">100%</span></div>
-      <input type="range" id="filterCon" min="0" max="200" value="100">
-      <div class="prop-row"><span class="prop-label">Sättigung</span><span class="prop-val" id="filterSatVal">100%</span></div>
-      <input type="range" id="filterSat" min="0" max="200" value="100">
-      <button id="filterResetBtn" style="margin-top:5px;width:100%;padding:5px;border:none;border-radius:6px;background:#1e2340;color:#8899cc;font-size:11px;cursor:pointer;">↺ Zurücksetzen</button>
+      <!-- Filter sub-panel (inline, collapsible) -->
+      <div style="margin-top:7px;border-top:1px solid #1e2340;padding-top:6px;">
+        <div id="filterToggleRow" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;">
+          <span style="font-size:11px;color:#888;display:flex;align-items:center;gap:4px;">
+            <span id="filterToggleArrow" style="font-size:9px;transition:transform .15s;">▶</span>Filter
+          </span>
+          <button id="filterResetBtn" style="font-size:10px;padding:2px 7px;border:none;border-radius:4px;background:#1e2340;color:#8899cc;cursor:pointer;" title="Filter zurücksetzen">↺</button>
+        </div>
+        <div id="filterSubPanel" style="display:none;margin-top:5px;">
+          <div class="prop-row"><span class="prop-label">Helligkeit</span><span class="prop-val" id="filterBrVal">100%</span></div>
+          <input type="range" id="filterBr" min="0" max="200" value="100">
+          <div class="prop-row"><span class="prop-label">Kontrast</span><span class="prop-val" id="filterConVal">100%</span></div>
+          <input type="range" id="filterCon" min="0" max="200" value="100">
+          <div class="prop-row"><span class="prop-label">Sättigung</span><span class="prop-val" id="filterSatVal">100%</span></div>
+          <input type="range" id="filterSat" min="0" max="200" value="100">
+        </div>
+      </div>
     </div>
 
     <div class="prop-section collapsed">
@@ -389,6 +402,7 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
           <div id="formCircleBtn" title="Kreis" style="width:28px;height:28px;border-radius:50%;background:#0028A5;cursor:pointer;border:2px solid #6366f1;"></div>
           <div id="formStickerBtn" title="Organische Form" style="width:44px;height:26px;border-radius:8px;background:#0028A5;cursor:pointer;border:2px solid transparent;"></div>
+          <div id="formPriceBtn" title="Preis-Ribbon" style="padding:0 10px;height:28px;border-radius:14px;background:linear-gradient(135deg,#E4003A 0%,#0028A5 100%);cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;letter-spacing:.4px;white-space:nowrap;">Preis</div>
           <label title="Eigene SVG hochladen" style="width:36px;height:26px;border-radius:6px;background:#22224a;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#aab;letter-spacing:.4px;">
             SVG<input type="file" id="svgShapeInput" accept=".svg,image/svg+xml" style="display:none">
           </label>
@@ -408,6 +422,42 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <input type="range" id="shapeSize" min="20" max="250" value="100">
     </div>
 
+
+    <div class="divider"></div>
+
+    <!-- TEXT -->
+    <div class="prop-section">
+      <div class="prop-title">Text</div>
+      <div id="priceRow" style="display:none;margin-bottom:5px;">
+        <input class="pi" id="priceInput" placeholder="99.–" style="font-size:15px;font-weight:700;text-align:center;">
+        <div style="font-size:10px;color:#666;text-align:center;margin-top:2px;">/Mt wird automatisch angezeigt</div>
+      </div>
+      <div id="txt12Row">
+        <input class="pi" id="txt1" value="" placeholder="Zeile 1">
+        <input class="pi" id="txt2" value="" placeholder="Zeile 2">
+      </div>
+      <div class="prop-row" style="margin-top:2px;align-items:center;">
+        <span class="prop-label">Schrift</span>
+        <div style="display:flex;gap:5px;flex:1;min-width:0;">
+          <select id="fontSelect" class="sel-res" style="flex:1;min-width:0;font-size:11px;padding:3px 5px;">
+            <option value="">System</option>
+          </select>
+          <label style="cursor:pointer;flex-shrink:0;padding:3px 8px;background:#2a2a3a;border-radius:4px;font-size:11px;white-space:nowrap;display:flex;align-items:center;">
+            ↑
+            <input type="file" accept=".ttf,.otf,.woff,.woff2" id="fontFileInput" style="display:none" multiple>
+          </label>
+        </div>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">Farbe</span>
+        <div class="color-row">
+          <div class="swatch" id="fgSwatch" style="background:#ffffff" title="Textfarbe">
+            <input type="color" id="fgColor" value="#ffffff">
+          </div>
+          <div id="swGradTextBtn" title="Swisscom Gradient" style="width:36px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;background:linear-gradient(110.33deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
+        </div>
+      </div>
+    </div>
 
     <div class="divider"></div>
 
@@ -440,36 +490,6 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 
     <div class="divider"></div>
 
-    <!-- TEXT -->
-    <div class="prop-section">
-      <div class="prop-title">Text</div>
-      <input class="pi" id="txt1" value="" placeholder="Zeile 1">
-      <input class="pi" id="txt2" value="" placeholder="Zeile 2">
-      <div class="prop-row" style="margin-top:2px;align-items:center;">
-        <span class="prop-label">Schrift</span>
-        <div style="display:flex;gap:5px;flex:1;min-width:0;">
-          <select id="fontSelect" class="sel-res" style="flex:1;min-width:0;font-size:11px;padding:3px 5px;">
-            <option value="">System</option>
-          </select>
-          <label style="cursor:pointer;flex-shrink:0;padding:3px 8px;background:#2a2a3a;border-radius:4px;font-size:11px;white-space:nowrap;display:flex;align-items:center;">
-            ↑
-            <input type="file" accept=".ttf,.otf,.woff,.woff2" id="fontFileInput" style="display:none" multiple>
-          </label>
-        </div>
-      </div>
-      <div class="prop-row">
-        <span class="prop-label">Farbe</span>
-        <div class="color-row">
-          <div class="swatch" id="fgSwatch" style="background:#ffffff" title="Textfarbe">
-            <input type="color" id="fgColor" value="#ffffff">
-          </div>
-          <div id="swGradTextBtn" title="Swisscom Gradient" style="width:36px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;background:linear-gradient(110.33deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
     <div class="prop-section collapsed">
       <div class="prop-title">Brand &amp; Effekte</div>
       <div class="toggle-row">
@@ -479,7 +499,9 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <div class="prop-row" id="stripeYRow" style="display:none"><span class="prop-label">Position</span><span class="prop-val" id="stripeYVal">95%</span></div>
       <input type="range" id="stripeYSlider" min="0" max="100" value="95" style="display:none">
       <div class="prop-row" id="stripeAngleRow" style="display:none"><span class="prop-label">Winkel</span><span class="prop-val" id="stripeAngleVal">0°</span></div>
-      <input type="range" id="stripeAngleSlider" min="-30" max="30" value="0" style="display:none">
+      <input type="range" id="stripeAngleSlider" min="-90" max="90" value="0" style="display:none">
+      <div class="prop-row" id="stripeWidthRow" style="display:none"><span class="prop-label">Dicke</span><span class="prop-val" id="stripeWidthVal">100%</span></div>
+      <input type="range" id="stripeWidthSlider" min="10" max="600" value="100" style="display:none">
     </div>
 
     <div class="divider"></div>
@@ -621,11 +643,13 @@ const S = {
   product: null,
   product2: null,
   badge:   null,
+  aiLabel: null,
   label:   null,
   freistellen: false,   // {kind:'circle'|'image', fill?, fg?, img?, x,y, r, baseR, text1, text2}
   stripe:  false,
   stripeY: 95,
   stripeAngle: 0,
+  stripeWidth: 100,
   selected: null,
   dragging: false,
   resizing: false,
@@ -808,6 +832,7 @@ function rebuildPalette() {
     }
     wrap.onclick=()=>{
       if (S.badge?.kind==='sticker') addStickerBadge(cc);
+      else if (S.badge?.priceMode) addPriceBadge(cc);
       else addCircleBadge(cc);
     };
     grid.appendChild(wrap);
@@ -837,11 +862,24 @@ function syncIconPreview() {
 function syncBadgeProps() {
   if (!S.badge) return;
   const b = S.badge;
-  // Text
+  // Text — switch between normal fields and price input
+  const priceRow = document.getElementById('priceRow');
+  const txt12Row = document.getElementById('txt12Row');
+  const priceInput = document.getElementById('priceInput');
+  if (b.priceMode) {
+    if (priceRow) priceRow.style.display = '';
+    if (txt12Row) txt12Row.style.display = 'none';
+    if (priceInput) priceInput.value = b.text1 || '';
+  } else {
+    if (priceRow) priceRow.style.display = 'none';
+    if (txt12Row) txt12Row.style.display = '';
+    const t1 = document.getElementById('txt1');
+    const t2 = document.getElementById('txt2');
+    if (t1) t1.value = b.text1 || '';
+    if (t2) t2.value = b.text2 || '';
+  }
   const t1 = document.getElementById('txt1');
   const t2 = document.getElementById('txt2');
-  if (t1) t1.value = b.text1 || '';
-  if (t2) t2.value = b.text2 || '';
   // Size slider
   const pct = b.baseR ? Math.round(b.r / b.baseR * 100) : 100;
   const szSlider = document.getElementById('shapeSize');
@@ -905,6 +943,35 @@ function addCircleBadge(cc) {
   }
   syncBadgeProps();
   S.selected='badge'; autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+}
+
+function addPriceBadge(cc) {
+  pushUndo();
+  const prev = S.badge;
+  if (prev && prev.priceMode) {
+    // Just update colour
+    prev.colorId = cc.id;
+    prev.fill    = JSON.parse(JSON.stringify(cc.fill));
+    prev.fg      = cc.fg;
+  } else {
+    const baseR = prev?.baseR || Math.round(Math.min(CW,CH) * .18);
+    S.badge = {
+      kind: 'circle',
+      priceMode: true,
+      colorId: cc.id,
+      fill: JSON.parse(JSON.stringify(cc.fill)),
+      fg:   cc.fg,
+      fgGradient: false,
+      x: prev?.x ?? CW - baseR - 25,
+      y: prev?.y ?? baseR + 18,
+      r: baseR,
+      baseR: baseR,
+      text1: document.getElementById('priceInput')?.value || '99.–',
+      text2: '',
+    };
+  }
+  syncBadgeProps();
+  S.selected = 'badge'; autoExpandSections('badge'); rebuildPalette(); render();
 }
 
 function addPillBadge(cc) {
@@ -980,11 +1047,14 @@ function addStickerBadge(cc) {
 function syncFormButtons() {
   const circleBtn  = document.getElementById('formCircleBtn');
   const stickerBtn = document.getElementById('formStickerBtn');
+  const priceBtn   = document.getElementById('formPriceBtn');
   const stickerRows= document.getElementById('stickerRows');
   if (!circleBtn) return;
   const kind = S.badge?.kind || 'circle';
-  circleBtn.style.borderColor  = kind==='circle'  ? '#6366f1' : 'transparent';
+  const isPrice = !!(S.badge?.priceMode);
+  circleBtn.style.borderColor  = (kind==='circle' && !isPrice)  ? '#6366f1' : 'transparent';
   if (stickerBtn) stickerBtn.style.borderColor = kind==='sticker' ? '#6366f1' : 'transparent';
+  if (priceBtn)   priceBtn.style.borderColor   = isPrice ? '#6366f1' : 'transparent';
   if (stickerRows) stickerRows.style.display = kind==='sticker' ? 'block' : 'none';
   const svgClear = document.getElementById('svgShapeClear');
   if (svgClear) svgClear.style.display = kind==='svgshape' ? 'inline-block' : 'none';
@@ -1111,14 +1181,13 @@ function computeAiLabelBaseR(labelAr) {
 // ── AI Label corner snapping ──────────────────────────────────────────────────
 // margin: fraction of min(CW,CH)
 function snapAiLabelToCorner(corner, marginFrac) {
-  if (!S.badge || !S.badge.aiLabel) return;
-  const b = S.badge;
+  if (!S.aiLabel) return;
+  const b = S.aiLabel;
   const frac = marginFrac ?? b.aiMargin ?? 0.03;
   b.aiMargin = frac;
   b.aiCorner = corner ?? b.aiCorner ?? 'bl';
   const hw = b.r * (b.aspect || b.svgAr || 1);
   const hh = b.r;
-  // Use CW for horizontal margin, CH for vertical margin
   const mgX = Math.round(CW * frac);
   const mgY = Math.round(CH * frac);
   const c = b.aiCorner;
@@ -1129,18 +1198,16 @@ function snapAiLabelToCorner(corner, marginFrac) {
 
 function syncAiPosSection() {
   const inline = document.getElementById('aiPosInline');
-  const isAi = !!(S.badge?.aiLabel);
+  const isAi = !!(S.aiLabel);
   if (inline) inline.style.display = isAi ? '' : 'none';
   if (!isAi) return;
-  // Sync margin slider
-  const mg = S.badge.aiMargin ?? 0.03;
+  const mg = S.aiLabel.aiMargin ?? 0.03;
   const sl = document.getElementById('aiMarginSlider');
   const vl = document.getElementById('aiMarginVal');
   if (sl) sl.value = Math.round(mg * 100);
   if (vl) vl.textContent = Math.round(mg * 100) + '%';
-  // Sync corner active state
   document.querySelectorAll('.corner-btn').forEach(btn => {
-    const active = btn.dataset.corner === (S.badge.aiCorner || 'bl');
+    const active = btn.dataset.corner === (S.aiLabel.aiCorner || 'bl');
     btn.style.borderColor = active ? '#6366f1' : '#3a3a5a';
     btn.style.background  = active ? '#2a2a5a' : '#1a1a2e';
     btn.style.color       = active ? '#fff'    : '#bbb';
@@ -1149,11 +1216,8 @@ function syncAiPosSection() {
 
 function applyAiLabel(al) {
   pushUndo();
-  const prev = S.badge;
-  // Size: use brand guideline minimum (clamp(CW×8%, 56, 112) / (2×ar))
-  // If switching label variant, keep existing size; otherwise compute fresh
-  const baseR = prev?.aiLabel ? prev.baseR : computeAiLabelBaseR(al.ar);
-  // Default: bottom-left corner, 3% margin (Swisscom brand guideline)
+  const prev = S.aiLabel;  // keep existing position/size if switching variants
+  const baseR = prev ? prev.baseR : computeAiLabelBaseR(al.ar);
   const mg = prev?.aiMargin ?? 0.03;
   const corner = prev?.aiCorner ?? 'bl';
   const hw = baseR * al.ar;
@@ -1161,14 +1225,13 @@ function applyAiLabel(al) {
   const mgX = Math.round(CW * mg);
   const mgY = Math.round(CH * mg);
   let dx, dy;
-  if (prev?.aiLabel) {
-    // Keep existing position
+  if (prev) {
     dx = prev.x; dy = prev.y;
   } else {
     dx = (corner==='tl'||corner==='bl') ? hw + mgX : CW - hw - mgX;
     dy = (corner==='tl'||corner==='tr') ? hh + mgY : CH - hh - mgY;
   }
-  S.badge = {
+  S.aiLabel = {
     kind: 'svgshape',
     builtinId: al.id,
     svgUrl: al.dataUrl,
@@ -1182,9 +1245,8 @@ function applyAiLabel(al) {
     r: baseR, baseR: baseR,
     text1: '', text2: '',
   };
-  S.selected = 'badge';
-  autoExpandSections('badge');
-  syncFormButtons(); syncBadgeProps(); render();
+  S.selected = 'aiLabel';
+  syncAiPosSection(); rebuildAiLabels(); render();
 }
 
 function rebuildAiLabels() {
@@ -1193,7 +1255,7 @@ function rebuildAiLabels() {
   grid.innerHTML = '';
   AI_LABELS.forEach(al => {
     const wrap = document.createElement('div');
-    const isActive = S.badge?.shapeId === al.id;
+    const isActive = S.aiLabel?.builtinId === al.id;
     const bg = (al.id === 'ai-neg') ? '#f0f0f8' : '#22224a';
     const border = isActive ? '#6366f1' : 'transparent';
     wrap.style.cssText = 'background:' + bg + ';border-radius:6px;padding:5px;cursor:pointer;border:2px solid ' + border + ';transition:border-color .1s;';
@@ -1599,6 +1661,31 @@ document.getElementById('productUrlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('productUrlBtn').click();
 });
 
+// Collapsible URL row toggle
+document.getElementById('urlToggle').addEventListener('click', () => {
+  const row   = document.getElementById('urlRow');
+  const arrow = document.getElementById('urlToggleArrow');
+  const open  = row.style.display !== 'none' && row.style.display !== '';
+  row.style.display   = open ? 'none' : 'flex';
+  arrow.style.transform = open ? '' : 'rotate(90deg)';
+  if (!open) setTimeout(() => document.getElementById('productUrlInput').focus(), 50);
+});
+
+// Collapsible Filter sub-panel toggle (click the row, but not the reset btn)
+document.getElementById('filterToggleRow').addEventListener('click', (e) => {
+  if (e.target.closest('#filterResetBtn')) return; // let reset btn handle itself
+  const panel = document.getElementById('filterSubPanel');
+  const arrow = document.getElementById('filterToggleArrow');
+  const open  = panel.style.display !== 'none';
+  panel.style.display   = open ? 'none' : 'block';
+  arrow.style.transform = open ? '' : 'rotate(90deg)';
+});
+
+// Header quick-export button → triggers the main export flow
+document.getElementById('headerExportBtn').addEventListener('click', () => {
+  document.getElementById('exportBtn').click();
+});
+
 function setStatus(msg,type='') {
   const e=document.getElementById('statusEl');
   e.textContent=msg; e.className='status'+(type?' '+type:'');
@@ -1768,23 +1855,24 @@ async function removeBgApi(file,key,onP) {
 // ────────────────────────────────────────────────────
 const HR=7;
 
-function badgeBounds() {
-  if (!S.badge) return null;
-  const {x,y,r}=S.badge;
-  if (S.badge.kind==='image') {
-    const hw=r, hh=r*(S.badge.ar||1);
+function badgeBounds(bd) {
+  const b = bd || (S.selected==='aiLabel' ? S.aiLabel : S.badge);
+  if (!b) return null;
+  const {x,y,r}=b;
+  if (b.kind==='image') {
+    const hw=r, hh=r*(b.ar||1);
     return {x:x-hw,y:y-hh,w:hw*2,h:hh*2};
   }
-  if (S.badge.kind==='pill') {
-    const hw=r*(S.badge.aspect||2.0);
+  if (b.kind==='pill') {
+    const hw=r*(b.aspect||2.0);
     return {x:x-hw,y:y-r,w:hw*2,h:r*2};
   }
-  if (S.badge.kind==='sticker') {
-    const hw=r*(S.badge.aspect||2.5);
+  if (b.kind==='sticker') {
+    const hw=r*(b.aspect||2.5);
     return {x:x-hw,y:y-r,w:hw*2,h:r*2};
   }
-  if (S.badge.kind==='svgshape') {
-    const ar=S.badge.aspect||S.badge.svgAr||1;
+  if (b.kind==='svgshape') {
+    const ar=b.aspect||b.svgAr||1;
     const hw=r*ar, hh=r;
     return {x:x-hw,y:y-hh,w:hw*2,h:hh*2};
   }
@@ -1800,8 +1888,9 @@ function handles() {
     const {x,y,w,h}=S.product2;
     return [{id:'nw',x,y},{id:'ne',x:x+w,y},{id:'sw',x,y:y+h},{id:'se',x:x+w,y:y+h}];
   }
-  if (S.selected==='badge'&&S.badge) {
+  if ((S.selected==='badge'&&S.badge)||(S.selected==='aiLabel'&&S.aiLabel)) {
     const b=badgeBounds();
+    if (!b) return [];
     return [{id:'nw',x:b.x,y:b.y},{id:'ne',x:b.x+b.w,y:b.y},
             {id:'sw',x:b.x,y:b.y+b.h},{id:'se',x:b.x+b.w,y:b.y+b.h}];
   }
@@ -1859,10 +1948,18 @@ function hitProduct(mx,my) {
 }
 function hitBadge(mx,my) {
   if (!S.badge) return false;
-  const b=badgeBounds();
+  const b=badgeBounds(S.badge);
   if (S.badge.kind==='image'||S.badge.kind==='pill'||S.badge.kind==='sticker'||S.badge.kind==='svgshape')
     return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
   return Math.hypot(mx-S.badge.x,my-S.badge.y)<=S.badge.r*1.2;
+}
+function hitAiLabel(mx,my) {
+  if (!S.aiLabel) return false;
+  const b=badgeBounds(S.aiLabel);
+  if (!b) return false;
+  if (S.aiLabel.kind==='svgshape')
+    return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
+  return Math.hypot(mx-S.aiLabel.x,my-S.aiLabel.y)<=S.aiLabel.r*1.2;
 }
 
 function canvasXY(e) {
@@ -1893,9 +1990,16 @@ canvas.addEventListener('mousedown',e=>{
       const p=S.product2;
       S.dragStart={x,y,px:p.x,py:p.y,pw:p.w,ph:p.h};
     } else {
-      S.dragStart={x,y,bx:S.badge.x,by:S.badge.y,br:S.badge.r};
+      const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+      S.dragStart={x,y,bx:ab.x,by:ab.y,br:ab.r};
     }
     return;
+  }
+  if (hitAiLabel(x,y)) {
+    pushUndo();
+    S.selected='aiLabel'; S.dragging=true;
+    S.dragStart={x,y,bx:S.aiLabel.x,by:S.aiLabel.y};
+    syncAiPosSection(); render(); return;
   }
   if (hitBadge(x,y)) {
     pushUndo();
@@ -1976,16 +2080,18 @@ canvas.addEventListener('mousemove',e=>{
       document.getElementById('p2SizeSlider').value=100;
       document.getElementById('p2SizeVal').textContent='100%';
     }
-    if (S.selected==='badge') {
+    if (S.selected==='badge'||S.selected==='aiLabel') {
       const {bx,by,br}=S.dragStart;
       // Project drag onto each corner's outward direction
       const signX=(c==='nw'||c==='sw')?-1:1;
       const signY=(c==='nw'||c==='ne')?-1:1;
       const dist=(dx*signX+dy*signY)*0.5;
-      S.badge.r=Math.max(15,br+dist);
-      S.badge.baseR=S.badge.r;
+      const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+      ab.r=Math.max(15,br+dist);
+      ab.baseR=ab.r;
       document.getElementById('shapeSize').value=100;
       document.getElementById('shapeSizeVal').textContent='100%';
+      if (S.selected==='aiLabel' && ab.aiCorner) snapAiLabelToCorner(null, null);
     }
     render(); return;
   }
@@ -2002,6 +2108,10 @@ canvas.addEventListener('mousemove',e=>{
     if (S.selected==='badge') {
       const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
       S.badge.x = raw.x; S.badge.y = raw.y; snapGuides = raw.guides;
+    }
+    if (S.selected==='aiLabel'&&S.aiLabel) {
+      const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
+      S.aiLabel.x = raw.x; S.aiLabel.y = raw.y; snapGuides = raw.guides;
     }
     if (S.selected==='label'&&S.label) {
       const raw = computeSnap(S.dragStart.lx+dx, S.dragStart.ly+dy);
@@ -2021,7 +2131,7 @@ canvas.addEventListener('mousemove',e=>{
   const h=hitHandle(x,y);
   if (h) canvas.style.cursor=h+'-resize';
   else if (hitStripe(x,y)) canvas.style.cursor='ns-resize';
-  else if (hitBadge(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)) canvas.style.cursor='grab';
+  else if (hitBadge(x,y)||hitAiLabel(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)) canvas.style.cursor='grab';
   else canvas.style.cursor='default';
 });
 
@@ -2040,7 +2150,16 @@ canvas.addEventListener('dblclick', () => {
 });
 
 document.addEventListener('keydown',e=>{
-  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  // Block shortcuts only when user is actively typing in a text-entry field.
+  // Range sliders, color pickers, checkboxes etc. should NOT block Delete/arrow keys.
+  const ae = document.activeElement;
+  const isTextEntry = ae && (
+    ae.tagName === 'TEXTAREA' ||
+    ae.tagName === 'SELECT' ||
+    (ae.tagName === 'INPUT' && ['text','number','email','password','search','url','tel',''].includes(ae.type || '')) ||
+    ae.isContentEditable
+  );
+  if (isTextEntry) return;
 
   // Ctrl+Z undo
   if ((e.ctrlKey||e.metaKey) && e.key==='z') { e.preventDefault(); applyUndo(); return; }
@@ -2055,10 +2174,13 @@ document.addEventListener('keydown',e=>{
 
   // Delete selected
   if (e.key==='Delete'||e.key==='Backspace') {
+    if (!S.selected) return;
+    e.preventDefault();
     pushUndo();
     if (S.selected==='product'){S.product=null;S.selected=null;render();}
     else if(S.selected==='product2'){S.product2=null;S.selected=null;render();}
     else if(S.selected==='badge'){S.badge=null;S.selected=null;rebuildPalette();rebuildCustomShapes();render();}
+    else if(S.selected==='aiLabel'){S.aiLabel=null;S.selected=null;rebuildAiLabels();render();}
     else if(S.selected==='label'){S.label=null;S.selected=null;render();}
     updateUndoBtn();
   }
@@ -2070,6 +2192,7 @@ document.addEventListener('keydown',e=>{
     const dx = e.key==='ArrowLeft'?-d : e.key==='ArrowRight'?d : 0;
     const dy = e.key==='ArrowUp'  ?-d : e.key==='ArrowDown' ?d : 0;
     if (S.selected==='badge'    && S.badge)    { S.badge.x  += dx; S.badge.y  += dy; }
+    if (S.selected==='aiLabel'  && S.aiLabel)  { S.aiLabel.x += dx; S.aiLabel.y += dy; }
     if (S.selected==='label'    && S.label)    { S.label.x  += dx; S.label.y  += dy; }
     if (S.selected==='product'  && S.product)  { S.product.x += dx; S.product.y += dy; }
     if (S.selected==='product2' && S.product2) { S.product2.x+= dx; S.product2.y+= dy; }
@@ -2196,7 +2319,7 @@ function hitProduct2(mx,my){
 
 function hitStripe(mx,my){
   if (!S.stripe) return false;
-  const sh=Math.max(4,Math.round(CH*.022));
+  const sh=Math.max(2,Math.round(CH*.022*(S.stripeWidth??100)/100));
   const sy=Math.round((S.stripeY??95)/100*CH) - Math.round(sh/2);
   return my>=sy-10&&my<=sy+sh+10;
 }
@@ -2269,18 +2392,45 @@ document.getElementById('cropAutoBtn').addEventListener('click',()=>{
 });
 
 document.getElementById('shapeSize').addEventListener('input',e=>{
-  if (!S.badge) return;
+  const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+  if (!ab) return;
   const s=+e.target.value/100;
   document.getElementById('shapeSizeVal').textContent=e.target.value+'%';
-  S.badge.r=S.badge.baseR*s;
-  // Re-snap to corner after resize
-  if (S.badge.aiLabel && S.badge.aiCorner) snapAiLabelToCorner(null, null);
+  ab.r=ab.baseR*s;
+  if (S.selected==='aiLabel' && S.aiLabel?.aiCorner) snapAiLabelToCorner(null, null);
   render();
+});
+
+// Price input → live update
+document.getElementById('priceInput').addEventListener('input', e => {
+  if (!S.badge?.priceMode) return;
+  S.badge.text1 = e.target.value;
+  render();
+});
+
+// Price form button
+document.getElementById('formPriceBtn').addEventListener('click', () => {
+  if (S.badge?.priceMode) return;
+  pushUndo();
+  const prev = S.badge;
+  const cc = CORP_COLORS.find(c => c.id === prev?.colorId) || CORP_COLORS[2]; // default blue
+  const baseR = prev?.baseR || Math.round(Math.min(CW,CH) * .18);
+  S.badge = {
+    kind: 'circle', priceMode: true,
+    colorId: cc.id, fill: JSON.parse(JSON.stringify(cc.fill)), fg: cc.fg,
+    fgGradient: false,
+    x: prev?.x ?? CW - baseR - 25,
+    y: prev?.y ?? baseR + 18,
+    r: baseR, baseR: baseR,
+    text1: document.getElementById('priceInput')?.value || '99.–',
+    text2: '',
+  };
+  syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
 });
 
 // Pill form toggle buttons
 document.getElementById('formCircleBtn').addEventListener('click',()=>{
-  if (S.badge?.kind==='circle') return;
+  if (S.badge?.kind==='circle' && !S.badge?.priceMode) return;
   pushUndo();
   const prev = S.badge;
   const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
@@ -2290,8 +2440,8 @@ document.getElementById('formCircleBtn').addEventListener('click',()=>{
     fgGradient:false,
     x: prev?.x ?? CW-baseR-25, y: prev?.y ?? baseR+18,
     r: baseR, baseR: baseR,
-    text1: document.getElementById('txt1').value,
-    text2: document.getElementById('txt2').value,
+    text1: prev?.priceMode ? '' : (document.getElementById('txt1').value),
+    text2: prev?.priceMode ? '' : (document.getElementById('txt2').value),
     iconUrl:prev?.iconUrl, iconImg:prev?.iconImg, iconBounds:prev?.iconBounds,
   };
   syncFormButtons(); syncBadgeProps(); render();
@@ -2403,7 +2553,7 @@ document.getElementById('stickerCornerSlider').addEventListener('input',e=>{
 // ── AI Label: corner buttons ─────────────────────────────────────────────────
 document.querySelectorAll('.corner-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (!S.badge?.aiLabel) return;
+    if (!S.aiLabel) return;
     pushUndo();
     snapAiLabelToCorner(btn.dataset.corner, null);
     syncAiPosSection();
@@ -2411,7 +2561,7 @@ document.querySelectorAll('.corner-btn').forEach(btn => {
 });
 
 document.getElementById('aiMarginSlider').addEventListener('input', e => {
-  if (!S.badge?.aiLabel) return;
+  if (!S.aiLabel) return;
   const mg = +e.target.value / 100;
   const vl = document.getElementById('aiMarginVal');
   if (vl) vl.textContent = e.target.value + '%';
@@ -2556,6 +2706,8 @@ document.getElementById('stripeToggle').addEventListener('click',()=>{
   document.getElementById('stripeYSlider').style.display=sv;
   document.getElementById('stripeAngleRow').style.display=sv;
   document.getElementById('stripeAngleSlider').style.display=sv;
+  document.getElementById('stripeWidthRow').style.display=sv;
+  document.getElementById('stripeWidthSlider').style.display=sv;
   render();
 });
 
@@ -2568,6 +2720,11 @@ document.getElementById('stripeYSlider').addEventListener('input',e=>{
 document.getElementById('stripeAngleSlider').addEventListener('input',e=>{
   S.stripeAngle=+e.target.value;
   document.getElementById('stripeAngleVal').textContent=e.target.value+'°';
+  render();
+});
+document.getElementById('stripeWidthSlider').addEventListener('input',e=>{
+  S.stripeWidth=+e.target.value;
+  document.getElementById('stripeWidthVal').textContent=e.target.value+'%';
   render();
 });
 document.getElementById('shadowSlider').addEventListener('input',e=>{
@@ -2774,16 +2931,19 @@ const MAX_UNDO = 10;
 function pushUndo() {
   const snap = {
     badge:      S.badge   ? JSON.parse(JSON.stringify({...S.badge,   iconImg:undefined, img:undefined})) : null,
+    aiLabel:    S.aiLabel ? JSON.parse(JSON.stringify({...S.aiLabel, svgImg:undefined})) : null,
     label:      S.label   ? JSON.parse(JSON.stringify({...S.label,  iconImg:undefined})) : null,
     product:    S.product  ? JSON.parse(JSON.stringify({...S.product,  img:undefined})) : null,
     product2:   S.product2 ? JSON.parse(JSON.stringify({...S.product2, img:undefined})) : null,
     badgeIconImg:  S.badge?.iconImg    || null,
+    aiLabelSvgImg: S.aiLabel?.svgImg   || null,
     labelIconImg:  S.label?.iconImg    || null,
     productImg:    S.product?.img      || null,
     product2Img:   S.product2?.img     || null,
     stripe: S.stripe,
     stripeY: S.stripeY,
     stripeAngle: S.stripeAngle,
+    stripeWidth: S.stripeWidth,
     bg:     S.bg,
     format: S.format,
   };
@@ -2795,8 +2955,10 @@ function pushUndo() {
 function applyUndo() {
   if (!undoStack.length) return;
   const snap = undoStack.pop();
-  if (snap.badge)   { snap.badge.iconImg   = snap.badgeIconImg; S.badge   = snap.badge;   }
-  else              S.badge   = null;
+  if (snap.badge)    { snap.badge.iconImg   = snap.badgeIconImg;  S.badge   = snap.badge;   }
+  else               S.badge   = null;
+  if (snap.aiLabel)  { snap.aiLabel.svgImg  = snap.aiLabelSvgImg; S.aiLabel = snap.aiLabel; }
+  else               S.aiLabel = null;
   if (snap.label)   { snap.label.iconImg   = snap.labelIconImg; S.label   = snap.label;   }
   else              S.label   = null;
   if (snap.product)  { snap.product.img    = snap.productImg;   S.product  = snap.product;  }
@@ -2806,15 +2968,20 @@ function applyUndo() {
   S.stripe = snap.stripe;
   S.stripeY = snap.stripeY ?? 95;
   S.stripeAngle = snap.stripeAngle ?? 0;
+  S.stripeWidth = snap.stripeWidth ?? 100;
   document.getElementById('stripeYSlider').value=Math.round(S.stripeY);
   document.getElementById('stripeYVal').textContent=Math.round(S.stripeY)+'%';
   document.getElementById('stripeAngleSlider').value=S.stripeAngle;
   document.getElementById('stripeAngleVal').textContent=S.stripeAngle+'°';
+  document.getElementById('stripeWidthSlider').value=S.stripeWidth;
+  document.getElementById('stripeWidthVal').textContent=S.stripeWidth+'%';
   const sv2=S.stripe?'':'none';
   document.getElementById('stripeYRow').style.display=sv2;
   document.getElementById('stripeYSlider').style.display=sv2;
   document.getElementById('stripeAngleRow').style.display=sv2;
   document.getElementById('stripeAngleSlider').style.display=sv2;
+  document.getElementById('stripeWidthRow').style.display=sv2;
+  document.getElementById('stripeWidthSlider').style.display=sv2;
   S.bg     = snap.bg;
   S.selected = null;
   // Sync p1 sliders
@@ -2837,7 +3004,8 @@ function applyUndo() {
       document.getElementById('p2Filter'+k+'Val').textContent=(f2[k]??100)+'%';
     });
   }
-  syncBadgeProps(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+  syncBadgeProps(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  rebuildAiLabels(); syncAiPosSection(); render();
   updateUndoBtn();
 }
 
@@ -3011,7 +3179,7 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
 
   // Stripe: above background, below product images
   if (S.stripe) {
-    const sh=Math.max(4,Math.round(H*.022));
+    const sh=Math.max(2,Math.round(H*.022*(S.stripeWidth??100)/100));
     const cy=Math.round((S.stripeY??95)/100*H);
     const angle=(S.stripeAngle??0)*Math.PI/180;
     const diag=Math.sqrt(W*W+H*H)+4;
@@ -3054,6 +3222,7 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
   }
 
   if (S.badge) drawBadge(c,S.badge,scX,scY);
+  if (S.aiLabel) drawBadge(c,S.aiLabel,scX,scY);
   drawLabel(c,scX,scY,forExport);
 
   if (!forExport) drawSnapGuides(c);
@@ -3149,6 +3318,55 @@ function makeTextFill(c, b, cx, cy, r, halfSpanX) {
     return g;
   }
   return b.fg || '#ffffff';
+}
+
+function drawPriceMode(c, b, cx, cy, r) {
+  const price = (b.text1 || '').trim();
+  if (!price) return;
+
+  // Start with preferred size, then shrink to fit within ~88% of circle diameter
+  const maxWidth = r * 1.76; // 88% of 2r
+  let fsMain = Math.round(r * 0.93);
+
+  // Measure at preferred size, scale down if needed
+  c.font = `800 ${fsMain}px ${S.fontName}`;
+  let pw = c.measureText(price).width;
+  if (pw > maxWidth) {
+    fsMain = Math.round(fsMain * maxWidth / pw);
+    c.font = `800 ${fsMain}px ${S.fontName}`;
+    pw = c.measureText(price).width;
+  }
+
+  const fsSub = Math.round(fsMain * 0.30);
+
+  c.save();
+  c.fillStyle    = b.fg || '#fff';
+  c.textBaseline = 'middle';
+  c.textAlign    = 'left';
+
+  // Find where the period/dot starts to anchor /Mt above it
+  const dotIdx  = price.search(/[.,]/);
+  const dashIdx = price.search(/[–—\-]/);
+  const anchorIdx = dotIdx >= 0 ? dotIdx : (dashIdx >= 0 ? dashIdx : -1);
+  let dashX_offset = pw;
+  if (anchorIdx >= 0) {
+    const prefixW = c.measureText(price.slice(0, anchorIdx)).width;
+    const dotW    = c.measureText(price[anchorIdx]).width;
+    dashX_offset  = prefixW + dotW * 0.5;
+  }
+
+  const startX = cx - pw / 2;
+  const priceY = cy + r * 0.10;
+  const subX = startX + dashX_offset;
+  const subY = priceY - (fsMain - fsSub) * 0.36;
+
+  c.font = `800 ${fsMain}px ${S.fontName}`;
+  c.fillText(price, startX, priceY);
+
+  c.font = `700 ${fsSub}px ${S.fontName}`;
+  c.fillText('/Mt', subX, subY);
+
+  c.restore();
 }
 
 function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
@@ -3345,8 +3563,12 @@ function drawBadge(c,b,scX,scY) {
 
   if (b.kind==='circle') {
     applyCircleFill(c,cx,cy,r,b.fill);
-    if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
-    drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+    if (b.priceMode) {
+      drawPriceMode(c,b,cx,cy,r);
+    } else {
+      if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
+      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+    }
 
   } else if (b.kind==='sticker') {
     const hw=r*(b.aspect||2.5);
@@ -4036,7 +4258,7 @@ document.getElementById('undoBtn').addEventListener('click', applyUndo);
 document.getElementById('resetBtn').addEventListener('click', () => {
   if (!confirm('Alles zurücksetzen?')) return;
   pushUndo();
-  S.badge = null; S.label = null; S.product = null;
+  S.badge = null; S.aiLabel = null; S.label = null; S.product = null;
   S.stripe = false; S.bg = null; S.selected = null;
   document.getElementById('txt1').value = '';
   document.getElementById('txt2').value = '';
