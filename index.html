@@ -180,6 +180,9 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
     <!-- Backgrounds tab -->
     <div class="tab-content" id="bgTab">
       <div class="lib-grid" id="bgGrid"></div>
+      <div id="bgFlipRow" style="display:none;margin:4px 4px 2px;display:none;">
+        <button id="bgFlipBtn" style="width:100%;padding:4px 0;background:#22224a;border:1.5px solid transparent;border-radius:6px;color:#aab;font-size:11px;cursor:pointer;transition:all .15s;">↕ Gradient umkehren</button>
+      </div>
       <label class="upload-row">
         <input type="file" accept="image/*" id="bgUpload" multiple>
         + Hintergrund
@@ -398,11 +401,13 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
     <!-- RIBBON -->
     <div class="prop-section">
       <div class="prop-title">Ribbon</div>
-      <div class="prop-row" style="margin-bottom:6px;"><span class="prop-label">Form</span>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <div style="margin-bottom:6px;">
+        <div style="font-size:10px;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">Form</div>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:nowrap;">
           <div id="formCircleBtn" title="Kreis" style="width:28px;height:28px;border-radius:50%;background:#0028A5;cursor:pointer;border:2px solid #6366f1;"></div>
           <div id="formStickerBtn" title="Organische Form" style="width:44px;height:26px;border-radius:8px;background:#0028A5;cursor:pointer;border:2px solid transparent;"></div>
-          <div id="formPriceBtn" title="Preis-Ribbon" style="padding:0 10px;height:28px;border-radius:14px;background:linear-gradient(135deg,#E4003A 0%,#0028A5 100%);cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;letter-spacing:.4px;white-space:nowrap;">Preis</div>
+          <div id="formPriceBtn" title="Preis/Mt-Ribbon" style="padding:0 9px;height:28px;border-radius:14px;background:linear-gradient(135deg,#E4003A 0%,#0028A5 100%);cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff;letter-spacing:.3px;white-space:nowrap;">Preis/Mt</div>
+          <div id="formToppreisBtn" title="Toppreis mit Streichpreis" style="padding:0 9px;height:28px;border-radius:14px;background:linear-gradient(135deg,#F20505 0%,#c80000 100%);cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff;letter-spacing:.3px;white-space:nowrap;">Toppreis</div>
           <label title="Eigene SVG hochladen" style="width:36px;height:26px;border-radius:6px;background:#22224a;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#aab;letter-spacing:.4px;">
             SVG<input type="file" id="svgShapeInput" accept=".svg,image/svg+xml" style="display:none">
           </label>
@@ -430,7 +435,11 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <div class="prop-title">Text</div>
       <div id="priceRow" style="display:none;margin-bottom:5px;">
         <input class="pi" id="priceInput" placeholder="99.–" style="font-size:15px;font-weight:700;text-align:center;">
-        <div style="font-size:10px;color:#666;text-align:center;margin-top:2px;">/Mt wird automatisch angezeigt</div>
+        <div id="mtHint" style="font-size:10px;color:#666;text-align:center;margin-top:2px;">/Mt wird automatisch angezeigt</div>
+        <div id="streichRow" style="display:none;">
+          <input class="pi" id="streichpreisInput" placeholder="Streichpreis (z.B. 149.–)" style="margin-top:6px;font-size:12px;text-align:center;color:#aaa;">
+          <div style="font-size:10px;color:#666;text-align:center;margin-top:2px;">leer lassen = kein Streichpreis</div>
+        </div>
       </div>
       <div id="txt12Row">
         <input class="pi" id="txt1" value="" placeholder="Zeile 1">
@@ -454,7 +463,8 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
           <div class="swatch" id="fgSwatch" style="background:#ffffff" title="Textfarbe">
             <input type="color" id="fgColor" value="#ffffff">
           </div>
-          <div id="swGradTextBtn" title="Swisscom Gradient" style="width:36px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;background:linear-gradient(110.33deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
+          <div id="swGradTextBtn" title="Swisscom Gradient" style="width:36px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;background:linear-gradient(180deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
+          <div id="swGradFlipBtn" title="Gradient umkehren" style="width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;background:#22224a;display:none;flex-shrink:0;align-items:center;justify-content:center;font-size:13px;line-height:1;transition:border-color .15s;">↕</div>
         </div>
       </div>
     </div>
@@ -599,15 +609,19 @@ const FORMATS = {
 
 // Corporate color palette for the circle shape
 const CORP_COLORS = [
-  { id:'cc-dknav', fg:'#fff',    fill:{type:'solid', color:'#040D33'} },
-  { id:'cc-navy',  fg:'#fff',    fill:{type:'solid', color:'#001155'} },
-  { id:'cc-blue',  fg:'#fff',    fill:{type:'solid', color:'#0028A5'} },
-  { id:'cc-cyan',  fg:'#fff',    fill:{type:'solid', color:'#009DE0'} },
-  { id:'cc-red',   fg:'#fff',    fill:{type:'solid', color:'#E4003A'} },
-  { id:'cc-pink',  fg:'#fff',    fill:{type:'solid', color:'#E32065'} },
-  { id:'cc-purp',  fg:'#fff',    fill:{type:'solid', color:'#BE19A9'} },
-  { id:'cc-wh1',   fg:SW.navy,   fill:{type:'solid', color:'#FFFFFF'} },
-  { id:'cc-wh2',   fg:SW.navy,   fill:{type:'solid', color:'#F5F5FA'} },
+  // Main Colours
+  { id:'cc-dknav', fg:'#fff',  group:'main', label:'Dark Navy',  fill:{type:'solid', color:'#040D33'} },
+  { id:'cc-navy',  fg:'#fff',  group:'main', label:'Navy',       fill:{type:'solid', color:'#001155'} },
+  { id:'cc-blue',  fg:'#fff',  group:'main', label:'Blue',       fill:{type:'solid', color:'#0445C8'} },
+  { id:'cc-cyan',  fg:'#fff',  group:'main', label:'Light Blue', fill:{type:'solid', color:'#11AAFF'} },
+  { id:'cc-red',   fg:'#fff',  group:'main', label:'Red',        fill:{type:'solid', color:'#F20505'} },
+  { id:'cc-wh1',   fg:'#001155', group:'main', label:'White',    fill:{type:'solid', color:'#FFFFFF'} },
+  // Secondary Colours
+  { id:'cc-turq',  fg:'#fff',  group:'sec',  label:'Turquoise',  fill:{type:'solid', color:'#00A3BF'} },
+  { id:'cc-azur',  fg:'#fff',  group:'sec',  label:'Azur',       fill:{type:'solid', color:'#0E6EEC'} },
+  { id:'cc-iris',  fg:'#fff',  group:'sec',  label:'Iris',       fill:{type:'solid', color:'#573CE4'} },
+  { id:'cc-purp',  fg:'#fff',  group:'sec',  label:'Orchid',     fill:{type:'solid', color:'#BE19A9'} },
+  { id:'cc-pink',  fg:'#fff',  group:'sec',  label:'Pink',       fill:{type:'solid', color:'#E32065'} },
 ];
 
 const BG_PRESETS = [
@@ -647,6 +661,7 @@ const S = {
   label:   null,
   freistellen: false,   // {kind:'circle'|'image', fill?, fg?, img?, x,y, r, baseR, text1, text2}
   stripe:  false,
+  bgFlipped: false,
   stripeY: 95,
   stripeAngle: 0,
   stripeWidth: 100,
@@ -784,7 +799,7 @@ function rebuildBgGrid() {
       wrap.appendChild(presetThumb(p));
     }
     wrap.title=p.label;
-    wrap.onclick=()=>{ S.bg=p; rebuildBgGrid(); render(); };
+    wrap.onclick=()=>{ S.bg=p; S.bgFlipped=false; syncBgFlipBtn(); rebuildBgGrid(); render(); };
     grid.appendChild(wrap);
   });
   S.bgLib.forEach((item,idx)=>{
@@ -792,7 +807,7 @@ function rebuildBgGrid() {
     const img=el('img'); img.src=item.dataUrl; img.style.cssText='width:100%;height:100%;object-fit:cover;';
     wrap.appendChild(img);
     const d=del_x(); d.onclick=e=>{e.stopPropagation();deleteBg(idx);}; wrap.appendChild(d);
-    wrap.onclick=()=>{ S.bg=item; rebuildBgGrid(); render(); };
+    wrap.onclick=()=>{ S.bg=item; S.bgFlipped=false; syncBgFlipBtn(); rebuildBgGrid(); render(); };
     grid.appendChild(wrap);
   });
 }
@@ -802,13 +817,37 @@ function deleteBg(idx) {
   if (S.bg?.id===id) S.bg=null;
   rebuildBgGrid(); render();
 }
+// Bg gradient flip
+document.getElementById('bgFlipBtn').addEventListener('click', () => {
+  if (!S.bg?.layers) return;
+  pushUndo();
+  S.bgFlipped = !S.bgFlipped;
+  const btn = document.getElementById('bgFlipBtn');
+  if (btn) {
+    btn.style.borderColor = S.bgFlipped ? '#6366f1' : 'transparent';
+    btn.style.color       = S.bgFlipped ? '#fff' : '#aab';
+  }
+  render();
+});
+
+function syncBgFlipBtn() {
+  const row = document.getElementById('bgFlipRow');
+  const btn = document.getElementById('bgFlipBtn');
+  const hasGradient = !!(S.bg?.layers?.some(l => l.type === 'linear'));
+  if (row) row.style.display = hasGradient ? '' : 'none';
+  if (btn) {
+    btn.style.borderColor = S.bgFlipped ? '#6366f1' : 'transparent';
+    btn.style.color       = S.bgFlipped ? '#fff' : '#aab';
+  }
+}
+
 document.getElementById('bgUpload').addEventListener('change',async e=>{
   for (const f of e.target.files) {
     const dataUrl=await toDataUrl(f);
     S.bgLib.push({id:'bg-'+Date.now()+rnd(),type:'image',dataUrl});
     localStorage.setItem('swc_bgLib',JSON.stringify(S.bgLib));
   }
-  rebuildBgGrid(); S.bg=S.bgLib[S.bgLib.length-1]; rebuildBgGrid(); render();
+  rebuildBgGrid(); S.bg=S.bgLib[S.bgLib.length-1]; S.bgFlipped=false; syncBgFlipBtn(); rebuildBgGrid(); render();
   e.target.value='';
 });
 
@@ -817,34 +856,49 @@ document.getElementById('bgUpload').addEventListener('change',async e=>{
 // ────────────────────────────────────────────────────
 function rebuildPalette() {
   const grid=document.getElementById('colorPalette'); grid.innerHTML='';
-  CORP_COLORS.forEach(cc=>{
-    const wrap=el('div','pal-swatch'+(S.badge?.colorId===cc.id?' active':''));
-    wrap.title=cc.id;
 
-    if (cc.fill.type==='solid') {
-      wrap.style.background=cc.fill.color;
-      if (cc.fill.color==='#FFFFFF'||cc.fill.color==='#F5F5FA') wrap.style.border='1.5px solid #33334a';
-    } else {
-      // render mini canvas for gradient types
-      const c=document.createElement('canvas'); c.width=c.height=60;
-      applyCircleFill(c.getContext('2d'),30,30,30,cc.fill);
-      wrap.appendChild(c);
-    }
-    wrap.onclick=()=>{
-      if (S.badge?.kind==='sticker') addStickerBadge(cc);
-      else if (S.badge?.priceMode) addPriceBadge(cc);
-      else addCircleBadge(cc);
-    };
-    grid.appendChild(wrap);
-  });
+  function makeSwatchGroup(ccs, groupLabel) {
+    const lbl = document.createElement('div');
+    lbl.style.cssText='font-size:9px;color:#888;letter-spacing:.5px;text-transform:uppercase;margin:5px 0 3px;grid-column:1/-1;';
+    lbl.textContent = groupLabel;
+    grid.appendChild(lbl);
+
+    ccs.forEach(cc=>{
+      const wrap=el('div','pal-swatch'+(S.badge?.colorId===cc.id?' active':''));
+      wrap.title=cc.label||cc.id;
+      if (cc.fill.type==='solid') {
+        wrap.style.background=cc.fill.color;
+        if (cc.fill.color==='#FFFFFF') wrap.style.border='1.5px solid #33334a';
+      } else {
+        const c=document.createElement('canvas'); c.width=c.height=60;
+        applyCircleFill(c.getContext('2d'),30,30,30,cc.fill);
+        wrap.appendChild(c);
+      }
+      wrap.onclick=()=>{
+        if (S.badge?.kind==='sticker') addStickerBadge(cc);
+        else if (S.badge?.priceMode) addPriceBadge(cc);
+        else addCircleBadge(cc);
+      };
+      grid.appendChild(wrap);
+    });
+  }
+
+  makeSwatchGroup(CORP_COLORS.filter(c=>c.group==='main'), 'Main Colours');
+  makeSwatchGroup(CORP_COLORS.filter(c=>c.group==='sec'),  'Secondary Colours');
 }
 
 function updateGradTextBtn() {
-  const btn = document.getElementById('swGradTextBtn');
+  const btn  = document.getElementById('swGradTextBtn');
+  const flip = document.getElementById('swGradFlipBtn');
   if (!btn) return;
   const on = !!(S.badge?.fgGradient);
   btn.style.borderColor = on ? '#0028A5' : 'transparent';
   btn.style.opacity     = on ? '1' : '0.55';
+  if (flip) {
+    flip.style.display     = on ? 'flex' : 'none';
+    flip.style.borderColor = S.badge?.fgGradientFlip ? '#0028A5' : 'transparent';
+    flip.style.opacity     = S.badge?.fgGradientFlip ? '1' : '0.65';
+  }
 }
 
 function syncIconPreview() {
@@ -870,6 +924,13 @@ function syncBadgeProps() {
     if (priceRow) priceRow.style.display = '';
     if (txt12Row) txt12Row.style.display = 'none';
     if (priceInput) priceInput.value = b.text1 || '';
+    const isTop = b.priceKind === 'top';
+    const mtHint   = document.getElementById('mtHint');
+    const streichRow = document.getElementById('streichRow');
+    if (mtHint)    mtHint.style.display    = isTop ? 'none' : '';
+    if (streichRow) streichRow.style.display = isTop ? '' : 'none';
+    const spInput = document.getElementById('streichpreisInput');
+    if (spInput) spInput.value = b.streichpreis || '';
   } else {
     if (priceRow) priceRow.style.display = 'none';
     if (txt12Row) txt12Row.style.display = '';
@@ -1054,7 +1115,9 @@ function syncFormButtons() {
   const isPrice = !!(S.badge?.priceMode);
   circleBtn.style.borderColor  = (kind==='circle' && !isPrice)  ? '#6366f1' : 'transparent';
   if (stickerBtn) stickerBtn.style.borderColor = kind==='sticker' ? '#6366f1' : 'transparent';
-  if (priceBtn)   priceBtn.style.borderColor   = isPrice ? '#6366f1' : 'transparent';
+  if (priceBtn)   priceBtn.style.borderColor   = (isPrice && S.badge?.priceKind==='mt')  ? '#6366f1' : 'transparent';
+  const topBtn = document.getElementById('formToppreisBtn');
+  if (topBtn)     topBtn.style.borderColor     = (isPrice && S.badge?.priceKind==='top') ? '#6366f1' : 'transparent';
   if (stickerRows) stickerRows.style.display = kind==='sticker' ? 'block' : 'none';
   const svgClear = document.getElementById('svgShapeClear');
   if (svgClear) svgClear.style.display = kind==='svgshape' ? 'inline-block' : 'none';
@@ -2401,31 +2464,95 @@ document.getElementById('shapeSize').addEventListener('input',e=>{
   render();
 });
 
+// Auto-format helper: append .- unless value has 2 decimal digits (e.g. 15.96)
+function autoFormatPrice(val) {
+  val = val.trim();
+  if (!val) return val;
+  // Normalize short hyphen after separator -> en dash (99.- -> 99.–)
+  val = val.replace(/([.,])-$/, '$1–');
+  // Already has .– suffix -> keep
+  if (/[.,]–$/.test(val)) return val;
+  // Has decimal with exactly 2 digits -> keep (e.g. 15.96)
+  if (/^\d+[.,]\d{2}$/.test(val)) return val;
+  // Has decimal with exactly 1 digit -> pad to 2 (e.g. 99.9 -> 99.90)
+  if (/^\d+[.,]\d$/.test(val)) return val + '0';
+  // Ends with . or , -> add – (e.g. 99. -> 99.–)
+  if (/^\d+[.,]$/.test(val)) return val + '–';
+  // Pure digits -> add .– (e.g. 99 -> 99.–)
+  if (/^\d+$/.test(val)) return val + '.–';
+  return val;
+}
+
 // Price input → live update
 document.getElementById('priceInput').addEventListener('input', e => {
   if (!S.badge?.priceMode) return;
   S.badge.text1 = e.target.value;
   render();
 });
+document.getElementById('priceInput').addEventListener('keydown', e => {
+  // Intercept hyphen and insert en dash after a separator
+  if (e.key === '-') {
+    const el = e.target;
+    const v = el.value;
+    if (/[.,]$/.test(v)) {
+      e.preventDefault();
+      el.value = v + '–';
+      el.dispatchEvent(new Event('input'));
+    }
+  }
+});
+document.getElementById('priceInput').addEventListener('blur', e => {
+  if (!S.badge?.priceMode) return;
+  const formatted = autoFormatPrice(e.target.value);
+  if (formatted !== e.target.value) {
+    e.target.value = formatted;
+    S.badge.text1 = formatted;
+    render();
+  }
+});
+document.getElementById('streichpreisInput').addEventListener('input', e => {
+  if (!S.badge?.priceMode) return;
+  S.badge.streichpreis = e.target.value;
+  render();
+});
+document.getElementById('streichpreisInput').addEventListener('blur', e => {
+  if (!S.badge?.priceMode) return;
+  const formatted = autoFormatPrice(e.target.value);
+  if (formatted !== e.target.value) {
+    e.target.value = formatted;
+    S.badge.streichpreis = formatted;
+    render();
+  }
+});
 
-// Price form button
-document.getElementById('formPriceBtn').addEventListener('click', () => {
-  if (S.badge?.priceMode) return;
-  pushUndo();
-  const prev = S.badge;
-  const cc = CORP_COLORS.find(c => c.id === prev?.colorId) || CORP_COLORS[2]; // default blue
-  const baseR = prev?.baseR || Math.round(Math.min(CW,CH) * .18);
+// Price form buttons
+function makePriceBadge(kind) {
+  const prev = S.badge?.priceMode ? S.badge : null;
+  const prevAny = S.badge;
+  const cc = CORP_COLORS.find(c => c.id === (prev||prevAny)?.colorId)
+          || (kind==='top' ? CORP_COLORS.find(c=>c.id==='cc-red') : CORP_COLORS.find(c=>c.id==='cc-blue'))
+          || CORP_COLORS[2];
+  const baseR = (prev||prevAny)?.baseR || Math.round(Math.min(CW,CH) * .18);
   S.badge = {
-    kind: 'circle', priceMode: true,
+    kind: 'circle', priceMode: true, priceKind: kind,
     colorId: cc.id, fill: JSON.parse(JSON.stringify(cc.fill)), fg: cc.fg,
     fgGradient: false,
-    x: prev?.x ?? CW - baseR - 25,
-    y: prev?.y ?? baseR + 18,
+    x: (prev||prevAny)?.x ?? CW - baseR - 25,
+    y: (prev||prevAny)?.y ?? baseR + 18,
     r: baseR, baseR: baseR,
     text1: document.getElementById('priceInput')?.value || '99.–',
+    streichpreis: kind==='top' ? (document.getElementById('streichpreisInput')?.value || '') : '',
     text2: '',
   };
   syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
+}
+document.getElementById('formPriceBtn').addEventListener('click', () => {
+  if (S.badge?.priceMode && S.badge?.priceKind==='mt') return;
+  pushUndo(); makePriceBadge('mt');
+});
+document.getElementById('formToppreisBtn').addEventListener('click', () => {
+  if (S.badge?.priceMode && S.badge?.priceKind==='top') return;
+  pushUndo(); makePriceBadge('top');
 });
 
 // Pill form toggle buttons
@@ -2588,7 +2715,16 @@ document.getElementById('fgColor').addEventListener('input',e=>{
 
 document.getElementById('swGradTextBtn').addEventListener('click',()=>{
   if (!S.badge) return;
+  pushUndo();
   S.badge.fgGradient=!S.badge.fgGradient;
+  if (!S.badge.fgGradient) S.badge.fgGradientFlip = false;
+  updateGradTextBtn();
+  render();
+});
+document.getElementById('swGradFlipBtn').addEventListener('click', () => {
+  if (!S.badge?.fgGradient) return;
+  pushUndo();
+  S.badge.fgGradientFlip = !S.badge.fgGradientFlip;
   updateGradTextBtn();
   render();
 });
@@ -3240,7 +3376,11 @@ function drawBg(c,W,H) {
     return;
   }
   if (S.bg.layers) {
-    paintLayers(c, W, H, S.bg.layers);
+    // Apply flip by offsetting each linear layer's angle by 180°
+    const layers = S.bgFlipped
+      ? S.bg.layers.map(l => l.type==='linear' ? {...l, angle: (l.angle + 180) % 360} : l)
+      : S.bg.layers;
+    paintLayers(c, W, H, layers);
   } else if (S.bg.type==='image') {
     let img=imgCache[S.bg.id];
     if (img) { c.drawImage(img,0,0,W,H); }
@@ -3303,9 +3443,7 @@ function makeTextFill(c, b, cx, cy, r, halfSpanX) {
   if (b.fgGradient) {
     // linear-gradient(110.33deg, #F20505 12.89%, #0445C8 33.5%, #1FB9FF 73.77%)
     const ang = 110.33 * Math.PI / 180;
-    // Size gradient to text width so red always starts at the left edge of the text.
-    // halfSpanX = half the measured text width; if unknown, fall back to circle span.
-    const sinA = Math.sin(ang); // ≈ 0.9363
+    const sinA = Math.sin(ang);
     const span = halfSpanX ? halfSpanX / sinA : r * 1.2;
     const x1 = cx - sinA * span;
     const y1 = cy + Math.cos(ang) * span;
@@ -3321,14 +3459,17 @@ function makeTextFill(c, b, cx, cy, r, halfSpanX) {
 }
 
 function drawPriceMode(c, b, cx, cy, r) {
-  const price = (b.text1 || '').trim();
+  // Normalize short hyphen to en dash for display
+  const price   = (b.text1        || '').trim().replace(/([.,])-$/, '$1–');
+  const streich = (b.streichpreis || '').trim().replace(/([.,])-$/, '$1–');
   if (!price) return;
 
-  // Start with preferred size, then shrink to fit within ~88% of circle diameter
-  const maxWidth = r * 1.76; // 88% of 2r
-  let fsMain = Math.round(r * 0.93);
+  const hasStreich = streich.length > 0;
+  const isTop      = b.priceKind === 'top';
+  const maxWidth   = r * 1.76;
 
-  // Measure at preferred size, scale down if needed
+  // ── Main price: scale down if too wide ──
+  let fsMain = Math.round(r * (hasStreich ? 0.72 : 0.93));
   c.font = `800 ${fsMain}px ${S.fontName}`;
   let pw = c.measureText(price).width;
   if (pw > maxWidth) {
@@ -3337,39 +3478,96 @@ function drawPriceMode(c, b, cx, cy, r) {
     pw = c.measureText(price).width;
   }
 
-  const fsSub = Math.round(fsMain * 0.30);
-
   c.save();
-  c.fillStyle    = b.fg || '#fff';
   c.textBaseline = 'middle';
-  c.textAlign    = 'left';
 
-  // Find where the period/dot starts to anchor /Mt above it
-  const dotIdx  = price.search(/[.,]/);
-  const dashIdx = price.search(/[–—\-]/);
-  const anchorIdx = dotIdx >= 0 ? dotIdx : (dashIdx >= 0 ? dashIdx : -1);
-  let dashX_offset = pw;
-  if (anchorIdx >= 0) {
-    const prefixW = c.measureText(price.slice(0, anchorIdx)).width;
-    const dotW    = c.measureText(price[anchorIdx]).width;
-    dashX_offset  = prefixW + dotW * 0.5;
+  if (hasStreich) {
+    // ── Toppreis + Streichpreis layout ──
+    const priceY   = cy - r * 0.08;
+    const streichY = cy + r * 0.44;
+
+    c.textAlign = 'center';
+    c.font = `800 ${fsMain}px ${S.fontName}`;
+    c.fillStyle = makeTextFill(c, b, cx, priceY, r, pw / 2);
+    c.fillText(price, cx, priceY);
+
+    // Streichpreis — Light variant if available
+    const lightFont  = fontLib.find(f => /light|thin|300/i.test(f.name))?.name || null;
+    const stFontName = lightFont || S.fontName;
+    const stWeight   = lightFont ? '400' : '300';
+    let fsSt = Math.round(r * 0.46);
+    c.font = `${stWeight} ${fsSt}px ${stFontName}`;
+    let spw = c.measureText(streich).width;
+    if (spw > maxWidth * 0.88) {
+      fsSt = Math.round(fsSt * (maxWidth * 0.88) / spw);
+      c.font = `${stWeight} ${fsSt}px ${stFontName}`;
+      spw = c.measureText(streich).width;
+    }
+
+    c.globalAlpha = 0.85;
+    c.fillStyle   = makeTextFill(c, b, cx, streichY, r, spw / 2);
+    c.fillText(streich, cx, streichY);
+    c.globalAlpha = 1;
+
+    // Diagonal strikethrough over digits only (before . or ,)
+    const sepIdx  = streich.search(/[.,]/);
+    const numPart = sepIdx >= 0 ? streich.slice(0, sepIdx) : streich;
+    c.font = `${stWeight} ${fsSt}px ${stFontName}`;
+    const numW = c.measureText(numPart).width;
+    const pad  = numW * 0.06;
+    const x1   = cx - spw / 2 - pad;
+    const x2   = cx - spw / 2 + numW + pad;
+    const rise  = (x2 - x1) * 0.32;
+    c.beginPath();
+    c.moveTo(x1, streichY + rise / 2);
+    c.lineTo(x2, streichY - rise / 2);
+    c.strokeStyle = '#001155';
+    c.lineWidth   = Math.max(2, fsSt * 0.10);
+    c.stroke();
+
+  } else if (isTop) {
+    // ── Toppreis alone: centered, no /Mt ──
+    c.textAlign = 'center';
+    c.font = `800 ${fsMain}px ${S.fontName}`;
+    c.fillStyle = makeTextFill(c, b, cx, cy, r, pw / 2);
+    c.fillText(price, cx, cy + r * 0.05);
+
+  } else {
+    // ── Preis/Mt layout ──
+    const fsSub     = Math.round(fsMain * 0.30);
+    const dotIdx    = price.search(/[.,]/);
+    const dashIdx   = price.search(/[–—\-]/);
+    const anchorIdx = dotIdx >= 0 ? dotIdx : (dashIdx >= 0 ? dashIdx : -1);
+
+    c.font = `800 ${fsMain}px ${S.fontName}`;
+    let dashX_offset = pw;
+    if (anchorIdx >= 0) {
+      const prefixW = c.measureText(price.slice(0, anchorIdx)).width;
+      const dotW    = c.measureText(price[anchorIdx]).width;
+      dashX_offset  = prefixW + dotW * 0.5;
+    }
+
+    const priceY = cy + r * 0.10;
+    const startX = cx - pw / 2;
+    const subX   = startX + dashX_offset;
+    const subY   = priceY - (fsMain - fsSub) * 0.36;
+
+    c.textAlign = 'left';
+    c.font = `800 ${fsMain}px ${S.fontName}`;
+    c.fillStyle = makeTextFill(c, b, cx, priceY, r, pw / 2);
+    c.fillText(price, startX, priceY);
+    c.font = `700 ${fsSub}px ${S.fontName}`;
+    c.fillStyle = makeTextFill(c, b, cx, subY, r, c.measureText('/Mt').width / 2);
+    c.fillText('/Mt', subX, subY);
   }
-
-  const startX = cx - pw / 2;
-  const priceY = cy + r * 0.10;
-  const subX = startX + dashX_offset;
-  const subY = priceY - (fsMain - fsSub) * 0.36;
-
-  c.font = `800 ${fsMain}px ${S.fontName}`;
-  c.fillText(price, startX, priceY);
-
-  c.font = `700 ${fsSub}px ${S.fontName}`;
-  c.fillText('/Mt', subX, subY);
 
   c.restore();
 }
 
 function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
+  // Normalize short hyphen to en dash (e.g. 20.- -> 20.–)
+  if (t1) t1 = t1.replace(/([.,])-$/, '$1–');
+  if (t2) t2 = t2.replace(/([.,])-$/, '$1–');
   if (!t1&&!t2) return;
   // If icon present: shift text block down into lower portion
   const offset = hasIcon ? r*0.22 : 0;
