@@ -593,6 +593,12 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <button class="mbtn" id="apiCancel">Abbrechen</button>
       <button class="mbtn primary" id="apiSave">Speichern</button>
     </div>
+
+    <div class="divider"></div>
+    <div class="prop-section">
+      <div class="prop-title">Ebenen</div>
+      <div id="layerPanel" style="display:flex;flex-direction:column;gap:3px;"></div>
+    </div>
   </div>
 </div>
 
@@ -660,6 +666,7 @@ const S = {
   aiLabel: null,
   label:   null,
   freistellen: false,   // {kind:'circle'|'image', fill?, fg?, img?, x,y, r, baseR, text1, text2}
+  layerOrder: ['stripe','product','product2','badge','aiLabel','label'],
   stripe:  false,
   bgFlipped: false,
   stripeY: 95,
@@ -680,6 +687,72 @@ const S = {
   return [..._defs,..._saved.filter(s=>!_defIds.includes(s.id))];
 })(),
 };
+
+// ── Layer ordering helpers ──
+const LAYER_LABELS = {
+  stripe:'Stripe', product:'Bild 1', product2:'Bild 2',
+  badge:'Ribbon', aiLabel:'AI Label', label:'Label'
+};
+
+function bringToFront(id) {
+  S.layerOrder = S.layerOrder.filter(x => x !== id);
+  S.layerOrder.push(id);
+  rebuildLayerPanel();
+}
+
+function rebuildLayerPanel() {
+  const panel = document.getElementById('layerPanel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  // Show active layers, top-first (reversed)
+  const active = S.layerOrder.filter(id => {
+    if (id==='product')  return !!S.product;
+    if (id==='product2') return !!S.product2;
+    if (id==='badge')    return !!S.badge;
+    if (id==='aiLabel')  return !!S.aiLabel;
+    if (id==='stripe')   return S.stripe;
+    if (id==='label')    return !!(S.label?.text1||S.label?.text2);
+    return false;
+  });
+  if (!active.length) { panel.innerHTML='<div style="font-size:10px;color:#555;padding:2px 0">Noch keine Elemente</div>'; return; }
+  [...active].reverse().forEach((id, vi) => {
+    const realIdx = active.length - 1 - vi; // index in active array
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:5px;padding:3px 5px;background:#1a1a30;border-radius:5px;';
+    const lbl = document.createElement('span');
+    lbl.textContent = LAYER_LABELS[id] || id;
+    lbl.style.cssText='flex:1;font-size:11px;color:#ccd;';
+    const up = document.createElement('button');
+    up.textContent='↑'; up.title='Nach oben';
+    up.style.cssText='background:none;border:none;color:#6366f1;cursor:pointer;font-size:13px;padding:0 2px;';
+    up.disabled = (vi === 0);
+    up.style.opacity = up.disabled ? '0.25' : '1';
+    up.onclick = () => {
+      // Move this layer up in stack (later in layerOrder = on top)
+      const io = S.layerOrder.indexOf(id);
+      if (io < S.layerOrder.length - 1) {
+        [S.layerOrder[io], S.layerOrder[io+1]] = [S.layerOrder[io+1], S.layerOrder[io]];
+        rebuildLayerPanel(); render();
+      }
+    };
+    const dn = document.createElement('button');
+    dn.textContent='↓'; dn.title='Nach unten';
+    dn.style.cssText='background:none;border:none;color:#6366f1;cursor:pointer;font-size:13px;padding:0 2px;';
+    dn.disabled = (vi === active.length - 1);
+    dn.style.opacity = dn.disabled ? '0.25' : '1';
+    dn.onclick = () => {
+      const io = S.layerOrder.indexOf(id);
+      if (io > 0) {
+        [S.layerOrder[io], S.layerOrder[io-1]] = [S.layerOrder[io-1], S.layerOrder[io]];
+        rebuildLayerPanel(); render();
+      }
+    };
+    row.appendChild(lbl); row.appendChild(up); row.appendChild(dn);
+    panel.appendChild(row);
+  });
+}
+
+
 
 let CW=600, CH=600;
 const canvas = document.getElementById('mainCanvas');
@@ -1003,7 +1076,7 @@ function addCircleBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+  S.selected='badge'; bringToFront('badge'); rebuildLayerPanel(); autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
 }
 
 function addPriceBadge(cc) {
@@ -1068,7 +1141,7 @@ function addPillBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  S.selected='badge'; bringToFront('badge'); rebuildLayerPanel(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
   syncFormButtons(); render();
 }
 
@@ -1309,7 +1382,7 @@ function applyAiLabel(al) {
     text1: '', text2: '',
   };
   S.selected = 'aiLabel';
-  syncAiPosSection(); rebuildAiLabels(); render();
+  bringToFront('aiLabel'); rebuildLayerPanel(); syncAiPosSection(); rebuildAiLabels(); render();
 }
 
 function rebuildAiLabels() {
@@ -1701,7 +1774,7 @@ document.getElementById('productUrlBtn').addEventListener('click', async () => {
             document.getElementById('fitToImageBtn').style.display = 'block';
             if (typeof updateFreistNowBtn === 'function') updateFreistNowBtn();
             S.selected = 'product';
-            render();
+            bringToFront('product'); rebuildLayerPanel(); render();
             setStatus('⚠ Geladen (kein CORS – Export gesperrt)', 'err');
             setProgress(-1);
             resolve();
@@ -1855,7 +1928,7 @@ async function applyProductBlob(blob) {
     S.selected='product';
     document.getElementById('fitToImageBtn').style.display='block';
     if (typeof updateFreistNowBtn === 'function') updateFreistNowBtn();
-    render();
+    bringToFront('product'); rebuildLayerPanel(); render();
     setTimeout(()=>setStatus('',''),3000);
   };
   img.src=url;
@@ -2327,7 +2400,7 @@ document.getElementById('product2Input').addEventListener('change',e=>{
       S.product2={img, x:(CW-w)/2, y:(CH-h)/2, w, h,
                   baseW:w, baseH:h, opacity:1};
       updateP2UI();
-      render();
+      bringToFront('product2'); rebuildLayerPanel(); render();
     };
     img.src=ev.target.result;
   };
@@ -2544,7 +2617,7 @@ function makePriceBadge(kind) {
     streichpreis: kind==='top' ? (document.getElementById('streichpreisInput')?.value || '') : '',
     text2: '',
   };
-  syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
+  bringToFront('badge'); rebuildLayerPanel(); syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
 }
 document.getElementById('formPriceBtn').addEventListener('click', () => {
   if (S.badge?.priceMode && S.badge?.priceKind==='mt') return;
@@ -2835,7 +2908,7 @@ document.getElementById('iconPosSlider').addEventListener('input', e => {
 });
 
 document.getElementById('stripeToggle').addEventListener('click',()=>{
-  S.stripe=!S.stripe;
+  S.stripe=!S.stripe; if(S.stripe) { bringToFront('stripe'); rebuildLayerPanel(); }
   document.getElementById('stripeToggle').classList.toggle('on',S.stripe);
   const sv=S.stripe?'':'none';
   document.getElementById('stripeYRow').style.display=sv;
@@ -3313,53 +3386,52 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
 
   drawBg(c,W,H);
 
-  // Stripe: above background, below product images
-  if (S.stripe) {
-    const sh=Math.max(2,Math.round(H*.022*(S.stripeWidth??100)/100));
-    const cy=Math.round((S.stripeY??95)/100*H);
-    const angle=(S.stripeAngle??0)*Math.PI/180;
-    const diag=Math.sqrt(W*W+H*H)+4;
-    c.save();
-    c.beginPath(); c.rect(0,0,W,H); c.clip();
-    c.translate(W/2, cy);
-    c.rotate(angle);
-    const g=c.createLinearGradient(-diag/2,0,diag/2,0);
-    g.addColorStop(0.07,'#F20505');
-    g.addColorStop(0.29,'#0445C8');
-    g.addColorStop(0.72,'#1FB9FF');
-    c.fillStyle=g; c.fillRect(-diag/2,-sh/2,diag,sh);
-    c.restore();
+  // Draw layers in dynamic order
+  for (const layerId of S.layerOrder) {
+    if (layerId==='stripe' && S.stripe) {
+      const sh=Math.max(2,Math.round(H*.022*(S.stripeWidth??100)/100));
+      const cy=Math.round((S.stripeY??95)/100*H);
+      const angle=(S.stripeAngle??0)*Math.PI/180;
+      const diag=Math.sqrt(W*W+H*H)+4;
+      c.save();
+      c.beginPath(); c.rect(0,0,W,H); c.clip();
+      c.translate(W/2, cy);
+      c.rotate(angle);
+      const g=c.createLinearGradient(-diag/2,0,diag/2,0);
+      g.addColorStop(0.07,'#F20505');
+      g.addColorStop(0.29,'#0445C8');
+      g.addColorStop(0.72,'#1FB9FF');
+      c.fillStyle=g; c.fillRect(-diag/2,-sh/2,diag,sh);
+      c.restore();
+    } else if (layerId==='product' && S.product) {
+      const p=S.product;
+      c.save(); c.globalAlpha=p.opacity;
+      if (p.shadow>0){const sa=(p.shadow/100)*0.5;c.shadowColor=`rgba(0,0,0,${sa})`;c.shadowBlur=(p.shadow/100)*30*scX;c.shadowOffsetX=(p.shadow/100)*4*scX;c.shadowOffsetY=(p.shadow/100)*12*scY;}
+      const f=p.filters||{}; const br=f.Br??100, con=f.Con??100, sat=f.Sat??100;
+      if (br!==100||con!==100||sat!==100) c.filter=`brightness(${br}%) contrast(${con}%) saturate(${sat}%)`;
+      const cL=(p.cropL||0)/100, cR=(p.cropR||0)/100, cT=(p.cropT||0)/100, cB=(p.cropB||0)/100;
+      const iw=p.img.naturalWidth, ih=p.img.naturalHeight;
+      const sx=iw*cL, sy=ih*cT, sw=iw*(1-cL-cR), sh=ih*(1-cT-cB);
+      const dw=p.w*scX*(1-cL-cR), dh=p.h*scY*(1-cT-cB);
+      const dx=p.x*scX + p.w*scX*cL, dy=p.y*scY + p.h*scY*cT;
+      c.drawImage(p.img, sx,sy,sw,sh, dx,dy,dw,dh);
+      c.restore();
+    } else if (layerId==='product2' && S.product2) {
+      const p=S.product2;
+      c.save(); c.globalAlpha=p.opacity??1;
+      if ((p.shadow||0)>0){const sa=(p.shadow/100)*0.5;c.shadowColor=`rgba(0,0,0,${sa})`;c.shadowBlur=(p.shadow/100)*30*scX;c.shadowOffsetX=(p.shadow/100)*4*scX;c.shadowOffsetY=(p.shadow/100)*12*scY;}
+      const f2=p.filters||{}; const br2=f2.Br??100, con2=f2.Con??100, sat2=f2.Sat??100;
+      if (br2!==100||con2!==100||sat2!==100) c.filter=`brightness(${br2}%) contrast(${con2}%) saturate(${sat2}%)`;
+      c.drawImage(p.img, p.x*scX, p.y*scY, p.w*scX, p.h*scY);
+      c.restore();
+    } else if (layerId==='badge' && S.badge) {
+      drawBadge(c,S.badge,scX,scY);
+    } else if (layerId==='aiLabel' && S.aiLabel) {
+      drawBadge(c,S.aiLabel,scX,scY);
+    } else if (layerId==='label') {
+      drawLabel(c,scX,scY,forExport);
+    }
   }
-
-  if (S.product) {
-    const p=S.product;
-    c.save(); c.globalAlpha=p.opacity;
-    if (p.shadow>0){const sa=(p.shadow/100)*0.5;c.shadowColor=`rgba(0,0,0,${sa})`;c.shadowBlur=(p.shadow/100)*30*scX;c.shadowOffsetX=(p.shadow/100)*4*scX;c.shadowOffsetY=(p.shadow/100)*12*scY;}
-    const f=p.filters||{}; const br=f.Br??100, con=f.Con??100, sat=f.Sat??100;
-    if (br!==100||con!==100||sat!==100) c.filter=`brightness(${br}%) contrast(${con}%) saturate(${sat}%)`;
-    const cL=(p.cropL||0)/100, cR=(p.cropR||0)/100, cT=(p.cropT||0)/100, cB=(p.cropB||0)/100;
-    const iw=p.img.naturalWidth, ih=p.img.naturalHeight;
-    const sx=iw*cL, sy=ih*cT, sw=iw*(1-cL-cR), sh=ih*(1-cT-cB);
-    const dw=p.w*scX*(1-cL-cR), dh=p.h*scY*(1-cT-cB);
-    const dx=p.x*scX + p.w*scX*cL, dy=p.y*scY + p.h*scY*cT;
-    c.drawImage(p.img, sx,sy,sw,sh, dx,dy,dw,dh);
-    c.restore();
-  }
-
-  // Second image layer (above product1)
-  if (S.product2) {
-    const p=S.product2;
-    c.save(); c.globalAlpha=p.opacity??1;
-    if ((p.shadow||0)>0){const sa=(p.shadow/100)*0.5;c.shadowColor=`rgba(0,0,0,${sa})`;c.shadowBlur=(p.shadow/100)*30*scX;c.shadowOffsetX=(p.shadow/100)*4*scX;c.shadowOffsetY=(p.shadow/100)*12*scY;}
-    const f2=p.filters||{}; const br2=f2.Br??100, con2=f2.Con??100, sat2=f2.Sat??100;
-    if (br2!==100||con2!==100||sat2!==100) c.filter=`brightness(${br2}%) contrast(${con2}%) saturate(${sat2}%)`;
-    c.drawImage(p.img, p.x*scX, p.y*scY, p.w*scX, p.h*scY);
-    c.restore();
-  }
-
-  if (S.badge) drawBadge(c,S.badge,scX,scY);
-  if (S.aiLabel) drawBadge(c,S.aiLabel,scX,scY);
-  drawLabel(c,scX,scY,forExport);
 
   if (!forExport) drawSnapGuides(c);
   if (!forExport&&S.selected) { drawCropOverlay(ctx); drawHandles(ctx); }
@@ -3571,11 +3643,28 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
   if (!t1&&!t2) return;
   // If icon present: shift text block down into lower portion
   const offset = hasIcon ? r*0.22 : 0;
-  const fs1=Math.round(r*(hasIcon?.42:.58)), fs2=Math.round(r*(hasIcon?.32:.40));
+  const maxW = r * 1.65; // max text width inside circle
   c.save();
   c.textAlign='center'; c.textBaseline='middle';
 
-  // Measure text width so gradient starts red at the text's left edge (not circle center)
+  // Base font sizes
+  let fs1=Math.round(r*(hasIcon?.42:.58)), fs2=Math.round(r*(hasIcon?.32:.40));
+
+  // Auto-shrink fs1 if t1 too wide
+  if (t1) {
+    c.font=`800 ${fs1}px ${S.fontName}`;
+    const w=c.measureText(t1).width;
+    if (w>maxW) fs1=Math.max(10, Math.round(fs1*maxW/w));
+  }
+  // Auto-shrink fs2 if t2 too wide (but not larger than fs1)
+  if (t2) {
+    fs2=Math.min(fs2, Math.round(fs1*0.75));
+    c.font=`600 ${fs2}px ${S.fontName}`;
+    const w=c.measureText(t2).width;
+    if (w>maxW) fs2=Math.max(8, Math.round(fs2*maxW/w));
+  }
+
+  // Measure for gradient
   let halfSpanX = null;
   if (b.fgGradient) {
     let maxHalf = 0;
@@ -4462,7 +4551,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   document.getElementById('txt2').value = '';
   document.getElementById('labelTxt1').value = '';
   document.getElementById('labelTxt2').value = '';
-  rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); syncBadgeProps(); render();
+  rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); syncBadgeProps(); render(); rebuildLayerPanel();
 });
 
 </script>
