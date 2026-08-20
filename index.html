@@ -400,7 +400,10 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 
     <!-- RIBBON -->
     <div class="prop-section">
-      <div class="prop-title">Ribbon</div>
+      <div class="prop-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Ribbon</span>
+        <button id="addBadge2Btn" title="Zweites Ribbon hinzufügen" style="display:none;background:#22224a;border:1.5px solid #6366f1;color:#aab;border-radius:5px;font-size:12px;cursor:pointer;padding:1px 7px;line-height:1.6;">+</button>
+      </div>
       <div style="margin-bottom:6px;">
         <div style="font-size:10px;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;">Form</div>
         <div style="display:flex;gap:5px;align-items:center;flex-wrap:nowrap;">
@@ -442,8 +445,8 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
         </div>
       </div>
       <div id="txt12Row">
-        <input class="pi" id="txt1" value="" placeholder="Zeile 1">
-        <input class="pi" id="txt2" value="" placeholder="Zeile 2">
+        <textarea class="pi" id="txt1" placeholder="Text (Enter = neue Zeile)" rows="2" style="resize:none;line-height:1.4;padding:6px 8px;font-family:inherit;"></textarea>
+        <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
       <div class="prop-row" style="margin-top:2px;align-items:center;">
         <span class="prop-label">Schrift</span>
@@ -521,8 +524,8 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
     <!-- LABEL -->
     <div class="prop-section collapsed">
       <div class="prop-title">Label (frei platzierbar)</div>
-      <input class="pi" id="labelTxt1" value="" placeholder="Zeile 1 (z.B. Swisscom)">
-      <input class="pi" id="labelTxt2" value="" placeholder="Zeile 2 (z.B. Benefits)" style="margin-top:5px;">
+      <textarea class="pi" id="labelTxt1" placeholder="Text (Enter = neue Zeile)" rows="2" style="resize:none;line-height:1.4;padding:6px 8px;font-family:inherit;"></textarea>
+      <input class="pi" id="labelTxt2" value="" placeholder="Zeile 2 (z.B. Benefits)" style="display:none;margin-top:5px;">
       <div class="prop-row" style="margin-top:6px;">
         <span class="prop-label">Farbe</span>
         <div id="labelColorPalette" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;"></div>
@@ -666,7 +669,8 @@ const S = {
   aiLabel: null,
   label:   null,
   freistellen: false,   // {kind:'circle'|'image', fill?, fg?, img?, x,y, r, baseR, text1, text2}
-  layerOrder: ['stripe','product','product2','badge','aiLabel','label'],
+  badge2:      null,
+  layerOrder: ['stripe','product','product2','badge','badge2','aiLabel','label'],
   stripe:  false,
   bgFlipped: false,
   stripeY: 95,
@@ -691,13 +695,29 @@ const S = {
 // ── Layer ordering helpers ──
 const LAYER_LABELS = {
   stripe:'Stripe', product:'Bild 1', product2:'Bild 2',
-  badge:'Ribbon', aiLabel:'AI Label', label:'Label'
+  badge:'Ribbon 1', badge2:'Ribbon 2', aiLabel:'AI Label', label:'Label'
 };
 
 function bringToFront(id) {
   S.layerOrder = S.layerOrder.filter(x => x !== id);
   S.layerOrder.push(id);
   rebuildLayerPanel();
+}
+
+// Badge slot helpers
+function targetSlot()  { return S.selected === 'badge2' ? 'badge2' : 'badge'; }
+function targetBadge() { return S[targetSlot()]; }
+function setTargetBadge(b) { S[targetSlot()] = b; }
+
+function hitBadge2(mx,my) {
+  if (!S.badge2) return false;
+  const b = badgeBounds(S.badge2);
+  if (!b) return false;
+  if (S.badge2.kind==='image' && S.badge2.priceMode)
+    return Math.hypot(mx-S.badge2.x,my-S.badge2.y)<=S.badge2.r*1.2;
+  if (S.badge2.kind==='image'||S.badge2.kind==='pill'||S.badge2.kind==='sticker'||S.badge2.kind==='svgshape')
+    return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
+  return Math.hypot(mx-S.badge2.x,my-S.badge2.y)<=S.badge2.r*1.2;
 }
 
 function rebuildLayerPanel() {
@@ -709,6 +729,7 @@ function rebuildLayerPanel() {
     if (id==='product')  return !!S.product;
     if (id==='product2') return !!S.product2;
     if (id==='badge')    return !!S.badge;
+    if (id==='badge2')   return !!S.badge2;
     if (id==='aiLabel')  return !!S.aiLabel;
     if (id==='stripe')   return S.stripe;
     if (id==='label')    return !!(S.label?.text1||S.label?.text2);
@@ -937,19 +958,24 @@ function rebuildPalette() {
     grid.appendChild(lbl);
 
     ccs.forEach(cc=>{
-      const wrap=el('div','pal-swatch'+(S.badge?.colorId===cc.id?' active':''));
+      const wrap=el('div','pal-swatch'+(targetBadge()?.colorId===cc.id?' active':''));
       wrap.title=cc.label||cc.id;
       if (cc.fill.type==='solid') {
         wrap.style.background=cc.fill.color;
         if (cc.fill.color==='#FFFFFF') wrap.style.border='1.5px solid #33334a';
+      } else if (cc.fill.type==='linear') {
+        // Show as CSS gradient in the swatch background
+        const a=cc.fill.a, b=cc.fill.b, ang=cc.fill.angle||135;
+        wrap.style.background=`linear-gradient(${ang}deg,${a},${b})`;
       } else {
         const c=document.createElement('canvas'); c.width=c.height=60;
         applyCircleFill(c.getContext('2d'),30,30,30,cc.fill);
         wrap.appendChild(c);
       }
       wrap.onclick=()=>{
-        if (S.badge?.kind==='sticker') addStickerBadge(cc);
-        else if (S.badge?.priceMode) addPriceBadge(cc);
+        const ab = targetBadge();
+        if (ab?.kind==='sticker') addStickerBadge(cc);
+        else if (ab?.priceMode)   addPriceBadge(cc);
         else addCircleBadge(cc);
       };
       grid.appendChild(wrap);
@@ -964,18 +990,19 @@ function updateGradTextBtn() {
   const btn  = document.getElementById('swGradTextBtn');
   const flip = document.getElementById('swGradFlipBtn');
   if (!btn) return;
-  const on = !!(S.badge?.fgGradient);
+  const ab = targetBadge();
+  const on = !!(ab?.fgGradient);
   btn.style.borderColor = on ? '#0028A5' : 'transparent';
   btn.style.opacity     = on ? '1' : '0.55';
   if (flip) {
     flip.style.display     = on ? 'flex' : 'none';
-    flip.style.borderColor = S.badge?.fgGradientFlip ? '#0028A5' : 'transparent';
-    flip.style.opacity     = S.badge?.fgGradientFlip ? '1' : '0.65';
+    flip.style.borderColor = ab?.fgGradientFlip ? '#0028A5' : 'transparent';
+    flip.style.opacity     = ab?.fgGradientFlip ? '1' : '0.65';
   }
 }
 
 function syncIconPreview() {
-  const hasIcon = !!(S.badge?.iconUrl);
+  const hasIcon = !!(targetBadge()?.iconUrl);
   const prev = document.getElementById('iconPreview');
   const rem  = document.getElementById('iconRemove');
   const ctrl = document.getElementById('iconControls');
@@ -983,12 +1010,12 @@ function syncIconPreview() {
   if (prev)  prev.style.display  = hasIcon ? 'flex'         : 'none';
   if (rem)   rem.style.display   = hasIcon ? 'inline-block' : 'none';
   if (ctrl)  ctrl.style.display  = hasIcon ? 'flex'         : 'none';
-  if (thumb && hasIcon) thumb.src = S.badge.iconUrl;
+  if (thumb && hasIcon) thumb.src = targetBadge().iconUrl;
 }
 
 function syncBadgeProps() {
-  if (!S.badge) return;
-  const b = S.badge;
+  const b = S.selected === 'badge2' ? S.badge2 : S.badge;
+  if (!b) return;
   // Text — switch between normal fields and price input
   const priceRow = document.getElementById('priceRow');
   const txt12Row = document.getElementById('txt12Row');
@@ -1027,7 +1054,14 @@ function syncBadgeProps() {
     if (fc) fc.value = b.fg;
     if (fs) fs.style.background = b.fg;
   }
-  // Gradient button
+  // Gradient button — hidden for price ribbons
+  const gradRow = document.getElementById('swGradTextBtn')?.parentElement;
+  const isPrice = !!(b.priceMode);
+  if (isPrice && b.fgGradient) {
+    b.fgGradient = false;
+    b.fgGradientFlip = false;
+  }
+  if (gradRow) gradRow.style.display = isPrice ? 'none' : '';
   updateGradTextBtn();
   // Icon preview / controls
   syncIconPreview();
@@ -1049,7 +1083,8 @@ function syncBadgeProps() {
 
 function addCircleBadge(cc) {
   pushUndo();
-  const prev = S.badge;
+  const slot = targetSlot();
+  const prev = S[slot];
   if (prev && prev.kind === 'circle') {
     // Circle already on canvas — just update colour in-place
     prev.colorId = cc.id;
@@ -1058,7 +1093,7 @@ function addCircleBadge(cc) {
   } else {
     // No badge, or badge is an image-ribbon → create / replace with circle
     const baseR = prev?.baseR || Math.round(Math.min(CW,CH)*.17);
-    S.badge = {
+    S[slot] = {
       kind: 'circle',
       colorId: cc.id,
       fill: JSON.parse(JSON.stringify(cc.fill)),
@@ -1076,12 +1111,13 @@ function addCircleBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; bringToFront('badge'); rebuildLayerPanel(); autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
+  S.selected=slot; bringToFront(slot); rebuildLayerPanel(); autoExpandSections('badge'); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
 }
 
 function addPriceBadge(cc) {
   pushUndo();
-  const prev = S.badge;
+  const slot = targetSlot();
+  const prev = S[slot];
   if (prev && prev.priceMode) {
     // Just update colour
     prev.colorId = cc.id;
@@ -1089,7 +1125,7 @@ function addPriceBadge(cc) {
     prev.fg      = cc.fg;
   } else {
     const baseR = prev?.baseR || Math.round(Math.min(CW,CH) * .18);
-    S.badge = {
+    S[slot] = {
       kind: 'circle',
       priceMode: true,
       colorId: cc.id,
@@ -1105,12 +1141,13 @@ function addPriceBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected = 'badge'; autoExpandSections('badge'); rebuildPalette(); render();
+  S.selected = slot; autoExpandSections('badge'); rebuildPalette(); render();
 }
 
 function addPillBadge(cc) {
   pushUndo();
-  const prev = S.badge;
+  const slot = targetSlot();
+  const prev = S[slot];
   if (prev && prev.kind === 'pill') {
     // Pill already on canvas — just update colour in-place
     prev.colorId = cc.id;
@@ -1122,7 +1159,7 @@ function addPillBadge(cc) {
     const aspect = prev?.kind==='pill' ? (prev.aspect||2.0) : 2.0;
     const baseR  = prev?.kind==='pill' ? (prev.baseR||pillR) : pillR;
     const hw     = baseR * aspect;
-    S.badge = {
+    S[slot] = {
       kind: 'pill',
       colorId: cc.id,
       fill: JSON.parse(JSON.stringify(cc.fill)),
@@ -1141,13 +1178,14 @@ function addPillBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; bringToFront('badge'); rebuildLayerPanel(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  S.selected=slot; bringToFront(slot); rebuildLayerPanel(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
   syncFormButtons(); render();
 }
 
 function addStickerBadge(cc) {
   pushUndo();
-  const prev = S.badge;
+  const slot = targetSlot();
+  const prev = S[slot];
   if (prev && prev.kind === 'sticker') {
     prev.colorId = cc.id;
     prev.fill    = JSON.parse(JSON.stringify(cc.fill));
@@ -1157,7 +1195,7 @@ function addStickerBadge(cc) {
     const aspect = prev?.kind==='sticker' ? (prev.aspect||2.5) : 2.5;
     const corner = prev?.kind==='sticker' ? (prev.cornerFrac||0.42) : 0.42;
     const hw     = baseR * aspect;
-    S.badge = {
+    S[slot] = {
       kind: 'sticker',
       colorId: cc.id,
       fill: JSON.parse(JSON.stringify(cc.fill)),
@@ -1174,7 +1212,7 @@ function addStickerBadge(cc) {
     };
   }
   syncBadgeProps();
-  S.selected='badge'; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  S.selected=slot; rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
   syncFormButtons(); render();
 }
 
@@ -1184,19 +1222,22 @@ function syncFormButtons() {
   const priceBtn   = document.getElementById('formPriceBtn');
   const stickerRows= document.getElementById('stickerRows');
   if (!circleBtn) return;
-  const kind = S.badge?.kind || 'circle';
-  const isPrice = !!(S.badge?.priceMode);
+  const activeBadge = S.selected === 'badge2' ? S.badge2 : S.badge;
+  const kind = activeBadge?.kind || 'circle';
+  const isPrice = !!(activeBadge?.priceMode);
   circleBtn.style.borderColor  = (kind==='circle' && !isPrice)  ? '#6366f1' : 'transparent';
   if (stickerBtn) stickerBtn.style.borderColor = kind==='sticker' ? '#6366f1' : 'transparent';
-  if (priceBtn)   priceBtn.style.borderColor   = (isPrice && S.badge?.priceKind==='mt')  ? '#6366f1' : 'transparent';
+  if (priceBtn)   priceBtn.style.borderColor   = (isPrice && activeBadge?.priceKind==='mt')  ? '#6366f1' : 'transparent';
   const topBtn = document.getElementById('formToppreisBtn');
-  if (topBtn)     topBtn.style.borderColor     = (isPrice && S.badge?.priceKind==='top') ? '#6366f1' : 'transparent';
+  if (topBtn)     topBtn.style.borderColor     = (isPrice && activeBadge?.priceKind==='top') ? '#6366f1' : 'transparent';
   if (stickerRows) stickerRows.style.display = kind==='sticker' ? 'block' : 'none';
   const svgClear = document.getElementById('svgShapeClear');
   if (svgClear) svgClear.style.display = kind==='svgshape' ? 'inline-block' : 'none';
-  if (kind==='sticker' && S.badge) {
-    const asp = S.badge.aspect || 2.5;
-    const cr  = S.badge.cornerFrac || 0.30;
+  const addBadge2Btn = document.getElementById('addBadge2Btn');
+  if (addBadge2Btn) addBadge2Btn.style.display = (S.badge && !S.badge2) ? '' : 'none';
+  if (kind==='sticker' && activeBadge) {
+    const asp = activeBadge.aspect || 2.5;
+    const cr  = activeBadge.cornerFrac || 0.30;
     const asl = document.getElementById('stickerAspectSlider');
     const avl = document.getElementById('stickerAspectVal');
     const csl = document.getElementById('stickerCornerSlider');
@@ -1232,10 +1273,11 @@ BUILTIN_SHAPES.forEach(s => {
 
 function applyBuiltinShape(shape) {
   pushUndo();
-  const prev = S.badge;
+  const slot = targetSlot();
+  const prev = S[slot];
   const cc = CORP_COLORS.find(c => c.id === prev?.colorId) || CORP_COLORS[0];
   const baseR = Math.round(Math.min(CW, CH) * 0.12);
-  S.badge = {
+  S[slot] = {
     kind: 'svgshape',
     colorId: cc.id,
     fill: JSON.parse(JSON.stringify(cc.fill)),
@@ -1253,6 +1295,7 @@ function applyBuiltinShape(shape) {
     text2: document.getElementById('txt2').value,
     iconUrl: prev?.iconUrl, iconImg: prev?.iconImg, iconBounds: prev?.iconBounds,
   };
+  S.selected = slot;
   document.getElementById('svgShapeClear').style.display = 'inline-block';
   syncFormButtons(); syncBadgeProps(); render();
 }
@@ -1458,38 +1501,38 @@ function saveIconLib() {
 
 function deleteIcon(id) {
   S.iconLib = S.iconLib.filter(ic => ic.id !== id);
-  if (S.badge?.iconUrl && S.iconLib.every(ic => ic.dataUrl !== S.badge.iconUrl)) {
-    // Active icon was deleted — clear it from badge
-    delete S.badge.iconUrl; delete S.badge.iconImg;
-    syncIconPreview();
+  for (const b of [S.badge, S.badge2]) {
+    if (b?.iconUrl && S.iconLib.every(ic => ic.dataUrl !== b.iconUrl)) {
+      delete b.iconUrl; delete b.iconImg;
+    }
   }
+  syncIconPreview();
   saveIconLib();
 rebuildFtIcons();
   render();
 }
 
 function applyFtIconToBadge(item) {
-  // Set as icon overlay on existing badge; if no badge, create a default circle first
-  if (!S.badge) {
-    // Create a default circle badge with first corporate color
+  const slot = targetSlot();
+  if (!S[slot]) {
     const cc = CORP_COLORS[0];
-    S.badge = {
+    const baseR = Math.round(Math.min(CW,CH)*0.17);
+    S[slot] = {
       kind:'circle', x: Math.round(CW*0.75), y: Math.round(CH*0.25),
-      r: Math.round(Math.min(CW,CH)*0.17), baseR: Math.round(Math.min(CW,CH)*0.17),
-      fill: cc.bg, fg: cc.fg, fgGradient: false,
+      r: baseR, baseR,
+      colorId: cc.id, fill: JSON.parse(JSON.stringify(cc.fill)), fg: cc.fg, fgGradient: false,
       text1: '', text2: '',
     };
-    S.selected = 'badge';
+    S.selected = slot;
     syncBadgeProps(); rebuildPalette(); rebuildCustomShapes();
   }
-  // Load SVG as image and set as icon
   const tempImg = new Image();
   tempImg.onload = () => {
-    S.badge.iconUrl = item.dataUrl;
-    S.badge.iconImg = tempImg;
-    S.badge.iconBounds = null;
-    delete S.badge.iconTint;
-    syncIconPreview();   // show icon controls (slider, colour palette)
+    S[slot].iconUrl = item.dataUrl;
+    S[slot].iconImg = tempImg;
+    S[slot].iconBounds = null;
+    delete S[slot].iconTint;
+    syncIconPreview();
     rebuildFtIcons();
     render();
   };
@@ -1570,46 +1613,51 @@ function ribbonAutoFg(img) {
 
 function addImageBadge(item) {
   pushUndo();
-  // item = {id, dataUrl, w, h} — creates/switches to an image-shaped badge
-  const prev   = S.badge;
-  const baseR  = prev?.baseR || Math.round(Math.min(CW,CH)*0.17);
-  const cc     = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
-  S.badge = {
+  const slot = targetSlot();
+  const prev  = S[slot];
+  const baseR = prev?.baseR || Math.round(Math.min(CW,CH)*0.17);
+  const cc    = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
+  S[slot] = {
     kind:      'image',
     shapeId:   item.id,
     dataUrl:   item.dataUrl,
-    ar:        1,   // always draw as circle (badge is always round)
+    ar:        1,
     colorId:   prev?.colorId,
     fill:      prev?.fill ? JSON.parse(JSON.stringify(prev.fill)) : JSON.parse(JSON.stringify(cc.fill)),
-    fg:        prev?.fg  || cc.fg,   // may be refined after image loads
-    fgGradient: prev?.fgGradient || false,
+    fg:        prev?.fg  || cc.fg,
+    fgGradient: false,
     x:         prev?.x  ?? Math.round(CW*0.75),
     y:         prev?.y  ?? Math.round(CH*0.25),
     r: baseR,  baseR,
-    text1:     document.getElementById('txt1').value,
-    text2:     document.getElementById('txt2').value,
+    // Preserve price mode if previous badge had it
+    priceMode:    prev?.priceMode    || false,
+    priceKind:    prev?.priceKind    || 'mt',
+    streichpreis: prev?.streichpreis || '',
+    text1:     prev?.priceMode
+                 ? (prev.text1 || document.getElementById('priceInput')?.value || '')
+                 : document.getElementById('txt1').value,
+    text2:     prev?.priceMode ? '' : document.getElementById('txt2').value,
     iconUrl:   prev?.iconUrl,
     iconImg:   prev?.iconImg,
     iconBounds:prev?.iconBounds,
   };
-  S.selected='badge';
+  S.selected = slot;
   syncBadgeProps(); rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); render();
 
   // Load image and auto-detect fg colour (async, updates after render)
   const cached = typeof imgCache !== 'undefined' && imgCache[item.id];
   if (cached) {
-    // Already in cache — detect immediately
     const autoFg = ribbonAutoFg(cached);
-    if (S.badge?.shapeId === item.id) {
-      S.badge.fg = autoFg;
+    if (S[slot]?.shapeId === item.id) {
+      S[slot].fg = autoFg;
       syncBadgeProps(); render();
     }
   } else {
     const im = new Image();
     im.onload = () => {
       if (typeof imgCache !== 'undefined') imgCache[item.id] = im;
-      if (S.badge?.shapeId === item.id) {
-        S.badge.fg = ribbonAutoFg(im);
+      if (S[slot]?.shapeId === item.id) {
+        S[slot].fg = ribbonAutoFg(im);
         syncBadgeProps(); render();
       }
     };
@@ -1992,7 +2040,7 @@ async function removeBgApi(file,key,onP) {
 const HR=7;
 
 function badgeBounds(bd) {
-  const b = bd || (S.selected==='aiLabel' ? S.aiLabel : S.badge);
+  const b = bd || (S.selected==='badge2' ? S.badge2 : S.selected==='aiLabel' ? S.aiLabel : S.badge);
   if (!b) return null;
   const {x,y,r}=b;
   if (b.kind==='image') {
@@ -2023,6 +2071,12 @@ function handles() {
   if (S.selected==='product2'&&S.product2) {
     const {x,y,w,h}=S.product2;
     return [{id:'nw',x,y},{id:'ne',x:x+w,y},{id:'sw',x,y:y+h},{id:'se',x:x+w,y:y+h}];
+  }
+  if (S.selected==='badge2'&&S.badge2) {
+    const b=badgeBounds(S.badge2);
+    if (!b) return [];
+    return [{id:'nw',x:b.x,y:b.y},{id:'ne',x:b.x+b.w,y:b.y},
+            {id:'sw',x:b.x,y:b.y+b.h},{id:'se',x:b.x+b.w,y:b.y+b.h}];
   }
   if ((S.selected==='badge'&&S.badge)||(S.selected==='aiLabel'&&S.aiLabel)) {
     const b=badgeBounds();
@@ -2085,6 +2139,8 @@ function hitProduct(mx,my) {
 function hitBadge(mx,my) {
   if (!S.badge) return false;
   const b=badgeBounds(S.badge);
+  if (S.badge.kind==='image' && S.badge.priceMode)
+    return Math.hypot(mx-S.badge.x,my-S.badge.y)<=S.badge.r*1.2;
   if (S.badge.kind==='image'||S.badge.kind==='pill'||S.badge.kind==='sticker'||S.badge.kind==='svgshape')
     return mx>=b.x&&mx<=b.x+b.w&&my>=b.y&&my<=b.y+b.h;
   return Math.hypot(mx-S.badge.x,my-S.badge.y)<=S.badge.r*1.2;
@@ -2126,7 +2182,7 @@ canvas.addEventListener('mousedown',e=>{
       const p=S.product2;
       S.dragStart={x,y,px:p.x,py:p.y,pw:p.w,ph:p.h};
     } else {
-      const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+      const ab = S.selected==='aiLabel' ? S.aiLabel : (S.selected==='badge2' ? S.badge2 : S.badge);
       S.dragStart={x,y,bx:ab.x,by:ab.y,br:ab.r};
     }
     return;
@@ -2137,11 +2193,17 @@ canvas.addEventListener('mousedown',e=>{
     S.dragStart={x,y,bx:S.aiLabel.x,by:S.aiLabel.y};
     syncAiPosSection(); render(); return;
   }
+  if (hitBadge2(x,y)) {
+    pushUndo();
+    S.selected='badge2'; S.dragging=true; autoExpandSections('badge');
+    S.dragStart={x,y,bx:S.badge2.x,by:S.badge2.y};
+    syncBadgeProps(); render(); return;
+  }
   if (hitBadge(x,y)) {
     pushUndo();
     S.selected='badge'; S.dragging=true; autoExpandSections('badge');
     S.dragStart={x,y,bx:S.badge.x,by:S.badge.y};
-    render(); return;
+    syncBadgeProps(); render(); return;
   }
   if (hitLabel(x,y)) {
     pushUndo();
@@ -2216,13 +2278,13 @@ canvas.addEventListener('mousemove',e=>{
       document.getElementById('p2SizeSlider').value=100;
       document.getElementById('p2SizeVal').textContent='100%';
     }
-    if (S.selected==='badge'||S.selected==='aiLabel') {
+    if (S.selected==='badge'||S.selected==='badge2'||S.selected==='aiLabel') {
       const {bx,by,br}=S.dragStart;
       // Project drag onto each corner's outward direction
       const signX=(c==='nw'||c==='sw')?-1:1;
       const signY=(c==='nw'||c==='ne')?-1:1;
       const dist=(dx*signX+dy*signY)*0.5;
-      const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+      const ab = S.selected==='aiLabel' ? S.aiLabel : (S.selected==='badge2' ? S.badge2 : S.badge);
       ab.r=Math.max(15,br+dist);
       ab.baseR=ab.r;
       document.getElementById('shapeSize').value=100;
@@ -2244,6 +2306,10 @@ canvas.addEventListener('mousemove',e=>{
     if (S.selected==='badge') {
       const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
       S.badge.x = raw.x; S.badge.y = raw.y; snapGuides = raw.guides;
+    }
+    if (S.selected==='badge2'&&S.badge2) {
+      const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
+      S.badge2.x = raw.x; S.badge2.y = raw.y; snapGuides = raw.guides;
     }
     if (S.selected==='aiLabel'&&S.aiLabel) {
       const raw = computeSnap(S.dragStart.bx+dx, S.dragStart.by+dy);
@@ -2267,7 +2333,7 @@ canvas.addEventListener('mousemove',e=>{
   const h=hitHandle(x,y);
   if (h) canvas.style.cursor=h+'-resize';
   else if (hitStripe(x,y)) canvas.style.cursor='ns-resize';
-  else if (hitBadge(x,y)||hitAiLabel(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)) canvas.style.cursor='grab';
+  else if (hitBadge(x,y)||hitBadge2(x,y)||hitAiLabel(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)) canvas.style.cursor='grab';
   else canvas.style.cursor='default';
 });
 
@@ -2316,6 +2382,7 @@ document.addEventListener('keydown',e=>{
     if (S.selected==='product'){S.product=null;S.selected=null;render();}
     else if(S.selected==='product2'){S.product2=null;S.selected=null;render();}
     else if(S.selected==='badge'){S.badge=null;S.selected=null;rebuildPalette();rebuildCustomShapes();render();}
+    else if(S.selected==='badge2'){S.badge2=null;S.selected=null;rebuildLayerPanel();render();}
     else if(S.selected==='aiLabel'){S.aiLabel=null;S.selected=null;rebuildAiLabels();render();}
     else if(S.selected==='label'){S.label=null;S.selected=null;render();}
     updateUndoBtn();
@@ -2328,6 +2395,7 @@ document.addEventListener('keydown',e=>{
     const dx = e.key==='ArrowLeft'?-d : e.key==='ArrowRight'?d : 0;
     const dy = e.key==='ArrowUp'  ?-d : e.key==='ArrowDown' ?d : 0;
     if (S.selected==='badge'    && S.badge)    { S.badge.x  += dx; S.badge.y  += dy; }
+    if (S.selected==='badge2'   && S.badge2)   { S.badge2.x += dx; S.badge2.y += dy; }
     if (S.selected==='aiLabel'  && S.aiLabel)  { S.aiLabel.x += dx; S.aiLabel.y += dy; }
     if (S.selected==='label'    && S.label)    { S.label.x  += dx; S.label.y  += dy; }
     if (S.selected==='product'  && S.product)  { S.product.x += dx; S.product.y += dy; }
@@ -2528,7 +2596,7 @@ document.getElementById('cropAutoBtn').addEventListener('click',()=>{
 });
 
 document.getElementById('shapeSize').addEventListener('input',e=>{
-  const ab = S.selected==='aiLabel' ? S.aiLabel : S.badge;
+  const ab = S.selected==='aiLabel' ? S.aiLabel : (S.selected==='badge2' ? S.badge2 : S.badge);
   if (!ab) return;
   const s=+e.target.value/100;
   document.getElementById('shapeSizeVal').textContent=e.target.value+'%';
@@ -2558,8 +2626,9 @@ function autoFormatPrice(val) {
 
 // Price input → live update
 document.getElementById('priceInput').addEventListener('input', e => {
-  if (!S.badge?.priceMode) return;
-  S.badge.text1 = e.target.value;
+  const ab = targetBadge();
+  if (!ab?.priceMode) return;
+  ab.text1 = e.target.value;
   render();
 });
 document.getElementById('priceInput').addEventListener('keydown', e => {
@@ -2575,41 +2644,58 @@ document.getElementById('priceInput').addEventListener('keydown', e => {
   }
 });
 document.getElementById('priceInput').addEventListener('blur', e => {
-  if (!S.badge?.priceMode) return;
+  const ab = targetBadge();
+  if (!ab?.priceMode) return;
   const formatted = autoFormatPrice(e.target.value);
   if (formatted !== e.target.value) {
     e.target.value = formatted;
-    S.badge.text1 = formatted;
+    ab.text1 = formatted;
     render();
   }
 });
 document.getElementById('streichpreisInput').addEventListener('input', e => {
-  if (!S.badge?.priceMode) return;
-  S.badge.streichpreis = e.target.value;
+  const ab = targetBadge();
+  if (!ab?.priceMode) return;
+  ab.streichpreis = e.target.value;
   render();
 });
 document.getElementById('streichpreisInput').addEventListener('blur', e => {
-  if (!S.badge?.priceMode) return;
+  const ab = targetBadge();
+  if (!ab?.priceMode) return;
   const formatted = autoFormatPrice(e.target.value);
   if (formatted !== e.target.value) {
     e.target.value = formatted;
-    S.badge.streichpreis = formatted;
+    ab.streichpreis = formatted;
     render();
   }
 });
 
 // Price form buttons
 function makePriceBadge(kind) {
-  const prev = S.badge?.priceMode ? S.badge : null;
-  const prevAny = S.badge;
+  const slot = targetSlot();
+  const prevAny = S[slot];
+  // If current badge is an image, keep it and just enable priceMode on it
+  if (prevAny && prevAny.kind === 'image') {
+    prevAny.priceMode    = true;
+    prevAny.priceKind    = kind;
+    prevAny.fgGradient   = false;
+    prevAny.fgGradientFlip = false;
+    prevAny.text1        = document.getElementById('priceInput')?.value || '99.–';
+    prevAny.streichpreis = kind==='top' ? (document.getElementById('streichpreisInput')?.value || '') : '';
+    prevAny.text2        = '';
+    S.selected = slot;
+    syncFormButtons(); syncBadgeProps(); render();
+    return;
+  }
+  const prev = prevAny?.priceMode ? prevAny : null;
   const cc = CORP_COLORS.find(c => c.id === (prev||prevAny)?.colorId)
           || (kind==='top' ? CORP_COLORS.find(c=>c.id==='cc-red') : CORP_COLORS.find(c=>c.id==='cc-blue'))
           || CORP_COLORS[2];
   const baseR = (prev||prevAny)?.baseR || Math.round(Math.min(CW,CH) * .18);
-  S.badge = {
+  S[slot] = {
     kind: 'circle', priceMode: true, priceKind: kind,
     colorId: cc.id, fill: JSON.parse(JSON.stringify(cc.fill)), fg: cc.fg,
-    fgGradient: false,
+    fgGradient: false, fgGradientFlip: false,
     x: (prev||prevAny)?.x ?? CW - baseR - 25,
     y: (prev||prevAny)?.y ?? baseR + 18,
     r: baseR, baseR: baseR,
@@ -2617,25 +2703,29 @@ function makePriceBadge(kind) {
     streichpreis: kind==='top' ? (document.getElementById('streichpreisInput')?.value || '') : '',
     text2: '',
   };
-  bringToFront('badge'); rebuildLayerPanel(); syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
+  S.selected = slot;
+  bringToFront(slot); rebuildLayerPanel(); syncFormButtons(); syncBadgeProps(); rebuildPalette(); render();
 }
 document.getElementById('formPriceBtn').addEventListener('click', () => {
-  if (S.badge?.priceMode && S.badge?.priceKind==='mt') return;
+  const ab = targetBadge();
+  if (ab?.priceMode && ab?.priceKind==='mt') return;
   pushUndo(); makePriceBadge('mt');
 });
 document.getElementById('formToppreisBtn').addEventListener('click', () => {
-  if (S.badge?.priceMode && S.badge?.priceKind==='top') return;
+  const ab = targetBadge();
+  if (ab?.priceMode && ab?.priceKind==='top') return;
   pushUndo(); makePriceBadge('top');
 });
 
 // Pill form toggle buttons
 document.getElementById('formCircleBtn').addEventListener('click',()=>{
-  if (S.badge?.kind==='circle' && !S.badge?.priceMode) return;
+  const slot = targetSlot();
+  const prev = S[slot];
+  if (prev?.kind==='circle' && !prev?.priceMode) return;
   pushUndo();
-  const prev = S.badge;
   const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
   const baseR = prev?.baseR || Math.round(Math.min(CW,CH)*.17);
-  S.badge = {
+  S[slot] = {
     kind:'circle', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
     fgGradient:false,
     x: prev?.x ?? CW-baseR-25, y: prev?.y ?? baseR+18,
@@ -2648,14 +2738,15 @@ document.getElementById('formCircleBtn').addEventListener('click',()=>{
 });
 
 document.getElementById('formStickerBtn').addEventListener('click',()=>{
-  if (S.badge?.kind==='sticker') return;
+  const slot = targetSlot();
+  const prev = S[slot];
+  if (prev?.kind==='sticker') return;
   pushUndo();
-  const prev = S.badge;
   const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
   const asp   = 2.5;
   const baseR = Math.round(Math.min(CW,CH) * 0.10);
   const hw    = baseR * asp;
-  S.badge = {
+  S[slot] = {
     kind:'sticker', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
     fgGradient:false,
     x: Math.max(hw+5, Math.min(CW-hw-5, prev?.x ?? CW/2)),
@@ -2692,10 +2783,11 @@ document.getElementById('svgShapeInput').addEventListener('change', e=>{
       // Use naturalWidth/naturalHeight if available and sensible
       if (img.naturalWidth>0 && img.naturalHeight>0)
         ar = img.naturalWidth / img.naturalHeight;
-      const prev = S.badge;
+      const slot = targetSlot();
+      const prev = S[slot];
       const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
       const baseR = Math.round(Math.min(CW,CH)*0.12);
-      S.badge = {
+      S[slot] = {
         kind:'svgshape', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
         fgGradient:false,
         svgUrl:url, svgImg:img, svgAr:ar,
@@ -2705,6 +2797,7 @@ document.getElementById('svgShapeInput').addEventListener('change', e=>{
         text2: document.getElementById('txt2').value,
         iconUrl:prev?.iconUrl, iconImg:prev?.iconImg, iconBounds:prev?.iconBounds,
       };
+      S.selected = slot;
       document.getElementById('svgShapeClear').style.display='inline-block';
       syncFormButtons(); syncBadgeProps(); render();
     };
@@ -2714,14 +2807,37 @@ document.getElementById('svgShapeInput').addEventListener('change', e=>{
   e.target.value='';
 });
 
-document.getElementById('svgShapeClear').addEventListener('click',()=>{
-  if (!S.badge || S.badge.kind!=='svgshape') return;
+// ── Badge2: + button ──
+document.getElementById('addBadge2Btn').addEventListener('click',()=>{
+  if (!S.badge || S.badge2) return;
   pushUndo();
-  // Switch back to sticker
-  const prev = S.badge;
+  // Create a default circle as badge2, offset from badge1
+  const cc = CORP_COLORS.find(c=>c.id==='cc-navy') || CORP_COLORS[1];
+  const baseR = Math.round(Math.min(CW,CH) * .17);
+  S.badge2 = {
+    kind: 'circle',
+    colorId: cc.id,
+    fill: JSON.parse(JSON.stringify(cc.fill)),
+    fg: cc.fg,
+    fgGradient: false,
+    x: S.badge.x - baseR * 2.4,
+    y: S.badge.y,
+    r: baseR, baseR: baseR,
+    text1: '', text2: '',
+  };
+  S.selected = 'badge2';
+  bringToFront('badge2'); rebuildLayerPanel();
+  syncFormButtons(); syncBadgeProps(); autoExpandSections('badge'); render();
+});
+
+document.getElementById('svgShapeClear').addEventListener('click',()=>{
+  const slot = targetSlot();
+  const prev = S[slot];
+  if (!prev || prev.kind!=='svgshape') return;
+  pushUndo();
   const cc = CORP_COLORS.find(c=>c.id===prev?.colorId) || CORP_COLORS[0];
   const asp=2.5, baseR=Math.round(Math.min(CW,CH)*0.10), hw=baseR*asp;
-  S.badge = {
+  S[slot] = {
     kind:'sticker', colorId:cc.id, fill:JSON.parse(JSON.stringify(cc.fill)), fg:cc.fg,
     fgGradient:false,
     x:Math.max(hw+5,Math.min(CW-hw-5,prev.x)), y:Math.max(baseR+5,Math.min(CH-baseR-5,prev.y)),
@@ -2733,18 +2849,20 @@ document.getElementById('svgShapeClear').addEventListener('click',()=>{
 });
 
 document.getElementById('stickerAspectSlider').addEventListener('input',e=>{
-  if (!S.badge || (S.badge.kind!=='sticker'&&S.badge.kind!=='svgshape')) return;
+  const ab = targetBadge();
+  if (!ab || (ab.kind!=='sticker'&&ab.kind!=='svgshape')) return;
   const asp = +e.target.value / 10;
-  S.badge.aspect = asp;
+  ab.aspect = asp;
   const vl = document.getElementById('stickerAspectVal');
   if (vl) vl.textContent = asp.toFixed(1)+'×';
   render();
 });
 
 document.getElementById('stickerCornerSlider').addEventListener('input',e=>{
-  if (!S.badge || S.badge.kind!=='sticker') return;
+  const ab = targetBadge();
+  if (!ab || ab.kind!=='sticker') return;
   const cr = +e.target.value / 100;
-  S.badge.cornerFrac = cr;
+  ab.cornerFrac = cr;
   const vl = document.getElementById('stickerCornerVal');
   if (vl) vl.textContent = Math.round(cr*100)+'%';
   render();
@@ -2770,40 +2888,44 @@ document.getElementById('aiMarginSlider').addEventListener('input', e => {
 
 ['txt1','txt2'].forEach(id=>{
   document.getElementById(id).addEventListener('input',e=>{
-    if (!S.badge) return;
-    if (id==='txt1') S.badge.text1=e.target.value;
-    else             S.badge.text2=e.target.value;
+    const ab = targetBadge();
+    if (!ab) return;
+    if (id==='txt1') ab.text1=e.target.value;
+    else             ab.text2=e.target.value;
     render();
   });
 });
 
 document.getElementById('fgColor').addEventListener('input',e=>{
-  if (!S.badge) return;
-  S.badge.fg=e.target.value;
-  S.badge.fgGradient=false;
+  const ab = targetBadge();
+  if (!ab) return;
+  ab.fg=e.target.value;
+  ab.fgGradient=false;
   document.getElementById('fgSwatch').style.background=e.target.value;
   updateGradTextBtn();
   render();
 });
 
 document.getElementById('swGradTextBtn').addEventListener('click',()=>{
-  if (!S.badge) return;
+  const ab = targetBadge();
+  if (!ab) return;
   pushUndo();
-  S.badge.fgGradient=!S.badge.fgGradient;
-  if (!S.badge.fgGradient) S.badge.fgGradientFlip = false;
+  ab.fgGradient=!ab.fgGradient;
+  if (!ab.fgGradient) ab.fgGradientFlip = false;
   updateGradTextBtn();
   render();
 });
 document.getElementById('swGradFlipBtn').addEventListener('click', () => {
-  if (!S.badge?.fgGradient) return;
+  const ab = targetBadge();
+  if (!ab?.fgGradient) return;
   pushUndo();
-  S.badge.fgGradientFlip = !S.badge.fgGradientFlip;
+  ab.fgGradientFlip = !ab.fgGradientFlip;
   updateGradTextBtn();
   render();
 });
 
 document.getElementById('iconInput').addEventListener('change', async e => {
-  const file = e.target.files[0]; if (!file || !S.badge) return;
+  const file = e.target.files[0]; if (!file || !targetBadge()) return;
   let dataUrl = await toDataUrl(file);
   // SVGs without explicit width/height: Chrome can't render them in canvas via drawImage.
   // Fix: inject width/height into the SVG root so naturalWidth is always > 0.
@@ -2820,10 +2942,11 @@ document.getElementById('iconInput').addEventListener('change', async e => {
   }
   const img = new Image(); img.src = dataUrl;
   img.onload = () => {
-    S.badge.iconUrl = dataUrl;
-    S.badge.iconImg = img;
-    S.badge.iconBounds = null; // reset; detect below
-    delete S.badge.iconTint;   // reset to auto-follow on fresh upload
+    const ab = targetBadge(); if (!ab) return;
+    ab.iconUrl = dataUrl;
+    ab.iconImg = img;
+    ab.iconBounds = null; // reset; detect below
+    delete ab.iconTint;   // reset to auto-follow on fresh upload
     // Detect tight bounding box of visible pixels (fixes extra-whitespace PNGs)
     try {
       const W = img.naturalWidth, H = img.naturalHeight;
@@ -2842,7 +2965,7 @@ document.getElementById('iconInput').addEventListener('change', async e => {
               if (y<minY) minY=y; if (y>maxY) maxY=y;
             }
           }
-          if (maxX >= 0) S.badge.iconBounds = {x:minX, y:minY, w:maxX-minX+1, h:maxY-minY+1};
+          if (maxX >= 0) ab.iconBounds = {x:minX, y:minY, w:maxX-minX+1, h:maxY-minY+1};
         }
       }
     } catch(e) { /* cross-origin SVG – skip bounds detection */ }
@@ -2853,9 +2976,10 @@ document.getElementById('iconInput').addEventListener('change', async e => {
 });
 
 document.getElementById('iconRemove').addEventListener('click', () => {
-  if (!S.badge) return;
-  delete S.badge.iconUrl; delete S.badge.iconImg;
-  delete S.badge.iconTint; delete S.badge.iconOffsetY;
+  const ab = targetBadge();
+  if (!ab) return;
+  delete ab.iconUrl; delete ab.iconImg;
+  delete ab.iconTint; delete ab.iconOffsetY;
   syncIconPreview(); render();
 });
 
@@ -2877,7 +3001,7 @@ function buildIconColorPalette() {
     btn.style.cssText = `width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;background:${bg};`;
     btn.addEventListener('click', () => {
       if (!S.badge) return;
-      S.badge.iconTint = opt.color; // null = auto (follow text)
+      const ab = targetBadge(); if (ab) ab.iconTint = opt.color; // null = auto
       updateIconColorPalette();
       render();
     });
@@ -2890,9 +3014,10 @@ function updateIconColorPalette() {
   const wrap = document.getElementById('iconColorPalette');
   if (!wrap) return;
   [...wrap.children].forEach((btn, i) => {
+    const ab = targetBadge();
     const isActive = (ICON_COLORS[i].color === null)
-      ? (S.badge?.iconTint === null || S.badge?.iconTint === undefined)
-      : S.badge?.iconTint === ICON_COLORS[i].color;
+      ? (ab?.iconTint === null || ab?.iconTint === undefined)
+      : ab?.iconTint === ICON_COLORS[i].color;
     btn.style.borderColor = isActive ? '#6366f1' : 'transparent';
   });
 }
@@ -2901,8 +3026,9 @@ buildIconColorPalette();
 
 
 document.getElementById('iconPosSlider').addEventListener('input', e => {
-  if (!S.badge) return;
-  S.badge.iconOffsetY = parseInt(e.target.value) / 100;
+  const ab = targetBadge();
+  if (!ab) return;
+  ab.iconOffsetY = parseInt(e.target.value) / 100;
   document.getElementById('iconPosVal').textContent = e.target.value + '%';
   render();
 });
@@ -3144,6 +3270,8 @@ function pushUndo() {
     label:      S.label   ? JSON.parse(JSON.stringify({...S.label,  iconImg:undefined})) : null,
     product:    S.product  ? JSON.parse(JSON.stringify({...S.product,  img:undefined})) : null,
     product2:   S.product2 ? JSON.parse(JSON.stringify({...S.product2, img:undefined})) : null,
+    badge2:     S.badge2  ? JSON.parse(JSON.stringify({...S.badge2, iconImg:undefined, img:undefined})) : null,
+    badge2IconImg: S.badge2?.iconImg || null,
     badgeIconImg:  S.badge?.iconImg    || null,
     aiLabelSvgImg: S.aiLabel?.svgImg   || null,
     labelIconImg:  S.label?.iconImg    || null,
@@ -3166,6 +3294,8 @@ function applyUndo() {
   const snap = undoStack.pop();
   if (snap.badge)    { snap.badge.iconImg   = snap.badgeIconImg;  S.badge   = snap.badge;   }
   else               S.badge   = null;
+  if (snap.badge2)   { snap.badge2.iconImg = snap.badge2IconImg; S.badge2  = snap.badge2; }
+  else               S.badge2  = null;
   if (snap.aiLabel)  { snap.aiLabel.svgImg  = snap.aiLabelSvgImg; S.aiLabel = snap.aiLabel; }
   else               S.aiLabel = null;
   if (snap.label)   { snap.label.iconImg   = snap.labelIconImg; S.label   = snap.label;   }
@@ -3272,10 +3402,11 @@ function labelMetrics(lb) {
   const fs = Math.round(lb.baseFs * (lb.scale || 1));
   const lineGap = fs * 0.18;
   let h = 0;
-  if (lb.iconImg) h += fs * 1.6 + lineGap;
-  if (lb.text1)   h += fs + lineGap;
-  if (lb.text2)   h += Math.round(fs * 0.82);
-  const t1len = (lb.text1 || '').length;
+  const lbM1 = lb.text1 ? lb.text1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
+  if (lb.iconImg)     h += fs * 1.6 + lineGap;
+  if (lbM1.length)    h += lbM1.length * (fs + lineGap);
+  if (lb.text2)       h += Math.round(fs * 0.82);
+  const t1len = lbM1.map(l=>l.length).reduce((a,b)=>Math.max(a,b), 0);
   const t2len = (lb.text2 || '').length;
   const w = Math.max(fs * 4, Math.max(t1len, t2len) * fs * 0.62 + fs);
   return { totalH: h || fs, totalW: w };
@@ -3302,8 +3433,9 @@ function drawLabel(c, scX, scY, forExport) {
   // Calculate total content height to centre on cy
   let totalH = 0;
   if (lb.iconImg) totalH += fs * 1.6 + lineGap;
-  if (lb.text1)   totalH += fs + lineGap;
-  if (lb.text2)   totalH += Math.round(fs * 0.82);
+  const lbLines1 = lb.text1 ? lb.text1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
+  if (lbLines1.length) totalH += lbLines1.length * (fs + lineGap);
+  if (lb.text2)        totalH += Math.round(fs * 0.82);
   if (!totalH) return;
 
   c.save();
@@ -3326,11 +3458,13 @@ function drawLabel(c, scX, scY, forExport) {
     drawY += iconSize + lineGap;
   }
 
-  if (lb.text1) {
+  if (lbLines1.length) {
     c.font = `800 ${fs}px ${fontFam}`;
     c.fillStyle = color;
-    c.fillText(lb.text1, cx, drawY);
-    drawY += fs + lineGap;
+    lbLines1.forEach(ln => {
+      c.fillText(ln, cx, drawY);
+      drawY += fs + lineGap;
+    });
   }
   if (lb.text2) {
     const fs2 = Math.round(fs * 0.82);
@@ -3426,6 +3560,8 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
       c.restore();
     } else if (layerId==='badge' && S.badge) {
       drawBadge(c,S.badge,scX,scY);
+    } else if (layerId==='badge2' && S.badge2) {
+      drawBadge(c,S.badge2,scX,scY);
     } else if (layerId==='aiLabel' && S.aiLabel) {
       drawBadge(c,S.aiLabel,scX,scY);
     } else if (layerId==='label') {
@@ -3637,24 +3773,33 @@ function drawPriceMode(c, b, cx, cy, r) {
 }
 
 function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
-  // Normalize short hyphen to en dash (e.g. 20.- -> 20.–)
+  // Normalize short hyphen to en dash
   if (t1) t1 = t1.replace(/([.,])-$/, '$1–');
   if (t2) t2 = t2.replace(/([.,])-$/, '$1–');
-  if (!t1&&!t2) return;
-  // If icon present: shift text block down into lower portion
+
+  // Split t1 on newlines — treat as multi-line single text block
+  const lines1 = t1 ? t1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
+  const hasT1 = lines1.length > 0;
+  if (!hasT1 && !t2) return;
+
   const offset = hasIcon ? r*0.22 : 0;
-  const maxW = r * 1.65; // max text width inside circle
+  const maxW = r * 1.65;
   c.save();
   c.textAlign='center'; c.textBaseline='middle';
 
-  // Base font sizes
+  // Base font sizes — scale down when multiple lines + icon to fit available space
   let fs1=Math.round(r*(hasIcon?.42:.58)), fs2=Math.round(r*(hasIcon?.32:.40));
+  if (lines1.length > 1) {
+    // Available height below icon ≈ 0.68r; without icon ≈ 1.1r
+    const maxFsForLines = Math.round(r * (hasIcon ? 0.68 : 1.1) / lines1.length);
+    fs1 = Math.min(fs1, maxFsForLines);
+  }
 
-  // Auto-shrink fs1 if t1 too wide
-  if (t1) {
+  // Auto-shrink fs1 so ALL lines of t1 fit width
+  if (hasT1) {
     c.font=`800 ${fs1}px ${S.fontName}`;
-    const w=c.measureText(t1).width;
-    if (w>maxW) fs1=Math.max(10, Math.round(fs1*maxW/w));
+    const maxLineW = Math.max(...lines1.map(l=>c.measureText(l).width));
+    if (maxLineW>maxW) fs1=Math.max(10, Math.round(fs1*maxW/maxLineW));
   }
   // Auto-shrink fs2 if t2 too wide (but not larger than fs1)
   if (t2) {
@@ -3668,22 +3813,42 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
   let halfSpanX = null;
   if (b.fgGradient) {
     let maxHalf = 0;
-    if (t1) { c.font=`800 ${fs1}px ${S.fontName}`; maxHalf = Math.max(maxHalf, c.measureText(t1).width / 2); }
+    if (hasT1) {
+      c.font=`800 ${fs1}px ${S.fontName}`;
+      lines1.forEach(ln => { maxHalf = Math.max(maxHalf, c.measureText(ln).width / 2); });
+    }
     if (t2) { c.font=`600 ${fs2}px ${S.fontName}`; maxHalf = Math.max(maxHalf, c.measureText(t2).width / 2); }
     if (maxHalf > 0) halfSpanX = maxHalf;
   }
 
-  if (t1&&t2) {
+  const lh1 = fs1 * 1.18; // line height for t1 lines
+
+  if (hasT1 && t2) {
+    // t1 (multi-line) + t2: t1 block above, t2 below
+    const totalT1H = lines1.length * lh1;
+    const blockTop = cy + offset - totalT1H / 2 - fs2 * 0.55;
     c.font=`800 ${fs1}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
-    c.fillText(t1,cx,cy+offset-fs1*.45);
+    lines1.forEach((ln, i) => {
+      c.fillText(ln, cx, blockTop + i * lh1 + lh1 / 2);
+    });
     c.font=`600 ${fs2}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
-    c.fillText(t2,cx,cy+offset+fs2*.70);
-  } else {
+    c.fillText(t2, cx, blockTop + totalT1H + fs2 * 0.65);
+  } else if (hasT1) {
+    // Only t1 (multi-line): center the whole block vertically
+    const totalT1H = lines1.length * lh1;
+    const blockTop = cy + offset - totalT1H / 2;
     c.font=`800 ${fs1}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
-    c.fillText(t1||t2,cx,cy+offset);
+    lines1.forEach((ln, i) => {
+      c.fillText(ln, cx, blockTop + i * lh1 + lh1 / 2);
+    });
+  } else {
+    // Only t2 (single line)
+    c.font=`600 ${fs2}px ${S.fontName}`;
+    c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    c.fillText(t2, cx, cy + offset);
   }
   c.restore();
 }
@@ -3696,8 +3861,10 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   const nh = bounds ? bounds.h : (img.naturalHeight || img.height || 1);
   const sx = bounds?.x ?? 0, sy = bounds?.y ?? 0;
 
+  const lines1icon = t1 ? t1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
   const hasText = !!(t1||t2);
   const hasTwo  = !!(t1&&t2);
+  const nLines  = lines1icon.length || 1;
 
   // Icon size: scaled to available space above text
   const maxSize = hasText ? (hasTwo ? r*0.52 : r*0.60) : r*1.26;
@@ -3708,20 +3875,19 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   // Auto-position icon vertically relative to text block
   let iconCY;
   if (!hasText) {
-    iconCY = cy; // centred in circle, no text
+    iconCY = cy;
   } else {
-    // Mirror drawBadgeText layout exactly
     const offset = r * 0.22;
     const fs1    = Math.round(r * 0.42);
+    const lh1    = fs1 * 1.18;
     const gap    = r * 0.08;
+    const totalH = nLines * lh1;
 
     const textTop = hasTwo
-      ? (cy + offset - fs1 * 0.45) - fs1 * 0.5
-      : (cy + offset)              - fs1 * 0.5;
+      ? (cy + offset - totalH / 2 - fs1 * 0.55)
+      : (cy + offset - totalH / 2);
 
     iconCY = textTop - gap - ih / 2;
-
-    // Clamp: icon must stay inside circle (top padding = 8% of r)
     const minCY = (cy - r) + ih / 2 + r * 0.08;
     if (iconCY < minCY) iconCY = minCY;
   }
@@ -4010,9 +4176,17 @@ function drawBadge(c,b,scX,scY) {
       return;
     }
     const hw=r, hh=r*(b.ar||1);
+    // Clip to circle so image doesn't bleed outside badge bounds
+    c.save();
+    c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.clip();
     c.drawImage(img,cx-hw,cy-hh,hw*2,hh*2);
-    if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
-    drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+    c.restore();
+    if (b.priceMode) {
+      drawPriceMode(c,b,cx,cy,r);
+    } else {
+      if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
+      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+    }
   }
 }
 
