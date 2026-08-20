@@ -590,7 +590,7 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 <div class="modal-overlay" id="apiModal">
   <div class="modal">
     <h3>remove.bg API Key</h3>
-    <p>Für beste Ergebnisse beim Freistellen – auch bei farbigen Hintergründen. Kostenlos bis 50 Bilder/Monat.<br><br>Key unter <strong>remove.bg</strong> → API erstellen.</p>
+    <p>Für beste Ergebnisse beim Freistellen – auch bei farbigen Hintergründen. Kostenlos bis 50 Bilder/Monat.<br><br>Key holen: <a href='https://www.remove.bg/dashboard#api-key' target='_blank' style='color:#11AAFF'>remove.bg → Dashboard → API Key</a></p>
     <input class="pi" id="apiInput" placeholder="Key eingeben…" type="password">
     <div class="modal-btns">
       <button class="mbtn" id="apiCancel">Abbrechen</button>
@@ -1701,14 +1701,20 @@ function updateBgModeLabel() {
   if (S.removeBgKey) {
     el.textContent='Freistellung: remove.bg ✓';
     el.style.color='#0028A5';
+    el.style.cursor='';
+    el.onclick=null;
   } else if (removeBgLib) {
     el.textContent='Freistellung: KI (lokal) ✓';
     el.style.color='#009DE0';
+    el.style.cursor='';
+    el.onclick=null;
   } else {
-    el.textContent='Freistellung: KI wird geladen…';
-    el.style.color='';
+    el.textContent='⚠ Freistellung: Key erforderlich → klicken';
+    el.style.color='#F20505';
+    el.style.cursor='pointer';
+    el.onclick=()=>document.getElementById('apiModal').classList.add('show');
   }
-  el.style.opacity='.75';
+  el.style.opacity='.9';
 }
 
 (async()=>{
@@ -1722,11 +1728,15 @@ function updateBgModeLabel() {
 
 function updateFreistNowBtn() {
   const btn = document.getElementById('freistNowBtn');
-  if (btn) btn.style.display = (S.product?.img && (removeBgLib || S.removeBgKey)) ? '' : 'none';
+  if (btn) btn.style.display = S.product?.img ? '' : 'none';
 }
 
 document.getElementById('freistNowBtn').addEventListener('click', async () => {
   if (!S.product?.img) return;
+  if (!removeBgLib && !S.removeBgKey) {
+    document.getElementById('apiModal').classList.add('show');
+    return;
+  }
   const btn = document.getElementById('freistNowBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Wird verarbeitet…';
@@ -2020,7 +2030,7 @@ document.getElementById('productInput').addEventListener('change',async e=>{
       blob=await removeBgLib(file,{model:'medium',output:{format:'image/png',quality:1},
         progress:(k,cur,tot)=>{ if(tot>0) setProgress(5+(cur/tot)*88); }});
     } else {
-      blob=file; setStatus('Tipp: remove.bg Key für beste Qualität','');
+      blob=file; setStatus('Tipp: remove.bg Key für Freistellung erforderlich',''); updateBgModeLabel();
     }
     await applyProductBlob(blob);
   } catch(err){ setStatus('Fehler: '+err.message,'err'); setProgress(-1); }
@@ -3717,21 +3727,23 @@ function drawPriceMode(c, b, cx, cy, r) {
     c.fillText(streich, cx, streichY);
     c.globalAlpha = 1;
 
-    // Diagonal strikethrough over digits only (before . or ,)
-    const sepIdx  = streich.search(/[.,]/);
-    const numPart = sepIdx >= 0 ? streich.slice(0, sepIdx) : streich;
-    c.font = `${stWeight} ${fsSt}px ${stFontName}`;
-    const numW = c.measureText(numPart).width;
-    const pad  = numW * 0.06;
-    const x1   = cx - spw / 2 - pad;
-    const x2   = cx - spw / 2 + numW + pad;
-    const rise  = (x2 - x1) * 0.32;
-    c.beginPath();
-    c.moveTo(x1, streichY + rise / 2);
-    c.lineTo(x2, streichY - rise / 2);
-    c.strokeStyle = '#001155';
-    c.lineWidth   = Math.max(2, fsSt * 0.10);
-    c.stroke();
+    // Diagonal strikethrough — only when streichpreis contains at least one digit
+    if (/\d/.test(streich)) {
+      const sepIdx  = streich.search(/[.,]/);
+      const numPart = sepIdx >= 0 ? streich.slice(0, sepIdx) : streich;
+      c.font = `${stWeight} ${fsSt}px ${stFontName}`;
+      const numW = c.measureText(numPart).width;
+      const pad  = numW * 0.06;
+      const x1   = cx - spw / 2 - pad;
+      const x2   = cx - spw / 2 + numW + pad;
+      const rise  = (x2 - x1) * 0.32;
+      c.beginPath();
+      c.moveTo(x1, streichY + rise / 2);
+      c.lineTo(x2, streichY - rise / 2);
+      c.strokeStyle = '#F20505';
+      c.lineWidth   = Math.max(2, fsSt * 0.10);
+      c.stroke();
+    }
 
   } else if (isTop) {
     // ── Toppreis alone: centered, no /Mt ──
