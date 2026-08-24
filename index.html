@@ -1476,8 +1476,8 @@ function rebuildAiLabels() {
 // ────────────────────────────────────────────────────
 const FT_ICONS = [
   {"id":"ft-icon-thumb-up-bold","name":"Thumb Up","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxwYXRoIGQ9Ik0yNC4wMDEgMTJIMTkuMjJsLjUzNC0yLjY3YTYuMTU4IDYuMTU4IDAgMCAwLS4wNjQtMi42OWwtLjA0LS4xNjVBNC41ODIgNC41ODIgMCAwIDAgMTUuMTk4IDNIMTRhMSAxIDAgMCAwLTEgMXY2LjcyM2wtMS44OSAzLjE0OUEyLjk5IDIuOTkgMCAwIDAgOSAxM0g0YTEgMSAwIDAgMC0xIDF2MTJhMSAxIDAgMCAwIDEgMWg1YTMuMDA0IDMuMDA0IDAgMCAwIDIuOTQtMi40MTJsMi42MTMgMS4zMDZBMSAxIDAgMCAwIDE1IDI2aDYuNTM3YTQuMDEzIDQuMDEzIDAgMCAwIDMuOTI2LTMuMjE5bDEuNTE3LTcuNTg2Yy4wMTMtLjA2NS4wMi0uMTMuMDItLjE5N0EzLjAwMiAzLjAwMiAwIDAgMCAyNC4wMDEgMTJ6TTEwIDI0YTEgMSAwIDAgMS0xIDFINVYxNWg0Yy41NTEgMCAxIC40NDkgMSAxdjh6bTEzLjUwMi0xLjYxQTIuMDEgMi4wMSAwIDAgMSAyMS41MzcgMjRoLTYuMzAxTDEyIDIyLjM4MnYtNi4xMDVsMi44NTctNC43NjJBMSAxIDAgMCAwIDE1IDExVjVoLjE5OWMxLjE5IDAgMi4yMjIuODA2IDIuNTEgMS45NThsLjA0MS4xNjRjLjE0Ny41OS4xNjIgMS4yMTguMDQzIDEuODE1bC0uNzczIDMuODY3QTEuMDAyIDEuMDAyIDAgMCAwIDE4IDE0aDYuMDAxYTEgMSAwIDAgMSAuOTk2LjkxNmwtMS40OTUgNy40NzR6IiBmaWxsPSIjMzMzIi8+PC9zdmc+","w":200,"h":200},
-  {"id":"ft-icon-mysecurity-bold","name":"My Security","dataUrl":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJFYmVuZV8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyNi4wMDAwMSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMzMzM7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTE5LjgxMTIyLDMuNDE1MDVjLS4xMjI3NC0uMTcwMzUtLjI5NjAyLS4yOTc2Ny0uNDk1MjQtLjM2NDAxTDEwLjMxNTk4LjA1MTA0Yy0uMjA1OTktLjA2ODA1LS40MjU5Ni0uMDY4MDUtLjYzMTk2LDBMLjY4NDAyLDMuMDUxMDRjLS4xOTkyMi4wNjYzNS0uMzcyNS4xOTM2Ni0uNDk1MjQuMzY0MDFDLjA2NTk4LDMuNTg1NC0uMDAwMDYsMy43OTAwNSwwLDQuMDAwMDJ2MTFDMCwyMS4wNDkwMyw5LjE2MzAyLDI1LjY5ODAxLDkuNTUyOTgsMjUuODk1MDNjLjEzODc5LjA2OTE1LjI5MTkzLjEwNTEuNDQ3MDIuMTA0OTguMTU1MDkuMDAwMTIuMzA4MjMtLjAzNTgzLjQ0NzAyLS4xMDQ5OC4zODk5NS0uMTk1MDEsOS41NTI5OC00Ljg0NjAxLDkuNTUyOTgtMTAuODk1MDJWNC4wMDAwMmMuMDAwMTItLjIwOTk2LS4wNjU5OC0uNDE0NjEtLjE4ODc4LS41ODQ5NmgwWk0xOCwxNS4wMDAwMmMwLDMuNzYzOTgtNS40MDgwMiw3LjQ2OTk3LTgsOC44NzIwMS0yLjU5MzAyLTEuMzk4OTktOC01LjEwMDA0LTgtOC44NzIwMVY0LjcyMTAybDgtMi42NjY5OSw4LDIuNjY1OTV2MTAuMjgwMDRaTTYuNDQsOC4zODUwM3YxLjM4NTAxaC0uMDQyOTFjLS43NzE2MSwwLTEuMzk3MDkuNjI1NDktMS4zOTcwOSwxLjM5NzA5djIuNTI3ODljMCwyLjY2NDc5LDIuMTYwMjIsNC44MjUwMSw0LjgyNTAxLDQuODI1MDFzNC44MjUwMS0yLjE2MDIyLDQuODI1MDEtNC44MjUwMXYtMi41Mjc4OWMwLS43NzE2MS0uNjI1NTUtMS4zOTcwOS0xLjM5NzA5LTEuMzk3MDloLS4wNDI5MXYtMS4zODUwMWMwLTEuODY5NTEtMS41MTU1LTMuMzg1MDEtMy4zODUwMS0zLjM4NTAxcy0zLjM4NTAxLDEuNTE1NS0zLjM4NTAxLDMuMzg1MDFaTTEyLjY1MDAyLDExLjc3MDAzdjEuOTI0OTljMCwxLjU2MDE4LTEuMjY0ODMsMi44MjUwMS0yLjgyNTAxLDIuODI1MDFzLTIuODI1MDEtMS4yNjQ4My0yLjgyNTAxLTIuODI1MDF2LTEuOTI0OTlzNS42NTAwMiwwLDUuNjUwMDIsMFpNMTEuMjEwMDIsOC4zODUwM3YxLjM4NTAxaC0yLjc3MDAydi0xLjM4NTAxYzAtLjc2NDg5LjYyMDEyLTEuMzg1MDEsMS4zODUwMS0xLjM4NTAxczEuMzg1MDEuNjIwMTIsMS4zODUwMSwxLjM4NTAxWiIvPjwvc3ZnPg==","w":200,"h":200},
-  {"id":"ft-icon-present-bold","name":"Present","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMzMzM7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5wcmVzZW50X0JPTEQ8L3RpdGxlPjxnIGlkPSJMYXllcl8xIiBkYXRhLW5hbWU9IkxheWVyIDEiPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI1LDEySDE3Ljc0bDMuOTQtMS41NS4wNSwwYTMuODgsMy44OCwwLDEsMC01LjI2LTQuNzdMMTUsOS4zMiwxMy41Niw1Ljc0YTMuODcsMy44NywwLDEsMC01LjI5LDQuNjlsLjA1LDBMMTIuMjYsMTJINWEzLDMsMCwwLDAtMywzVjI2YTEsMSwwLDAsMCwxLDFIMjdhMSwxLDAsMCwwLDEtMVYxNUEzLDMsMCwwLDAsMjUsMTJaTTE4LjM2LDYuMzNBMS44NywxLjg3LDAsMSwxLDIwLjkyLDguNmwtNC4xMywxLjYyWk04LDYuODlBMS44OCwxLjg4LDAsMCwxLDkuODcsNWExLjkyLDEuOTIsMCwwLDEsMS44LDEuNDFsMS41NCwzLjgxTDkuMDgsOC42QTEuODksMS44OSwwLDAsMSw4LDYuODlaTTQsMTVhMSwxLDAsMCwxLDEtMWg5VjI1SDRaTTI2LDI1SDE2VjE0aDlhMSwxLDAsMCwxLDEsMVoiLz48L2c+PC9zdmc+","w":200,"h":200},
+  {"id":"ft-icon-mysecurity-bold","name":"My Security","dataUrl":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBpZD0iRWJlbmVfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMjAgMjYuMDAwMDEiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojMzMzO308L3N0eWxlPjwvZGVmcz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xOS44MTEyMiwzLjQxNTA1Yy0uMTIyNzQtLjE3MDM1LS4yOTYwMi0uMjk3NjctLjQ5NTI0LS4zNjQwMUwxMC4zMTU5OC4wNTEwNGMtLjIwNTk5LS4wNjgwNS0uNDI1OTYtLjA2ODA1LS42MzE5NiwwTC42ODQwMiwzLjA1MTA0Yy0uMTk5MjIuMDY2MzUtLjM3MjUuMTkzNjYtLjQ5NTI0LjM2NDAxQy4wNjU5OCwzLjU4NTQtLjAwMDA2LDMuNzkwMDUsMCw0LjAwMDAydjExQzAsMjEuMDQ5MDMsOS4xNjMwMiwyNS42OTgwMSw5LjU1Mjk4LDI1Ljg5NTAzYy4xMzg3OS4wNjkxNS4yOTE5My4xMDUxLjQ0NzAyLjEwNDk4LjE1NTA5LjAwMDEyLjMwODIzLS4wMzU4My40NDcwMi0uMTA0OTguMzg5OTUtLjE5NTAxLDkuNTUyOTgtNC44NDYwMSw5LjU1Mjk4LTEwLjg5NTAyVjQuMDAwMDJjLjAwMDEyLS4yMDk5Ni0uMDY1OTgtLjQxNDYxLS4xODg3OC0uNTg0OTZoMFpNMTgsMTUuMDAwMDJjMCwzLjc2Mzk4LTUuNDA4MDIsNy40Njk5Ny04LDguODcyMDEtMi41OTMwMi0xLjM5ODk5LTgtNS4xMDAwNC04LTguODcyMDFWNC43MjEwMmw4LTIuNjY2OTksOCwyLjY2NTk1djEwLjI4MDA0Wk02LjQ0LDguMzg1MDN2MS4zODUwMWgtLjA0MjkxYy0uNzcxNjEsMC0xLjM5NzA5LjYyNTQ5LTEuMzk3MDksMS4zOTcwOXYyLjUyNzg5YzAsMi42NjQ3OSwyLjE2MDIyLDQuODI1MDEsNC44MjUwMSw0LjgyNTAxczQuODI1MDEtMi4xNjAyMiw0LjgyNTAxLTQuODI1MDF2LTIuNTI3ODljMC0uNzcxNjEtLjYyNTU1LTEuMzk3MDktMS4zOTcwOS0xLjM5NzA5aC0uMDQyOTF2LTEuMzg1MDFjMC0xLjg2OTUxLTEuNTE1NS0zLjM4NTAxLTMuMzg1MDEtMy4zODUwMXMtMy4zODUwMSwxLjUxNTUtMy4zODUwMSwzLjM4NTAxWk0xMi42NTAwMiwxMS43NzAwM3YxLjkyNDk5YzAsMS41NjAxOC0xLjI2NDgzLDIuODI1MDEtMi44MjUwMSwyLjgyNTAxcy0yLjgyNTAxLTEuMjY0ODMtMi44MjUwMS0yLjgyNTAxdi0xLjkyNDk5czUuNjUwMDIsMCw1LjY1MDAyLDBaTTExLjIxMDAyLDguMzg1MDN2MS4zODUwMWgtMi43NzAwMnYtMS4zODUwMWMwLS43NjQ4OS42MjAxMi0xLjM4NTAxLDEuMzg1MDEtMS4zODUwMXMxLjM4NTAxLjYyMDEyLDEuMzg1MDEsMS4zODUwMVoiLz48L3N2Zz4=","w":200,"h":200},
+  {"id":"ft-icon-present-bold","name":"Present","dataUrl":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMzAgMzAiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojMzMzO308L3N0eWxlPjwvZGVmcz48dGl0bGU+cHJlc2VudF9CT0xEPC90aXRsZT48ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIj48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yNSwxMkgxNy43NGwzLjk0LTEuNTUuMDUsMGEzLjg4LDMuODgsMCwxLDAtNS4yNi00Ljc3TDE1LDkuMzIsMTMuNTYsNS43NGEzLjg3LDMuODcsMCwxLDAtNS4yOSw0LjY5bC4wNSwwTDEyLjI2LDEySDVhMywzLDAsMCwwLTMsM1YyNmExLDEsMCwwLDAsMSwxSDI3YTEsMSwwLDAsMCwxLTFWMTVBMywzLDAsMCwwLDI1LDEyWk0xOC4zNiw2LjMzQTEuODcsMS44NywwLDEsMSwyMC45Miw4LjZsLTQuMTMsMS42MlpNOCw2Ljg5QTEuODgsMS44OCwwLDAsMSw5Ljg3LDVhMS45MiwxLjkyLDAsMCwxLDEuOCwxLjQxbDEuNTQsMy44MUw5LjA4LDguNkExLjg5LDEuODksMCwwLDEsOCw2Ljg5Wk00LDE1YTEsMSwwLDAsMSwxLTFoOVYyNUg0Wk0yNiwyNUgxNlYxNGg5YTEsMSwwLDAsMSwxLDFaIi8+PC9nPjwvc3ZnPg==","w":200,"h":200},
   {"id":"ft-icon-account-bold","name":"Account","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxzdHlsZT4uc3Qye2ZpbGw6IzMzM308L3N0eWxlPjxnIGlkPSJMYXllcl8xIj48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTUgMkM3LjgzMiAyIDIgNy44MzIgMiAxNXM1LjgzMiAxMyAxMyAxMyAxMy01LjgzMiAxMy0xM1MyMi4xNjggMiAxNSAyek04IDIzLjQ3OVYyM2MwLTEuNjU0IDEuMzQ2LTMgMy0zaDhjMS42NTQgMCAzIDEuMzQ2IDMgM3YuNDc5QzIwLjA5NyAyNS4wNTMgMTcuNjU3IDI2IDE1IDI2cy01LjA5Ny0uOTQ3LTctMi41MjF6bTE1Ljc3Ny0xLjg3NkMyMy4xNjcgMTkuNTMgMjEuMjY5IDE4IDE5IDE4aC04Yy0yLjI2OSAwLTQuMTY4IDEuNTI5LTQuNzc3IDMuNjAzQTEwLjkyOSAxMC45MjkgMCAwIDEgNCAxNUM0IDguOTM1IDguOTM1IDQgMTUgNHMxMSA0LjkzNSAxMSAxMWMwIDIuNDgtLjgzNCA0Ljc2Mi0yLjIyMyA2LjYwM3oiLz48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTUgNmMtMi43NTcgMC01IDIuMjQzLTUgNXMyLjI0MyA1IDUgNSA1LTIuMjQzIDUtNS0yLjI0My01LTUtNXptMCA4Yy0xLjY1NCAwLTMtMS4zNDYtMy0zczEuMzQ2LTMgMy0zIDMgMS4zNDYgMyAzLTEuMzQ2IDMtMyAzeiIvPjwvZz48L3N2Zz4=","w":200,"h":200},
   {"id":"ft-icon-assistant-bold-1","name":"Assistant","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxzdHlsZT4uc3Qye2ZpbGw6IzMzM308L3N0eWxlPjxnIGlkPSJMYXllcl8xIj48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTcuMjkzIDE1LjI5M0wxNS41ODYgMTdoLTEuMTcybC0xLjcwNy0xLjcwN0ExIDEgMCAwIDAgMTEgMTZ2NGExIDEgMCAwIDAgMS43MDcuNzA3TDE0LjQxNCAxOWgxLjE3MmwxLjcwNyAxLjcwN0ExIDEgMCAwIDAgMTkgMjB2LTRhMSAxIDAgMCAwLTEuNzA3LS43MDd6TTE1IDE0YzMuMzA5IDAgNi0yLjY5MSA2LTZzLTIuNjkxLTYtNi02LTYgMi42OTEtNiA2IDIuNjkxIDYgNiA2em0wLTEwYzIuMjA2IDAgNCAxLjc5NCA0IDRzLTEuNzk0IDQtNCA0LTQtMS43OTQtNC00IDEuNzk0LTQgNC00eiIvPjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0yMi44NzEgMTcuMDcxYS45OTcuOTk3IDAgMCAwLTEuMzAzLjU2NkwxOC4zMTYgMjZoLTYuNjMybC0zLjI1Mi04LjM2MmExIDEgMCAwIDAtMS4zMDQtLjU2N0M3LjAwMSAxNy4xMjMgNCAxOC4zNjUgNCAyMnY1YTEgMSAwIDAgMCAxIDFoNS45NzdhLjM1OS4zNTkgMCAwIDAgLjA0NiAwSDI1YTEgMSAwIDAgMCAxLTF2LTVjMC0zLjYzNS0zLjAwMS00Ljg3Ny0zLjEyOS00LjkyOXpNNiAyNnYtNGMwLTEuMjE3LjUyNC0yLjAwNiAxLjAxOC0yLjQ4TDkuNTM4IDI2SDZ6bTE4IDBoLTMuNTM4bDIuNTItNi40OEMyMy40NzYgMTkuOTk1IDI0IDIwLjc4NCAyNCAyMnY0eiIvPjwvZz48L3N2Zz4=","w":200,"h":200},
   {"id":"ft-icon-bell-bold","name":"Bell","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxwYXRoIGQ9Ik0yNi42NTMgMjIuMjI3QTkuOTc1IDkuOTc1IDAgMCAxIDIzIDE0LjVWMTNjMC0yLjg1LTEuNTUtNS41LTQtNi45MlY2YzAtMi4yMDYtMS43OTQtNC00LTRzLTQgMS43OTQtNCA0di4wOEM4LjU1IDcuNSA3IDEwLjE1IDcgMTN2MS41YTkuOTcyIDkuOTcyIDAgMCAxLTMuNjU0IDcuNzI4QTEgMSAwIDAgMCAzLjk4MSAyNEgxMWMwIDIuMjA2IDEuNzk0IDQgNCA0czQtMS43OTQgNC00aDcuMDE5YTEgMSAwIDAgMCAuNjM0LTEuNzczek0xNSAyNmMtMS4xMDMgMC0yLS44OTctMi0yaDRjMCAxLjEwMi0uODk4IDItMiAyem0tOC42MzEtNEExMS45NTUgMTEuOTU1IDAgMCAwIDkgMTQuNVYxM2E2LjAzIDYuMDMgMCAwIDEgMy40My01LjQxNS45OTkuOTk5IDAgMCAwIC41Ny0uOTAyVjZjMC0xLjEwMy44OTctMiAyLTJzMiAuODk3IDIgMnYuNjgzYTEgMSAwIDAgMCAuNTcuOTAyQTYuMDMgNi4wMyAwIDAgMSAyMSAxM3YxLjVjMCAyLjc2LjkzOSA1LjM5IDIuNjMgNy41SDYuMzd6IiBmaWxsPSIjMzMzIi8+PC9zdmc+","w":200,"h":200},
@@ -1560,6 +1560,42 @@ function applyFtIconToBadge(item) {
     S[slot].iconImg = tempImg;
     S[slot].iconBounds = null;
     delete S[slot].iconTint;
+    // Detect tight bounding box (same as uploaded icons) for correct centering
+    try {
+      const W = tempImg.naturalWidth  || item.w || 200;
+      const H = tempImg.naturalHeight || item.h || 200;
+      if (W > 0 && H > 0) {
+        const bbc = document.createElement('canvas'); bbc.width=W; bbc.height=H;
+        const bbx = bbc.getContext('2d'); bbx.drawImage(tempImg, 0, 0, W, H);
+        const id = bbx.getImageData(0, 0, W, H); const d = id.data;
+        let hasAlpha = false;
+        for (let i=3; i<d.length; i+=4) { if (d[i]<255) { hasAlpha=true; break; } }
+        if (hasAlpha) {
+          let minX=W, minY=H, maxX=-1, maxY=-1;
+          let totalAlpha=0, weightedY=0;
+          for (let y=0; y<H; y++) for (let x=0; x<W; x++) {
+            const a = d[(y*W+x)*4+3];
+            if (a > 10) {
+              if (x<minX) minX=x; if (x>maxX) maxX=x;
+              if (y<minY) minY=y; if (y>maxY) maxY=y;
+              totalAlpha += a; weightedY += y * a;
+            }
+          }
+          if (maxX >= 0) {
+            S[slot].iconBounds = {x:minX, y:minY, w:maxX-minX+1, h:maxY-minY+1};
+            // Visual centre Y as fraction of bounds height (0=top, 0.5=geometric centre, 1=bottom)
+            // Used in drawBadgeIcon to align visual mass with cy rather than geometric bounds centre.
+            if (totalAlpha > 0) {
+              const vcy = weightedY / totalAlpha;
+              S[slot].iconCenterYFrac = (vcy - minY) / (maxY - minY + 1);
+            }
+          }
+        }
+      }
+    } catch(e) {
+      // SVG cross-origin blocked – fall back to declared dimensions
+      if (item.w && item.h) S[slot].iconBounds = { x: 0, y: 0, w: item.w, h: item.h };
+    }
     syncIconPreview();
     rebuildFtIcons();
     render();
@@ -3700,49 +3736,83 @@ function drawBg(c,W,H) {
   }
 }
 
-// sx,sy,sw,sh = optional source crop (tight bounds for whitespace-padded PNGs)
+// sx,sy,sw,sh = optional source crop in the image's coordinate system.
+// For SVGs without intrinsic dimensions (naturalWidth=0), we first render to a 200×200
+// intermediate canvas, then crop using bounds (sx,sy,sw,sh are in that 200×200 space).
 function drawIconTinted(c, img, x, y, w, h, tint, sx=0, sy=0, sw=null, sh=null) {
   const pw = Math.ceil(w)||1, ph = Math.ceil(h)||1;
+  const hasDims = img.naturalWidth > 0;
+
+  if (!hasDims) {
+    // ── SVG path ──
+    // 1. Render SVG at 200×200 into an intermediate canvas (reliable cross-browser)
+    const REF = 200;
+    const rc = document.createElement('canvas'); rc.width=REF; rc.height=REF;
+    const rx = rc.getContext('2d', {willReadFrequently: true});
+    rx.drawImage(img, 0, 0, REF, REF); // 5-arg: scales SVG into 200×200
+
+    // 2. Tint via pixel replacement (data: URLs are same-origin → getImageData works)
+    if (tint) {
+      try {
+        const id = rx.getImageData(0, 0, REF, REF); const d = id.data;
+        const tc = document.createElement('canvas'); tc.width=1; tc.height=1;
+        const tx = tc.getContext('2d'); tx.fillStyle=tint; tx.fillRect(0,0,1,1);
+        const [tr,tg,tb] = Array.from(tx.getImageData(0,0,1,1).data);
+        for (let i=0; i<d.length; i+=4) if (d[i+3]>0) { d[i]=tr; d[i+1]=tg; d[i+2]=tb; }
+        rx.putImageData(id, 0, 0);
+      } catch(e) {
+        // Fallback: compositing (if CORS somehow blocks — unlikely for data: URLs)
+        const oc = document.createElement('canvas'); oc.width=REF; oc.height=REF;
+        const ox = oc.getContext('2d');
+        ox.fillStyle=tint; ox.fillRect(0,0,REF,REF);
+        ox.globalCompositeOperation='destination-in'; ox.drawImage(img,0,0,REF,REF);
+        rx.clearRect(0,0,REF,REF); rx.drawImage(oc,0,0);
+      }
+    }
+
+    // 3. Draw with optional crop (bounds in 200×200 space → tight icon content)
+    const cX = (sw!=null) ? sx : 0;
+    const cY = (sh!=null) ? sy : 0;
+    const cW = (sw!=null) ? sw : REF;
+    const cH = (sh!=null) ? sh : REF;
+    c.drawImage(rc, cX, cY, cW, cH, x, y, w, h);
+    return;
+  }
+
+  // ── PNG / explicit-size image path ──
   const srcW = sw ?? (img.naturalWidth || pw);
   const srcH = sh ?? (img.naturalHeight || ph);
-  // SVGs without explicit dimensions have naturalWidth=0; 9-arg drawImage fails silently for them.
-  // Use 5-arg form (render to destination size) in that case.
-  const hasDims = img.naturalWidth > 0;
   const doDraw = (ctx, dx, dy, dw, dh) =>
-    hasDims ? ctx.drawImage(img, sx, sy, srcW, srcH, dx, dy, dw, dh)
-            : ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.drawImage(img, sx, sy, srcW, srcH, dx, dy, dw, dh);
 
   if (!tint) { doDraw(c, x, y, w, h); return; }
 
-  // Approach A: pixel-level replacement (data-URL PNGs are same-origin)
-  // willReadFrequently keeps canvas in CPU memory for reliable getImageData
+  // Pixel-level tinting
   let drawn = false;
   try {
     const oc = document.createElement('canvas'); oc.width=pw; oc.height=ph;
     const ox = oc.getContext('2d', { willReadFrequently: true });
     doDraw(ox, 0, 0, pw, ph);
-    const id = ox.getImageData(0, 0, pw, ph);
-    const d = id.data;
-    // Parse tint → RGB
-    const tc = document.createElement('canvas'); tc.width=1; tc.height=1;
-    const tx = tc.getContext('2d'); tx.fillStyle=tint; tx.fillRect(0,0,1,1);
-    const td = tx.getImageData(0,0,1,1).data;
-    const tr=td[0], tg=td[1], tb=td[2];
-    for (let i=0; i<d.length; i+=4) {
-      if (d[i+3]>0) { d[i]=tr; d[i+1]=tg; d[i+2]=tb; }
+    const id = ox.getImageData(0, 0, pw, ph); const d = id.data;
+    let anyDrawn = false;
+    for (let i=3; i<d.length; i+=4) { if (d[i]>0) { anyDrawn=true; break; } }
+    if (anyDrawn) {
+      const tc = document.createElement('canvas'); tc.width=1; tc.height=1;
+      const tx = tc.getContext('2d'); tx.fillStyle=tint; tx.fillRect(0,0,1,1);
+      const [tr,tg,tb] = Array.from(tx.getImageData(0,0,1,1).data);
+      for (let i=0; i<d.length; i+=4) if (d[i+3]>0) { d[i]=tr; d[i+1]=tg; d[i+2]=tb; }
+      ox.putImageData(id, 0, 0);
+      c.drawImage(oc, x, y, w, h);
+      drawn = true;
     }
-    ox.putImageData(id, 0, 0);
-    c.drawImage(oc, x, y, w, h);
-    drawn = true;
-  } catch(e) { /* cross-origin SVG – fall through */ }
+  } catch(e) {}
 
-  // Approach B: destination-in compositing (no getImageData needed, works for SVG)
+  // Destination-in compositing fallback
   if (!drawn) {
     const oc = document.createElement('canvas'); oc.width=pw; oc.height=ph;
     const ox = oc.getContext('2d');
-    ox.fillStyle = tint;
-    ox.fillRect(0, 0, pw, ph);
-    ox.globalCompositeOperation = 'destination-in';
+    ox.fillStyle=tint; ox.fillRect(0,0,pw,ph);
+    ox.globalCompositeOperation='destination-in';
     doDraw(ox, 0, 0, pw, ph);
     c.drawImage(oc, x, y, w, h);
   }
@@ -3909,7 +3979,7 @@ function drawPriceMode(c, b, cx, cy, r) {
   c.restore();
 }
 
-function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
+function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
   // Normalize short hyphen to en dash
   if (t1) t1 = t1.replace(/([.,])-$/, '$1–');
   if (t2) t2 = t2.replace(/([.,])-$/, '$1–');
@@ -3919,16 +3989,19 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
   const hasT1 = lines1.length > 0;
   if (!hasT1 && !t2) return;
 
-  const offset = hasIcon ? r*0.22 : 0;
+  // offset = how far the text block's centre sits below cy
+  // When there's an icon, offset = iconH/2 + gap/2 so icon+gap+text is centred at cy
+  const gap = r * 0.08;
+  const offset = hasIcon ? (iconH / 2 + gap / 2) : 0;
   const maxW = r * 1.65;
   c.save();
   c.textAlign='center'; c.textBaseline='middle';
 
   // Base font sizes — scale down when multiple lines + icon to fit available space
-  let fs1=Math.round(r*(hasIcon?.42:.58)), fs2=Math.round(r*(hasIcon?.32:.40));
+  let fs1=Math.round(r*(hasIcon?.50:.58)), fs2=Math.round(r*(hasIcon?.38:.40));
   if (lines1.length > 1) {
-    // Available height below icon ≈ 0.68r; without icon ≈ 1.1r
-    const maxFsForLines = Math.round(r * (hasIcon ? 0.68 : 1.1) / lines1.length);
+    // Available height below icon ≈ 0.85r; without icon ≈ 1.1r
+    const maxFsForLines = Math.round(r * (hasIcon ? 0.85 : 1.1) / lines1.length);
     fs1 = Math.min(fs1, maxFsForLines);
   }
 
@@ -3992,41 +4065,78 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon) {
 
 function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   const img = b.iconImg;
-  // Use tight bounds if detected (removes extra whitespace from PNG icons)
-  const bounds = b.iconBounds;
-  const nw = bounds ? bounds.w : (img.naturalWidth  || img.width  || 1);
-  const nh = bounds ? bounds.h : (img.naturalHeight || img.height || 1);
-  const sx = bounds?.x ?? 0, sy = bounds?.y ?? 0;
+  const hasDimsSvg = img.naturalWidth > 0; // false for SVGs without explicit width/height attrs
+  const bounds = b.iconBounds; // tight content bounds (detected at 200×200 for SVGs)
+
+  // Determine scaling dimensions and crop region.
+  // For SVGs (hasDimsSvg=false): drawIconTinted renders to 200×200 intermediate canvas.
+  //   bounds = crop rect in that 200×200 space; nw/nh = content size for scale calculation.
+  //   No bounds: fall back to 200×200 no-crop (SVG content fills ~73%).
+  // For PNGs (hasDimsSvg=true): standard naturalWidth/Height with optional bounds crop.
+  let nw, nh, sx, sy, cropW, cropH;
+  if (hasDimsSvg) {
+    nw = bounds ? bounds.w : (img.naturalWidth  || 1);
+    nh = bounds ? bounds.h : (img.naturalHeight || 1);
+    sx = bounds?.x ?? 0; sy = bounds?.y ?? 0;
+    cropW = bounds ? bounds.w : null;
+    cropH = bounds ? bounds.h : null;
+  } else {
+    if (bounds) {
+      // Bounds detected in 200×200 space — tight crop AND scale from bounds
+      nw = bounds.w; nh = bounds.h;
+      sx = bounds.x; sy = bounds.y;
+      cropW = bounds.w; cropH = bounds.h;
+    } else {
+      // No bounds — use full 200×200, no crop; content fills ~73% visually
+      nw = 200; nh = 200;
+      sx = 0; sy = 0;
+      cropW = null; cropH = null;
+    }
+  }
 
   const lines1icon = t1 ? t1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
   const hasText = !!(t1||t2);
   const hasTwo  = !!(t1&&t2);
   const nLines  = lines1icon.length || 1;
 
-  // Icon size: scaled to available space above text
-  const maxSize = hasText ? (hasTwo ? r*0.52 : r*0.60) : r*1.26;
+  // Icon size: scale content to maxSize (tight crop fills iw×ih completely).
+  // Smaller than before so text can be larger.
+  const maxSize = hasText ? (hasTwo ? r*0.55 : r*0.62) : r*0.85;
   const scale = Math.min(maxSize / nw, maxSize / nh);
   const iw = nw * scale;
   const ih = nh * scale;
 
-  // Auto-position icon vertically relative to text block
+  // Auto-position icon vertically relative to text block.
+  // Compute offset dynamically so the combined (icon + gap + text) block is vertically centered.
   let iconCY;
   if (!hasText) {
-    iconCY = cy;
+    // Align the visual centre of mass (not geometric centre) with cy.
+    // iconCenterYFrac = fraction within bounds height where visual mass sits (0.5 = perfect centre).
+    // If not available, fall back to geometric centre (0.5 → no shift).
+    const f = (b.iconCenterYFrac != null) ? b.iconCenterYFrac : 0.5;
+    iconCY = cy - (f - 0.5) * ih;
   } else {
-    const offset = r * 0.22;
-    const fs1    = Math.round(r * 0.42);
+    const fs1    = Math.round(r * 0.50);
+    const fs2    = Math.round(r * 0.38);
     const lh1    = fs1 * 1.18;
-    const gap    = r * 0.08;
+    const gap    = r * 0.04;
     const totalH = nLines * lh1;
 
-    const textTop = hasTwo
-      ? (cy + offset - totalH / 2 - fs1 * 0.55)
-      : (cy + offset - totalH / 2);
+    // Extra height occupied by t2 line (only for hasTwo)
+    const t2Extra = hasTwo ? fs2 * 0.55 + fs2 * 0.65 : 0;
+    // Total block height: icon + gap + t1 lines [+ t2]
+    const blockH = ih + gap + totalH + t2Extra;
+    // Place block so its centre lands at cy
+    const blockTop = cy - blockH / 2;
+    iconCY = blockTop + ih / 2;
 
-    iconCY = textTop - gap - ih / 2;
-    const minCY = (cy - r) + ih / 2 + r * 0.08;
+    // Safety: don't push icon above the circle edge
+    const minCY = (cy - r) + ih / 2 + r * 0.05;
     if (iconCY < minCY) iconCY = minCY;
+
+    // The text offset from cy, used by drawBadgeText, must match.
+    // offset = iconCY + ih/2 + gap - textTop_adjustment
+    // We store nothing here; drawBadgeText uses the same formula below.
   }
 
   // Apply manual offset from slider (fine-tuning)
@@ -4036,7 +4146,11 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   const tint = (b.iconTint !== undefined && b.iconTint !== null)
     ? b.iconTint
     : (b.fg || '#ffffff');
-  drawIconTinted(c, img, cx - iw/2, iconCY - ih/2, iw, ih, tint, sx, sy, nw, nh);
+  // Pass cropW/cropH (not nw/nh) so drawIconTinted knows the correct crop region:
+  // - For SVGs: crop is in 200×200 intermediate canvas space (null = no crop = full 200×200)
+  // - For PNGs: crop is in naturalWidth/Height space (null = no crop)
+  drawIconTinted(c, img, cx - iw/2, iconCY - ih/2, iw, ih, tint, sx, sy, cropW, cropH);
+  return ih; // let caller pass ih to drawBadgeText for consistent centering
 }
 // Truncate text with ellipsis to fit maxW
 function truncateText(c, text, maxW) {
@@ -4145,20 +4259,53 @@ function drawBadge(c,b,scX,scY) {
   const t1=b.text1||'', t2=b.text2||'';
   const hasIcon = !!b.iconUrl;
 
-  // Lazy-load icon image if needed
+  // Lazy-load icon image if needed, and detect bounds/visual-centre on first load
   if (hasIcon && !b.iconImg) {
     const im=new Image(); im.src=b.iconUrl;
-    im.onload=()=>{ b.iconImg=im; render(); };
+    im.onload=()=>{
+      b.iconImg=im;
+      // Also detect bounds + visual centre Y if not already set (e.g. badge loaded from localStorage)
+      if (b.iconBounds == null || b.iconCenterYFrac == null) {
+        try {
+          const W = im.naturalWidth  || 200;
+          const H = im.naturalHeight || 200;
+          const bbc = document.createElement('canvas'); bbc.width=W; bbc.height=H;
+          const bbx = bbc.getContext('2d', {willReadFrequently:true});
+          bbx.drawImage(im, 0, 0, W, H);
+          const id = bbx.getImageData(0,0,W,H); const d = id.data;
+          let minX=W, minY=H, maxX=-1, maxY=-1, totalA=0, wY=0;
+          for (let y=0; y<H; y++) for (let x=0; x<W; x++) {
+            const a = d[(y*W+x)*4+3];
+            if (a>10) {
+              if(x<minX)minX=x; if(x>maxX)maxX=x;
+              if(y<minY)minY=y; if(y>maxY)maxY=y;
+              totalA+=a; wY+=y*a;
+            }
+          }
+          if (maxX>=0) {
+            if (b.iconBounds==null) b.iconBounds={x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1};
+            if (b.iconCenterYFrac==null && totalA>0)
+              b.iconCenterYFrac = (wY/totalA - minY) / (maxY-minY+1);
+          }
+        } catch(e) {}
+      }
+      render();
+    };
   }
 
   if (b.kind==='circle') {
     applyCircleFill(c,cx,cy,r,b.fill);
+    // applyCircleFill does its own save/clip/restore, so no clip is active here.
+    // Re-establish a circle clip for icon and text so they can't paint outside the circle.
+    c.save();
+    c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.clip();
     if (b.priceMode) {
       drawPriceMode(c,b,cx,cy,r);
     } else {
-      if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
-      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+      const iconH = (hasIcon && b.iconImg) ? drawBadgeIcon(c,b,cx,cy,r,t1,t2) : 0;
+      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH);
     }
+    c.restore();
 
   } else if (b.kind==='sticker') {
     const hw=r*(b.aspect||2.5);
@@ -4321,8 +4468,8 @@ function drawBadge(c,b,scX,scY) {
     if (b.priceMode) {
       drawPriceMode(c,b,cx,cy,r);
     } else {
-      if (hasIcon && b.iconImg) drawBadgeIcon(c,b,cx,cy,r,t1,t2);
-      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon);
+      const iconH = (hasIcon && b.iconImg) ? drawBadgeIcon(c,b,cx,cy,r,t1,t2) : 0;
+      drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH);
     }
   }
 }
