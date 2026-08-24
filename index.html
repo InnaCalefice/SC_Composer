@@ -3856,10 +3856,10 @@ function drawPriceMode(c, b, cx, cy, r) {
       c.font = `800 ${fsAbMt}px ${S.fontName}`;
       pwAb = c.measureText(price).width;
     }
-    const fsLabel  = Math.round(r * 0.22);
+    const fsLabel  = Math.round(r * 0.28);
     const priceY   = cy;
-    const abY      = priceY - fsAbMt * 0.5 - Math.round(r * 0.14);
-    const mtY      = priceY + fsAbMt * 0.5 + Math.round(r * 0.10);
+    const abY      = priceY - fsAbMt * 0.5 - Math.round(r * 0.11);
+    const mtY      = priceY + fsAbMt * 0.5 + Math.round(r * 0.04);
 
     // "ab"
     c.textAlign = 'center';
