@@ -3999,6 +3999,12 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
 
   // Base font sizes — scale down when multiple lines + icon to fit available space
   let fs1=Math.round(r*(hasIcon?.50:.58)), fs2=Math.round(r*(hasIcon?.38:.40));
+
+  // Auto-shrink t2 for common "label" words (Rabatt, Discount, etc.) that read better smaller
+  if (t2) {
+    const LABEL_WORDS = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv)/i;
+    if (LABEL_WORDS.test(t2.trim())) fs2 = Math.round(fs2 * 0.58);
+  }
   if (lines1.length > 1) {
     // Available height below icon ≈ 0.85r; without icon ≈ 1.1r
     const maxFsForLines = Math.round(r * (hasIcon ? 0.85 : 1.1) / lines1.length);
@@ -4117,7 +4123,10 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
     iconCY = cy - (f - 0.5) * ih;
   } else {
     const fs1    = Math.round(r * 0.50);
-    const fs2    = Math.round(r * 0.38);
+    // Match the label-word shrink from drawBadgeText so centering stays in sync
+    const LABEL_RE = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv)/i;
+    const fs2raw   = Math.round(r * 0.38);
+    const fs2      = (t2 && LABEL_RE.test(t2.trim())) ? Math.round(fs2raw * 0.58) : fs2raw;
     const lh1    = fs1 * 1.18;
     const gap    = r * 0.04;
     const totalH = nLines * lh1;
