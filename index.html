@@ -4043,7 +4043,7 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
   if (hasT1 && t2) {
     // t1 (multi-line) + t2: t1 block above, t2 below
     const totalT1H = lines1.length * lh1;
-    const blockTop = cy + offset - totalT1H / 2 - fs2 * 0.55;
+    const blockTop = cy + offset - totalT1H / 2 - fs2 * 0.38;
     c.font=`800 ${fs1}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
     lines1.forEach((ln, i) => {
@@ -4051,7 +4051,7 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
     });
     c.font=`600 ${fs2}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
-    c.fillText(t2, cx, blockTop + totalT1H + fs2 * 0.65);
+    c.fillText(t2, cx, blockTop + totalT1H + fs2 * 0.38);
   } else if (hasT1) {
     // Only t1 (multi-line): center the whole block vertically
     const totalT1H = lines1.length * lh1;
