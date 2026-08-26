@@ -451,6 +451,12 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
         <textarea class="pi" id="txt1" placeholder="Text (Enter = neue Zeile)" rows="2" style="resize:none;line-height:1.4;padding:6px 8px;font-family:inherit;"></textarea>
         <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
+      <div id="langBtns" style="display:flex;gap:4px;margin-top:4px;align-items:center;">
+        <span style="font-size:10px;color:var(--text2);flex-shrink:0;">Übersetzen:</span>
+        <button class="hbtn" id="langDE" title="Deutsch">DE</button>
+        <button class="hbtn" id="langFR" title="Français">FR</button>
+        <button class="hbtn" id="langIT" title="Italiano">IT</button>
+      </div>
       <div class="prop-row" style="margin-top:2px;align-items:center;">
         <span class="prop-label">Schrift</span>
         <div style="display:flex;gap:5px;flex:1;min-width:0;">
@@ -3024,6 +3030,84 @@ document.getElementById('aiMarginSlider').addEventListener('input', e => {
   });
 });
 
+// ── Badge label-word translation ──────────────────────────────────
+const LANG_MAP = [
+  { de: 'Rabatt',       fr: 'Rabais',        it: 'Sconto' },
+  { de: 'Discount',     fr: 'Discount',      it: 'Discount' },
+  { de: 'Sparen',       fr: 'Économisez',    it: 'Risparmia' },
+  { de: 'Angebot',      fr: 'Offre',         it: 'Offerta' },
+  { de: 'Sale',         fr: 'Soldes',        it: 'Saldi' },
+  { de: 'Gespart',      fr: 'Économisé',     it: 'Risparmiato' },
+  { de: 'Preisvorteil', fr: 'Avantage prix', it: 'Vantaggio' },
+  { de: 'Ersparnis',    fr: 'Économie',      it: 'Risparmio' },
+  { de: 'Aktion',       fr: 'Promotion',     it: 'Promozione' },
+  { de: 'Sonderpreis',  fr: 'Prix spécial',  it: 'Prezzo speciale' },
+  { de: 'Exklusiv',     fr: 'Exclusif',      it: 'Esclusivo' },
+  { de: 'Profitieren',  fr: 'Profitez',      it: 'Approfitta' },
+  { de: 'ab',           fr: 'dès',           it: 'da' },
+  { de: '/Mt',          fr: '/mois',         it: '/mese' },
+  { de: 'par Monat',    fr: 'par mois',      it: 'al mese' },
+  { de: 'für ein Jahr', fr: 'pour un an',    it: 'per un anno' },
+  { de: 'Neu',          fr: 'Nouveau',       it: 'Nuovo' },
+  { de: 'Gratis',       fr: 'Gratuit',       it: 'Gratis' },
+];
+function translateText(text, targetLang) {
+  if (!text) return text;
+  const sorted = [...LANG_MAP].sort((a,b)=>{
+    const aL = Math.max(...['de','fr','it'].map(l=>(a[l]||'').length));
+    const bL = Math.max(...['de','fr','it'].map(l=>(b[l]||'').length));
+    return bL - aL;
+  });
+  // Process line by line — once a line matches exactly, stop further replacements on it
+  return text.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return line;
+    // 1) Exact whole-line match (most common: single label word per line)
+    for (const group of sorted) {
+      const target = group[targetLang];
+      if (!target) continue;
+      for (const srcLang of ['de','fr','it']) {
+        if (srcLang === targetLang) continue;
+        const src = group[srcLang];
+        if (src && trimmed.toLowerCase() === src.toLowerCase()) {
+          return line.replace(trimmed, target);
+        }
+      }
+    }
+    // 2) Partial word-boundary match for compound lines (e.g. "50% Rabatt")
+    let result = line;
+    for (const group of sorted) {
+      const target = group[targetLang];
+      if (!target) continue;
+      for (const srcLang of ['de','fr','it']) {
+        if (srcLang === targetLang) continue;
+        const src = group[srcLang];
+        if (!src) continue;
+        const escaped = src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const pat = /^[a-zA-ZÀ-ÿ]/.test(src) ? `\\b${escaped}\\b` : escaped;
+        const newResult = result.replace(new RegExp(pat, 'gi'), target);
+        if (newResult !== result) { result = newResult; break; }
+      }
+    }
+    return result;
+  }).join('\n');
+}
+function translateBadge(lang) {
+  const ab = targetBadge();
+  if (!ab) return;
+  ab.lang = lang;
+  ab.text1 = translateText(ab.text1, lang);
+  ab.text2 = translateText(ab.text2, lang);
+  const t1el = document.getElementById('txt1');
+  const t2el = document.getElementById('txt2');
+  if (t1el) t1el.value = ab.text1 || '';
+  if (t2el) t2el.value = ab.text2 || '';
+  render();
+}
+document.getElementById('langDE')?.addEventListener('click', () => translateBadge('de'));
+document.getElementById('langFR')?.addEventListener('click', () => translateBadge('fr'));
+document.getElementById('langIT')?.addEventListener('click', () => translateBadge('it'));
+
 document.getElementById('fgColor').addEventListener('input',e=>{
   const ab = targetBadge();
   if (!ab) return;
@@ -3932,21 +4016,23 @@ function drawPriceMode(c, b, cx, cy, r) {
     const abY      = priceY - fsAbMt * 0.5 - Math.round(r * 0.11);
     const mtY      = priceY + fsAbMt * 0.5 + Math.round(r * 0.04);
 
-    // "ab"
+    // "ab" / "dès" / "da"
+    const abLabel  = b.lang==='fr' ? 'dès' : b.lang==='it' ? 'da' : 'ab';
+    const mtLabel2 = b.lang==='fr' ? 'par mois' : b.lang==='it' ? 'al mese' : 'pro Monat';
     c.textAlign = 'center';
     c.font = `600 ${fsLabel}px ${S.fontName}`;
     c.fillStyle = makeTextFill(c, b, cx, abY, r, r * 0.3);
-    c.fillText('ab', cx, abY);
+    c.fillText(abLabel, cx, abY);
 
     // Price
     c.font = `800 ${fsAbMt}px ${S.fontName}`;
     c.fillStyle = makeTextFill(c, b, cx, priceY, r, pwAb / 2);
     c.fillText(price, cx, priceY);
 
-    // "pro Monat"
+    // "pro Monat" / "par mois" / "al mese"
     c.font = `600 ${fsLabel}px ${S.fontName}`;
     c.fillStyle = makeTextFill(c, b, cx, mtY, r, r * 0.5);
-    c.fillText('pro Monat', cx, mtY);
+    c.fillText(mtLabel2, cx, mtY);
 
   } else {
     // ── Preis/Mt layout ──
@@ -3972,9 +4058,13 @@ function drawPriceMode(c, b, cx, cy, r) {
     c.font = `800 ${fsMain}px ${S.fontName}`;
     c.fillStyle = makeTextFill(c, b, cx, priceY, r, pw / 2);
     c.fillText(price, startX, priceY);
-    c.font = `700 ${fsSub}px ${S.fontName}`;
-    c.fillStyle = makeTextFill(c, b, cx, subY, r, c.measureText('/Mt').width / 2);
-    c.fillText('/Mt', subX, subY);
+    const mtLabel = b.lang==='fr' ? '/mois' : b.lang==='it' ? '/mese' : '/Mt';
+    const mtIsLong = mtLabel !== '/Mt';
+    const mtFs = mtIsLong ? Math.round(fsSub * 0.86) : fsSub;
+    const mtWeight = mtIsLong ? 300 : 700;
+    c.font = `${mtWeight} ${mtFs}px ${S.fontName}`;
+    c.fillStyle = makeTextFill(c, b, cx, subY, r, c.measureText(mtLabel).width / 2);
+    c.fillText(mtLabel, subX, subY);
   }
 
   c.restore();
@@ -4003,7 +4093,7 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
 
   // Auto-shrink t2 for common "label" words (Rabatt, Discount, etc.) that read better smaller
   if (t2) {
-    const LABEL_WORDS = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv)/i;
+    const LABEL_WORDS = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv|rabais|économisez|économie|soldes|promotion|exclusif|profitez|par mois|\/mois|sconto|risparmia|risparmio|offerta|saldi|promozione|esclusivo|approfitta|al mese|\/mese)/i;
     if (LABEL_WORDS.test(t2.trim())) fs2 = Math.round(fs2 * 0.70);
   }
   if (lines1.length > 1) {
@@ -4125,7 +4215,7 @@ function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   } else {
     const fs1    = Math.round(r * 0.50);
     // Match the label-word shrink from drawBadgeText so centering stays in sync
-    const LABEL_RE = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv)/i;
+    const LABEL_RE = /^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv|rabais|économisez|économie|soldes|promotion|exclusif|profitez|par mois|\/mois|sconto|risparmia|risparmio|offerta|saldi|promozione|esclusivo|approfitta|al mese|\/mese)/i;
     const fs2raw   = Math.round(r * 0.38);
     const fs2      = (t2 && LABEL_RE.test(t2.trim())) ? Math.round(fs2raw * 0.70) : fs2raw;
     const lh1    = fs1 * 1.18;
@@ -4273,7 +4363,7 @@ function drawBadge(c,b,scX,scY) {
     const _lines = t1.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
     if (_lines.length > 1) {
       const _last = _lines[_lines.length - 1];
-      if (/^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv)/i.test(_last)) {
+      if (/^(rabatt|discount|sparen|angebot|sale|off|gespart|preisvorteil|ersparnis|aktion|sonderpreis|exklusiv|rabais|économisez|économie|soldes|promotion|exclusif|profitez|par mois|\/mois|sconto|risparmia|risparmio|offerta|saldi|promozione|esclusivo|approfitta|al mese|\/mese)/i.test(_last)) {
         t2 = _last;
         t1 = _lines.slice(0, -1).join('\n');
       }
