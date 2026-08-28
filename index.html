@@ -157,6 +157,44 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 ::-webkit-scrollbar { width:4px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+
+      /* ── Resizable Panels ── */
+      .resize-handle {
+        width: 5px; flex-shrink: 0; cursor: col-resize; z-index: 20;
+        background: transparent; transition: background .15s;
+        position: relative;
+      }
+      .resize-handle::after {
+        content: ''; position: absolute; inset: 0 -3px;
+      }
+      .resize-handle:hover, .resize-handle.dragging {
+        background: var(--accent);
+      }
+      @media (min-width: 1600px) {
+        .library { width: 250px; }
+        .props { width: 330px; }
+      }
+
+      .layout-style-card {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 0 0 5px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: border-color .15s, transform .1s;
+        background: var(--surf2);
+        display: flex; flex-direction: column;
+      }
+      .layout-style-card:hover { border-color: var(--accent); transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+      .layout-style-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,120,240,.3); }
+      .layout-style-card svg { width: 100%; height: auto; border-radius: 8px 8px 0 0; display: block; flex-shrink: 0; }
+      .layout-style-label {
+        font-size: 9px; font-weight: 700; letter-spacing: .5px; color: #888;
+        text-align: center; margin-top: 4px; padding: 0 4px; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+      }
+
 </style>
 </head>
 <body>
@@ -190,6 +228,92 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
       <div id="bgFlipRow" style="display:none;margin:4px 4px 2px;display:none;">
         <button id="bgFlipBtn" style="width:100%;padding:4px 0;background:#222;border:1.5px solid transparent;border-radius:6px;color:#888;font-size:11px;cursor:pointer;transition:all .15s;">↕ Gradient umkehren</button>
       </div>
+
+      <!-- ── Layout Styles ── -->
+      <div class="lib-label" style="margin:8px 0 6px 2px;">LAYOUT STYLES</div>
+      <div id="layoutStyleGrid" class="lib-grid" style="margin-bottom:4px;">
+        <div class="layout-style-card" onclick="applyLayoutStyle('split')" title="Hintergrund-Teilung">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="lg1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#9B59B6"/></linearGradient></defs>
+            <rect width="60" height="80" fill="url(#lg1a)"/>
+            <polygon points="0,80 0,44 58,14 60,14 60,80" fill="#E8EDF0"/>
+            <!-- Generic device -->
+            <rect x="14" y="30" width="32" height="26" rx="5" fill="#d8dee4" stroke="#c0c8d0" stroke-width="0.8"/>
+            <rect x="14" y="30" width="10" height="26" rx="5" fill="#c8d0d8" stroke="#b8c0c8" stroke-width="0.8"/>
+            <circle cx="19" cy="37" r="1.8" fill="#1FBFFF"/>
+            <circle cx="19" cy="43" r="1.8" fill="#00c840"/>
+            <rect x="27" y="34" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="30.5" y="34" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="34" y="34" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="27" y="37.5" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="30.5" y="37.5" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="34" y="37.5" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="27" y="41" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="30.5" y="41" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="34" y="41" width="2.2" height="1.8" rx="0.8" fill="#aab4bc"/>
+            <rect x="18" y="56" width="24" height="3" rx="1.5" fill="#c8d0d8"/>
+            <!-- Upload icon -->
+            <circle cx="30" cy="43" r="8" fill="white" opacity="0.65"/>
+            <line x1="30" y1="38.5" x2="30" y2="47.5" stroke="#0028A5" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="25.5,42 30,37.5 34.5,42" fill="none" stroke="#0028A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="25.5" y1="48" x2="34.5" y2="48" stroke="#0028A5" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="layout-style-label">Hintergrund-Teilung</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleed')" title="Full Bleed Imagery">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#1FBFFF"/></linearGradient></defs>
+            <rect width="60" height="80" fill="url(#lg2)"/>
+            <circle cx="30" cy="32" r="14" fill="white" opacity="0.12"/>
+            <rect x="8" y="52" width="34" height="5" rx="2.5" fill="white" opacity="0.9"/>
+            <rect x="8" y="60" width="24" height="3" rx="1.5" fill="white" opacity="0.5"/>
+          </svg>
+          <div class="layout-style-label">Full Bleed</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('typeimage')" title="Type and Image">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <rect width="60" height="42" fill="#333"/>
+            <rect y="42" width="60" height="38" fill="#ffffff"/>
+            <rect x="6" y="48" width="30" height="5" rx="2.5" fill="#040D33" opacity="0.8"/>
+            <rect x="6" y="56" width="22" height="3" rx="1.5" fill="#040D33" opacity="0.4"/>
+            <rect x="6" y="62" width="14" height="2.5" rx="1" fill="#E4003A" opacity="0.7"/>
+          </svg>
+          <div class="layout-style-label">Type &amp; Image</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('typeproduct')" title="Type and Product">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <rect width="60" height="80" fill="#f0f4ff"/>
+            <rect x="4" y="12" width="26" height="4" rx="2" fill="#040D33" opacity="0.85"/>
+            <rect x="4" y="19" width="20" height="3" rx="1.5" fill="#040D33" opacity="0.45"/>
+            <rect x="4" y="26" width="16" height="6" rx="3" fill="#E4003A"/>
+            <rect x="33" y="8" width="22" height="64" rx="6" fill="#0028A5" opacity="0.10"/>
+            <rect x="37" y="16" width="14" height="46" rx="4" fill="#0028A5" opacity="0.22"/>
+          </svg>
+          <div class="layout-style-label">Type &amp; Product</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('lifeform')" title="Lifeform & Logo as Hero">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="lg5" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#1FBFFF" stop-opacity="0.4"/><stop offset="1" stop-color="#040D33"/></radialGradient></defs>
+            <rect width="60" height="80" fill="#040D33"/>
+            <rect width="60" height="80" fill="url(#lg5)"/>
+            <path d="M30,14 C40,14 50,24 50,36 C50,50 38,60 28,56 C16,52 12,38 20,27 C25,19 27,14 30,14Z" fill="#E4003A" opacity="0.7"/>
+            <path d="M30,17 C38,17 46,27 44,39 C42,51 30,58 22,51 C14,44 18,28 26,21 C28,18 30,17 30,17Z" fill="#0028A5" opacity="0.8"/>
+            <path d="M30,20 C36,20 42,30 40,40 C38,50 28,56 22,48 C16,40 22,26 28,21 C30,19 30,20 30,20Z" fill="white" opacity="0.9"/>
+          </svg>
+          <div class="layout-style-label">Lifeform Hero</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('typeonly')" title="Type Only">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="lg6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4003A"/><stop offset="0.5" stop-color="#0028A5"/><stop offset="1" stop-color="#1FBFFF"/></linearGradient></defs>
+            <rect width="60" height="80" fill="url(#lg6)"/>
+            <rect x="8" y="22" width="38" height="7" rx="3.5" fill="white" opacity="0.95"/>
+            <rect x="8" y="33" width="30" height="5" rx="2.5" fill="white" opacity="0.7"/>
+            <rect x="8" y="42" width="22" height="4" rx="2" fill="white" opacity="0.5"/>
+          </svg>
+          <div class="layout-style-label">Type Only</div>
+        </div>
+      </div>
+      <div class="lib-divider" style="margin:6px 0 10px;"></div>
 
       <!-- ── Hintergrund-Teilung ── -->
       <div class="lib-divider" style="margin:10px 0 8px;"></div>
@@ -298,6 +422,7 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
 
     </div>
   </div>
+  <div id="resizeLeft" class="resize-handle" title="Panel-Breite anpassen"></div>
 
   <!-- CENTER: Canvas -->
   <div class="canvas-area">
@@ -322,6 +447,8 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border-radius:5
     </div>
     <canvas id="mainCanvas" draggable="false"></canvas>
   </div>
+
+  <div id="resizeRight" class="resize-handle" title="Panel-Breite anpassen"></div>
 
   <!-- RIGHT: Properties -->
   <div class="props">
@@ -1041,6 +1168,7 @@ function deleteBg(idx) {
     if (S.bgSplit.enabled) render();
   });
   syncBgSplitUI();
+  window.syncBgSplitUI = syncBgSplitUI;
 })();
 
 
@@ -2171,9 +2299,22 @@ document.getElementById('filterToggleRow').addEventListener('click', (e) => {
   arrow.style.transform = open ? '' : 'rotate(90deg)';
 });
 
-// Header quick-export button → triggers the main export flow
+// Header quick-export button → open export modal
 document.getElementById('headerExportBtn').addEventListener('click', () => {
-  document.getElementById('exportBtn').click();
+  S.exportFmt = S.exportFmt || 'png';
+  document.getElementById('expPng').classList.toggle('active', S.exportFmt !== 'jpg');
+  document.getElementById('expJpg').classList.toggle('active', S.exportFmt === 'jpg');
+  document.getElementById('expPng').style.borderColor = S.exportFmt !== 'jpg' ? '#3878f0' : '#333';
+  document.getElementById('expPng').style.background  = S.exportFmt !== 'jpg' ? '#1e2a4a' : 'transparent';
+  document.getElementById('expPng').style.color       = S.exportFmt !== 'jpg' ? '#fff' : '#aaa';
+  document.getElementById('expJpg').style.borderColor = S.exportFmt === 'jpg'  ? '#3878f0' : '#333';
+  document.getElementById('expJpg').style.background  = S.exportFmt === 'jpg'  ? '#1e2a4a' : 'transparent';
+  document.getElementById('expJpg').style.color       = S.exportFmt === 'jpg'  ? '#fff' : '#aaa';
+  document.getElementById('exportModal').style.display = 'flex';
+});
+// Close modal on backdrop click
+document.getElementById('exportModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('exportModal')) document.getElementById('exportModal').style.display = 'none';
 });
 
 function setStatus(msg,type='') {
@@ -2258,12 +2399,61 @@ function applyProductBlob(blob) {
         if (bh>maxH){ bh=maxH; bw=Math.round(bh/ar); }
         S.product={img,opacity:1,shadow:0,
           x:Math.round((CW-bw)/2),y:Math.round((CH-bh)/2),w:bw,h:bh,baseW:bw,baseH:bh,
-          cropT:0,cropB:0,cropL:0,cropR:0};
-        // Reset crop sliders
-        ['T','B','L','R'].forEach(s=>{
-          const el=document.getElementById('crop'+s); if(el) el.value=0;
-          const lbl=document.getElementById('crop'+s+'Val'); if(lbl) lbl.textContent='0%';
-        });
+          cropT:0,cropB:0,cropL:0,cropR:0,
+          glow:{enabled:false,opacity:0.73,radius:0.15,colorA:'#E4003A',colorB:'#0028A5',colorC:'#1FBFFF'}};
+        // Auto-crop transparent edges, then reset sliders for non-transparent images
+        // ── Auto-crop transparent edges ──
+        (()=>{
+          try {
+            const oc=document.createElement('canvas');
+            oc.width=img.naturalWidth; oc.height=img.naturalHeight;
+            const ox=oc.getContext('2d');
+            ox.drawImage(img,0,0);
+            const px=ox.getImageData(0,0,oc.width,oc.height).data;
+            const W=oc.width, H=oc.height;
+            let minX=W,maxX=0,minY=H,maxY=0;
+            for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+              if(px[(y*W+x)*4+3]>3){ // alpha threshold
+                if(x<minX)minX=x; if(x>maxX)maxX=x;
+                if(y<minY)minY=y; if(y>maxY)maxY=y;
+              }
+            }
+            if(maxX>minX && maxY>minY){
+              // Add 1% padding to avoid cutting too tight
+              const pad=1;
+              const cL=Math.max(0, Math.round(minX/W*100)-pad);
+              const cR=Math.max(0, Math.round((W-1-maxX)/W*100)-pad);
+              const cT=Math.max(0, Math.round(minY/H*100)-pad);
+              const cB=Math.max(0, Math.round((H-1-maxY)/H*100)-pad);
+              S.product.cropL=cL; S.product.cropR=cR;
+              S.product.cropT=cT; S.product.cropB=cB;
+              // Rescale so visible area = 80% of canvas
+              const visFracW=(100-cL-cR)/100, visFracH=(100-cT-cB)/100;
+              if(visFracW>0 && visFracH>0){
+                const targetW=CW*0.80/visFracW, targetH=CH*0.80/visFracH;
+                const scale=Math.min(targetW/bw, targetH/bh);
+                const nw=Math.round(bw*scale), nh=Math.round(bh*scale);
+                S.product.w=nw; S.product.h=nh;
+                S.product.baseW=nw; S.product.baseH=nh;
+                // Center on VISIBLE content, not full image bounds
+                const visW=nw*visFracW, visH=nh*visFracH;
+                const visOffX=nw*(cL/100), visOffY=nh*(cT/100);
+                S.product.x=Math.round((CW-visW)/2 - visOffX);
+                S.product.y=Math.round((CH-visH)/2 - visOffY);
+              }
+              // Update sliders
+              ['T','B','L','R'].forEach(s=>{
+                const el=document.getElementById('crop'+s);
+                const lbl=document.getElementById('crop'+s+'Val');
+                const val=S.product['crop'+s];
+                if(el) el.value=val;
+                if(lbl) lbl.textContent=val+'%';
+              });
+            }
+          } catch(e){ console.warn('auto-crop failed',e); }
+        })();
+
+        // (sliders updated inside auto-crop block above)
         const thumb=document.getElementById('productThumb');
         if(thumb){thumb.src=url; thumb.style.display='block';}
         const hint=document.getElementById('productHint'); if(hint) hint.style.display='none';
@@ -2590,6 +2780,12 @@ canvas.addEventListener('mousedown',e=>{
     canvas.style.cursor='ns-resize'; render(); return;
   }
   if (hitProduct(x,y)) {
+    // Placeholder: open upload dialog on click
+    if (S.product?.isPlaceholder) {
+      S.selected='product'; rebuildLayerPanel(); render();
+      const inp=document.getElementById('productInput'); if(inp) inp.click();
+      return;
+    }
     pushUndo();
     S.selected='product'; S.dragging=true; autoExpandSections('product');
     S.dragStart={x,y,px:S.product.x,py:S.product.y};
@@ -5480,6 +5676,228 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     });
   }
 })();
+
+
+const _PLACEHOLDER_PRODUCT_URL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzIwIiB2aWV3Qm94PSIwIDAgNDAwIDMyMCI+CiAgPCEtLSBEZXZpY2UgYm9keSAtLT4KICA8cmVjdCB4PSI4MCIgeT0iNjAiIHdpZHRoPSIyNDAiIGhlaWdodD0iMjAwIiByeD0iMjQiIHJ5PSIyNCIgCiAgICAgICAgZmlsbD0iI2U4ZWNmMCIgc3Ryb2tlPSIjYzBjOGQwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8IS0tIFZlbnRpbGF0aW9uIGdyaWQgZG90cyAtLT4KICA8ZyBmaWxsPSIjYjBiYWM0IiBvcGFjaXR5PSIwLjYiPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMTgwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjIwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjQwIiBjeT0iMTAwIiByPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMjAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyNDAiIGN5PSIxMjAiIHI9IjMiLz4KICAgIDxjaXJjbGUgY3g9IjE2MCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjE4MCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIyMCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjI0MCIgY3k9IjE0MCIgcj0iMyIvPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMTgwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjIwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjQwIiBjeT0iMTYwIiByPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMjAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyNDAiIGN5PSIxODAiIHI9IjMiLz4KICAgIDxjaXJjbGUgY3g9IjE2MCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjE4MCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIyMCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjI0MCIgY3k9IjIwMCIgcj0iMyIvPgogIDwvZz4KICA8IS0tIExlZnQgc3RyaXAgLS0+CiAgPHJlY3QgeD0iODAiIHk9IjYwIiB3aWR0aD0iNjAiIGhlaWdodD0iMjAwIiByeD0iMjQiIHJ5PSIyNCIgZmlsbD0iI2QwZDhlMCIgc3Ryb2tlPSIjYzBjOGQwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8IS0tIExFRCBpbmRpY2F0b3IgLS0+CiAgPGNpcmNsZSBjeD0iMTEwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMUZCRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMTAiIGN5PSIxMTUiIHI9IjUiIGZpbGw9IiMwMGM4NDAiIG9wYWNpdHk9IjAuNiIvPgogIDwhLS0gTG9nbyBoaW50IC0tPgogIDxjaXJjbGUgY3g9IjExMCIgY3k9IjE2MCIgcj0iMTIiIGZpbGw9IiMwMDI4QTUiIG9wYWNpdHk9IjAuMTUiLz4KICA8Y2lyY2xlIGN4PSIxMTAiIGN5PSIxNjAiIHI9IjciIGZpbGw9IiMwMDI4QTUiIG9wYWNpdHk9IjAuMjUiLz4KICA8IS0tIEJhc2Ugc2hhZG93IC0tPgogIDxlbGxpcHNlIGN4PSIyMDAiIGN5PSIyNzUiIHJ4PSIxMDAiIHJ5PSIxMiIgZmlsbD0iI2MwYzhkMCIgb3BhY2l0eT0iMC40Ii8+CiAgPCEtLSBCb3R0b20gZm9vdCAtLT4KICA8cmVjdCB4PSIxMjAiIHk9IjI1NSIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxMiIgcng9IjYiIGZpbGw9IiNkMGQ4ZTAiIHN0cm9rZT0iI2MwYzhkMCIgc3Ryb2tlLXdpZHRoPSIxIi8+Cjwvc3ZnPg==';
+
+function loadPlaceholderProduct() {
+  if (S.product) return Promise.resolve(); // keep real product
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const ar = img.naturalHeight / img.naturalWidth; // ~0.80
+      const bw = Math.round(CW * 0.55), bh = Math.round(bw * ar);
+      S.product = {
+        img, opacity:1, shadow:0,
+        x: Math.round((CW-bw)/2), y: Math.round((CH-bh)/2),
+        w:bw, h:bh, baseW:bw, baseH:bh,
+        cropT:0, cropB:0, cropL:0, cropR:0,
+        isPlaceholder: true,
+        glow:{enabled:false,opacity:0.73,radius:0.15,colorA:'#E4003A',colorB:'#0028A5',colorC:'#1FBFFF'}
+      };
+      if (!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = _PLACEHOLDER_PRODUCT_URL;
+  });
+}
+
+// Pre-load placeholder product image at startup
+const _PLACEHOLDER_IMG = new Image();
+_PLACEHOLDER_IMG.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzIwIiB2aWV3Qm94PSIwIDAgNDAwIDMyMCI+CiAgPCEtLSBEZXZpY2UgYm9keSAtLT4KICA8cmVjdCB4PSI4MCIgeT0iNjAiIHdpZHRoPSIyNDAiIGhlaWdodD0iMjAwIiByeD0iMjQiIHJ5PSIyNCIgZmlsbD0iI2U4ZWNmMCIgc3Ryb2tlPSIjYzBjOGQwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8IS0tIFZlbnRpbGF0aW9uIGdyaWQgZG90cyAtLT4KICA8ZyBmaWxsPSIjYjBiYWM0IiBvcGFjaXR5PSIwLjYiPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMTgwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjIwIiBjeT0iMTAwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjQwIiBjeT0iMTAwIiByPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMjAiIGN5PSIxMjAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyNDAiIGN5PSIxMjAiIHI9IjMiLz4KICAgIDxjaXJjbGUgY3g9IjE2MCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjE4MCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIyMCIgY3k9IjE0MCIgcj0iMyIvPjxjaXJjbGUgY3g9IjI0MCIgY3k9IjE0MCIgcj0iMyIvPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMTgwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjIwIiBjeT0iMTYwIiByPSIzIi8+PGNpcmNsZSBjeD0iMjQwIiBjeT0iMTYwIiByPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyMjAiIGN5PSIxODAiIHI9IjMiLz48Y2lyY2xlIGN4PSIyNDAiIGN5PSIxODAiIHI9IjMiLz4KICAgIDxjaXJjbGUgY3g9IjE2MCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjE4MCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjIyMCIgY3k9IjIwMCIgcj0iMyIvPjxjaXJjbGUgY3g9IjI0MCIgY3k9IjIwMCIgcj0iMyIvPgogIDwvZz4KICA8IS0tIExlZnQgc3RyaXAgLS0+CiAgPHJlY3QgeD0iODAiIHk9IjYwIiB3aWR0aD0iNjAiIGhlaWdodD0iMjAwIiByeD0iMjQiIHJ5PSIyNCIgZmlsbD0iI2QwZDhlMCIgc3Ryb2tlPSIjYzBjOGQwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8IS0tIExFRCBpbmRpY2F0b3IgLS0+CiAgPGNpcmNsZSBjeD0iMTEwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMUZCRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMTAiIGN5PSIxMTUiIHI9IjUiIGZpbGw9IiMwMGM4NDAiIG9wYWNpdHk9IjAuNiIvPgogIDwhLS0gTG9nbyBoaW50IC0tPgogIDxjaXJjbGUgY3g9IjExMCIgY3k9IjE2MCIgcj0iMTIiIGZpbGw9IiMwMDI4QTUiIG9wYWNpdHk9IjAuMTUiLz4KICA8Y2lyY2xlIGN4PSIxMTAiIGN5PSIxNjAiIHI9IjciIGZpbGw9IiMwMDI4QTUiIG9wYWNpdHk9IjAuMjUiLz4KICA8IS0tIEJhc2Ugc2hhZG93IC0tPgogIDxlbGxpcHNlIGN4PSIyMDAiIGN5PSIyNzUiIHJ4PSIxMDAiIHJ5PSIxMiIgZmlsbD0iI2MwYzhkMCIgb3BhY2l0eT0iMC40Ii8+CiAgPCEtLSBCb3R0b20gZm9vdCAtLT4KICA8cmVjdCB4PSIxMjAiIHk9IjI1NSIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxMiIgcng9IjYiIGZpbGw9IiNkMGQ4ZTAiIHN0cm9rZT0iI2MwYzhkMCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgPCEtLSBVcGxvYWQgaWNvbiBvdmVybGF5IChjZW50ZXIgb2YgZGV2aWNlKSAtLT4KICA8Y2lyY2xlIGN4PSIyMTAiIGN5PSIxNjAiIHI9IjMyIiBmaWxsPSIjMDAyOEE1IiBvcGFjaXR5PSIwLjEyIi8+CiAgPGNpcmNsZSBjeD0iMjEwIiBjeT0iMTYwIiByPSIyOCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuNzAiLz4KICA8IS0tIFVwbG9hZCBhcnJvdyAtLT4KICA8bGluZSB4MT0iMjEwIiB5MT0iMTQ4IiB4Mj0iMjEwIiB5Mj0iMTcyIiBzdHJva2U9IiMwMDI4QTUiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cG9seWxpbmUgcG9pbnRzPSIyMDAsMTU4IDIxMCwxNDcgMjIwLDE1OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAyOEE1IiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPCEtLSBVcGxvYWQgYmFzZSBsaW5lIC0tPgogIDxsaW5lIHgxPSIyMDAiIHkxPSIxNzMiIHgyPSIyMjAiIHkyPSIxNzMiIHN0cm9rZT0iIzAwMjhBNSIgc3Ryb2tlLXdpZHRoPSIzLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=';
+
+window.applyLayoutStyle = function applyLayoutStyle(style) {
+  document.querySelectorAll('.layout-style-card').forEach(el => el.classList.remove('active'));
+  const activeCard = document.querySelector('.layout-style-card[onclick*="' + style + '"]');
+  if (activeCard) activeCard.classList.add('active');
+  pushUndo();
+  const findPreset = id => BG_PRESETS.find(p => p.id === id);
+
+  function clearCanvas() {
+    S.badge = null; S.badge2 = null; S.aiLabel = null; S.label = null;
+    S.freeTexts = {};
+    S.layerOrder = ['product','product2','badge','badge2','aiLabel','label'];
+    S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
+    S.bgSplit.enabled = false;
+    S.bgFlipped = false;
+  }
+  function addFT(text, x, y, size, color, weight) {
+    const id = 'ft_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    if (!S.freeTexts) S.freeTexts = {};
+    S.freeTexts[id] = {
+      id, text, x:Math.round(x), y:Math.round(y),
+      fontSize:Math.round(size), color:color||'#ffffff',
+      fontWeight:weight||'800', opacity:1,
+      glow:{enabled:false,opacity:0.73,radius:0.15,colorA:'#E4003A',colorB:'#0028A5',colorC:'#1FBFFF'}
+    };
+    S.layerOrder.push(id);
+  }
+  function addBadge(x, y, r, text1, text2, fillColor) {
+    S.badge = {
+      x, y, r, text1:text1||'', text2:text2||'',
+      fill:{type:'solid', color:fillColor||'#E4003A'}, fg:'#ffffff',
+      shape:'circle', opacity:1,
+      glow:{enabled:false,opacity:0.73,radius:0.15,colorA:'#E4003A',colorB:'#0028A5',colorC:'#1FBFFF'}
+    };
+  }
+  function setPlaceholderProduct() {
+    if (S.product && !S.product.isPlaceholder) return; // keep real product
+    const img = _PLACEHOLDER_IMG;
+    if (!img.complete || !img.naturalWidth) return;
+    const bw = Math.round(CW*0.72), bh = Math.round(bw*(img.naturalHeight/img.naturalWidth));
+    S.product = {
+      img, opacity:1, shadow:0,
+      x:Math.round((CW-bw)/2), y:Math.round((CH-bh)/2),
+      w:bw, h:bh, baseW:bw, baseH:bh,
+      cropT:0, cropB:0, cropL:0, cropR:0,
+      isPlaceholder:true,
+      glow:{enabled:false,opacity:0.73,radius:0.15,colorA:'#E4003A',colorB:'#0028A5',colorC:'#1FBFFF'}
+    };
+    if (!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
+  }
+
+  clearCanvas();
+
+  if (style === 'split') {
+    S.bg = findPreset('bg-gr1') || findPreset('p-ng') || findPreset('p-dn');
+    S.bgSplit.enabled = true; S.bgSplit.angle = 73; S.bgSplit.pos = 38;
+    S.bgSplit.color = '#E8EDF0';
+    setPlaceholderProduct();
+    addBadge(CW*0.22, CH*0.78, Math.round(Math.min(CW,CH)*0.14), 'CHF 29.–', '/Mt.', '#E4003A');
+  } else if (style === 'fullbleed') {
+    S.bg = findPreset('p-ng') || findPreset('p-dn');
+    setPlaceholderProduct();
+    addFT('Entdecke,\nwas du kannst', CW*0.35, CH*0.65, Math.min(CW,CH)*0.09, '#ffffff', '800');
+    addBadge(CW*0.80, CH*0.18, Math.round(Math.min(CW,CH)*0.12), 'Jetzt', 'entdecken', '#E4003A');
+  } else if (style === 'typeimage') {
+    S.bg = findPreset('p-dn');
+    setPlaceholderProduct();
+    addFT('Power up\nyour world', CW*0.35, CH*0.72, Math.min(CW,CH)*0.09, '#ffffff', '800');
+    addBadge(CW*0.78, CH*0.20, Math.round(Math.min(CW,CH)*0.12), 'Mehr\ninfos', '', '#0028A5');
+  } else if (style === 'typeproduct') {
+    S.bg = findPreset('p-wh');
+    setPlaceholderProduct();
+    addFT('blue TV', CW*0.28, CH*0.30, Math.min(CW,CH)*0.11, '#040D33', '800');
+    addFT('59.90 €/Monat', CW*0.28, CH*0.45, Math.min(CW,CH)*0.05, '#040D33', '400');
+    addBadge(CW*0.28, CH*0.65, Math.round(Math.min(CW,CH)*0.13), '0.–', '/Mt.', '#E4003A');
+  } else if (style === 'lifeform') {
+    S.bg = findPreset('p-dn');
+    addFT('Ihr Headline\nhier', CW*0.50, CH*0.65, Math.min(CW,CH)*0.09, '#ffffff', '800');
+  } else if (style === 'typeonly') {
+    S.bg = {id:'_typeonly', label:'Type Only', layers:[{type:'linear', angle:135,
+      stops:[{c:'#E4003A',p:0},{c:'#0028A5',p:50},{c:'#1FBFFF',p:100}]}]};
+    addFT('Your home\nis in safe\nhands', CW*0.50, CH*0.50, Math.min(CW,CH)*0.10, '#ffffff', '800');
+  }
+
+  if (window.syncBgSplitUI) window.syncBgSplitUI();
+  if (typeof rebuildBgGrid === 'function') rebuildBgGrid();
+  rebuildLayerPanel(); render();
+}
+
+
+// ── Resizable Panels ──────────────────────────────────────────────────────
+// Remove stale keys from older sessions
+try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_right_w'); } catch(e) {}
+(function() {
+  const KEY_L = 'swc_panel_l', KEY_R = 'swc_panel_r';
+  const MIN_W = 150, MAX_W = 350;
+  // Defaults: larger on big screens (media query already handles CSS; JS uses same logic)
+  const DEFAULT_L = window.innerWidth >= 1600 ? 250 : 210;
+  const DEFAULT_R = window.innerWidth >= 1600 ? 330 : 292;
+
+  const libEl   = document.querySelector('.library');
+  const propsEl = document.querySelector('.props');
+  const hLeft   = document.getElementById('resizeLeft');
+  const hRight  = document.getElementById('resizeRight');
+  if (!libEl || !propsEl || !hLeft || !hRight) return;
+
+  function clamp(v) { return Math.min(MAX_W, Math.max(MIN_W, v)); }
+
+  function save(key, w) {
+    try { localStorage.setItem(key, String(Math.round(w))); } catch(e) {}
+  }
+
+  // Restore saved widths (new versioned keys only)
+  try {
+    const sl = parseInt(localStorage.getItem(KEY_L));
+    const sr = parseInt(localStorage.getItem(KEY_R));
+    if (sl >= MIN_W && sl <= MAX_W) libEl.style.width   = sl + 'px';
+    if (sr >= MIN_W && sr <= MAX_W) propsEl.style.width = sr + 'px';
+  } catch(e) {}
+
+  function makeResizable(handle, targetEl, dir, key, def) {
+    // Double-click → reset to default
+    handle.addEventListener('dblclick', () => {
+      targetEl.style.width = def + 'px';
+      save(key, def);
+    });
+
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault();
+      handle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      const startX = e.clientX;
+      const startW = targetEl.offsetWidth;
+
+      function onMove(e) {
+        const dx = dir === 'right' ? e.clientX - startX : startX - e.clientX;
+        targetEl.style.width = clamp(startW + dx) + 'px';
+      }
+      function onUp() {
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        save(key, targetEl.offsetWidth);
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  makeResizable(hLeft,  libEl,   'right', KEY_L, DEFAULT_L);
+  makeResizable(hRight, propsEl, 'left',  KEY_R, DEFAULT_R);
+})();
+
 </script>
+
+<!-- ── Export Modal ── -->
+<div id="exportModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:22px 24px;min-width:280px;box-shadow:0 12px 40px rgba(0,0,0,.7);">
+    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:.3px;">Bild exportieren</div>
+    <!-- Format -->
+    <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">FORMAT</div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      <button id="expPng" onclick="S.exportFmt='png';document.getElementById('expPng').classList.add('active');document.getElementById('expJpg').classList.remove('active');"
+        style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #3878f0;background:#1e2a4a;color:#fff;font-size:12px;font-weight:700;cursor:pointer;" class="active">PNG</button>
+      <button id="expJpg" onclick="S.exportFmt='jpg';document.getElementById('expJpg').classList.add('active');document.getElementById('expPng').classList.remove('active');"
+        style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #333;background:transparent;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;">JPG</button>
+    </div>
+    <!-- Produktname -->
+    <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">PRODUKTNAME (optional)</div>
+    <input id="produktName" type="text" placeholder="z.B. Internet-Box-3" maxlength="60"
+      style="width:100%;box-sizing:border-box;padding:7px 10px;border-radius:7px;border:1px solid #333;background:#111;color:#fff;font-size:12px;margin-bottom:16px;outline:none;">
+    <!-- Resolution -->
+    <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">AUFLÖSUNG</div>
+    <select id="exportRes" style="width:100%;padding:7px 10px;border-radius:7px;border:1px solid #333;background:#111;color:#fff;font-size:12px;margin-bottom:20px;cursor:pointer;">
+      <option value="360">360 px (Mini)</option>
+      <option value="800">800 px (Klein)</option>
+      <option value="1200" selected>1200 px (Standard)</option>
+      <option value="2000">2000 px (Gross)</option>
+      <option value="3000">3000 px (Druck)</option>
+    </select>
+    <!-- Buttons -->
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('exportModal').style.display='none';"
+        style="flex:1;padding:9px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;font-size:12px;font-weight:700;cursor:pointer;">Abbrechen</button>
+      <button id="exportBtn"
+        style="flex:2;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#E4003A,#b8002a);color:#fff;font-size:12px;font-weight:700;cursor:pointer;">↓ Herunterladen</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
