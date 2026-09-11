@@ -1614,6 +1614,7 @@ const S = {
   return [..._defs,..._saved.filter(s=>!_defIds.includes(s.id))];
 })(),
 };
+window.S = S;
 
 // ── Layer ordering helpers ──
 const LAYER_LABELS = {
@@ -2359,7 +2360,9 @@ function setFormat(ratio) {
   }
   const {w,h}=FORMATS[ratio];
   const area=canvas.parentElement;
-  const maxW=area.clientWidth-40, maxH=area.clientHeight-60;
+  const _aCS=getComputedStyle(area);
+  const maxW=area.clientWidth -parseFloat(_aCS.paddingLeft)-parseFloat(_aCS.paddingRight);
+  const maxH=area.clientHeight-parseFloat(_aCS.paddingTop) -parseFloat(_aCS.paddingBottom);
   if (w>=h) {
     CW=Math.min(maxW,720); CH=Math.round(CW*h/w);
     if (CH>maxH) { CH=maxH; CW=Math.round(CH*w/h); }
@@ -3274,10 +3277,11 @@ function addFrameBadge(frameType) {
       slot = 'xbadge_' + (idx >= 0 ? idx : xbs.length);
     }
   }
-  // Default: full canvas width minus margin on each side
-  const margin = Math.round(CW * 0.06);
-  const hw = Math.round((CW - 2 * margin) / 2);   // half-width
-  const r  = Math.round(CH * 0.18);                 // half-height (~36% of canvas height)
+  // Phase 7A.4: horizontal width derived from authoritative Safe Area margin
+  // safeM = same formula as drawMarginGuides() + computeSnap() + resize snap
+  const safeM  = Math.round(Math.min(CW, CH) * 0.06);  // Safe Area horizontal boundary
+  const hw     = Math.round((CW - 2 * safeM) / 2);     // half-width: frame spans L=safeM → R=CW-safeM
+  const r      = Math.round(CH * 0.18);                 // half-height (~36% of canvas height) — unchanged
   const aspect = hw / r;
   setBadgeBySlot(slot, {
     kind: 'frame',
@@ -3288,7 +3292,7 @@ function addFrameBadge(frameType) {
     frameImgUrl: null,
     fill: { color: '#1a2a4a' },
     x: Math.round(CW / 2),
-    y: Math.round(CH - margin - r),  // bottom-aligned with defined margin
+    y: Math.round(CH - safeM - r),  // Phase 7A.5: bottom edge = Safe Area bottom (CH - safeM)
     r: r, baseR: r,
     opacity: 1,
     glow: {enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}
@@ -4087,14 +4091,7 @@ document.getElementById('filterToggleRow').addEventListener('click', (e) => {
 // Header quick-export button → open export modal
 document.getElementById('headerExportBtn').addEventListener('click', () => {
   S.exportFmt = S.exportFmt || 'png';
-  document.getElementById('expPng').classList.toggle('active', S.exportFmt !== 'jpg');
-  document.getElementById('expJpg').classList.toggle('active', S.exportFmt === 'jpg');
-  document.getElementById('expPng').style.borderColor = S.exportFmt !== 'jpg' ? '#3878f0' : '#333';
-  document.getElementById('expPng').style.background  = S.exportFmt !== 'jpg' ? '#1e2a4a' : 'transparent';
-  document.getElementById('expPng').style.color       = S.exportFmt !== 'jpg' ? '#fff' : '#aaa';
-  document.getElementById('expJpg').style.borderColor = S.exportFmt === 'jpg'  ? '#3878f0' : '#333';
-  document.getElementById('expJpg').style.background  = S.exportFmt === 'jpg'  ? '#1e2a4a' : 'transparent';
-  document.getElementById('expJpg').style.color       = S.exportFmt === 'jpg'  ? '#fff' : '#aaa';
+  updateExportFormatUI();
   document.getElementById('exportModal').style.display = 'flex';
 });
 // Close modal on backdrop click
@@ -4661,6 +4658,7 @@ canvas.addEventListener('mousedown',e=>{
   }
   const h=hitHandle(x,y);
   if (h) {
+    pushUndo(); // Phase 7A.1: one undo step per resize gesture
     S.resizing=true; S.resizeCorner=h;
     if (S.selected==='product') {
       const p=S.product;
@@ -4841,26 +4839,102 @@ canvas.addEventListener('mousemove',e=>{
       const ab = S.selected==='aiLabel' ? S.aiLabel : (activeBadge());
       const isAspectShape = ab && (ab.kind==='frame'||ab.kind==='pill'||ab.kind==='button'||ab.kind==='sticker');
       if (isAspectShape) {
-        // Free resize: dx → width (aspect), dy → height (r), independent
+        // Phase 7A.1: anchor-based resize — opposite edge stays fixed
         const startHW = br * (ba ?? 1);
-        if (c==='e'||c==='w') {
-          // Edge: only width
-          const edgeSignX = c==='w' ? -1 : 1;
-          const newHW = Math.max(15, startHW + dx * edgeSignX);
-          ab.aspect = newHW / ab.r;
-        } else if (c==='n'||c==='s') {
-          // Edge: only height — keep absolute width (hw) constant
-          const edgeSignY = c==='n' ? -1 : 1;
-          const newR = Math.max(10, br + dy * edgeSignY);
-          ab.r = newR; ab.baseR = newR;
-          ab.aspect = startHW / newR; // keep width constant
-        } else {
-          // Corner: both
-          const newHW = Math.max(15, startHW + dx * signX);
-          const newR  = Math.max(10, br + dy * signY);
-          ab.r = newR; ab.baseR = newR;
-          ab.aspect = newHW / newR;
+        const {bx, by} = S.dragStart;
+        const L0 = bx - startHW, R0 = bx + startHW;
+        const T0 = by - br,      B0 = by + br;
+
+        // Phase 7A.2: moving-edge-only snap (anchor edge never snaps)
+        const _z   = typeof zoomLevel !== 'undefined' ? Math.max(0.25, zoomLevel) : 1;
+        const _th  = SNAP_THRESH / _z;
+        const _m   = Math.round(Math.min(CW, CH) * 0.06);
+        const _obj = getSnapTargetBounds(S.selected);
+        const _sE  = (raw, isX) => {
+          const tgts = isX ? [0, _m, CW/2, CW-_m, CW] : [0, _m, CH/2, CH-_m, CH];
+          for (const t of _obj) {
+            if (isX) tgts.push(t.x, t.x+t.w/2, t.x+t.w);
+            else     tgts.push(t.y, t.y+t.h/2, t.y+t.h);
+          }
+          let best = null, bestD = _th;
+          for (const tgt of tgts) { const d = Math.abs(raw - tgt); if (d < bestD) { bestD = d; best = tgt; } }
+          return best !== null ? {val: best, guide: best} : {val: raw, guide: null};
+        };
+        const _guides = [];
+
+        if (c==='e') {
+          const rawR  = L0 + 2*(startHW + dx);
+          const sx    = _sE(rawR, true);
+          const newHW = Math.max(15, (sx.val - L0) / 2);
+          ab.aspect = newHW / ab.r; ab.x = L0 + newHW;         // left = L0
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+        } else if (c==='w') {
+          const rawL  = L0 + 2*dx;
+          const sx    = _sE(rawL, true);
+          const newHW = Math.max(15, (R0 - sx.val) / 2);
+          ab.aspect = newHW / ab.r; ab.x = R0 - newHW;         // right = R0
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+        } else if (c==='s') {
+          const rawB  = T0 + 2*(br + dy);
+          const sy    = _sE(rawB, false);
+          const newR  = Math.max(10, (sy.val - T0) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = startHW / newR;
+          ab.y = T0 + newR;                                      // top = T0
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
+        } else if (c==='n') {
+          const rawT  = T0 + 2*dy;
+          const sy    = _sE(rawT, false);
+          const newR  = Math.max(10, (B0 - sy.val) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = startHW / newR;
+          ab.y = B0 - newR;                                      // bottom = B0
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
+        } else if (c==='se') {
+          const rawR  = L0 + 2*(startHW + dx);
+          const rawB  = T0 + 2*(br + dy);
+          const sx    = _sE(rawR, true);  const sy = _sE(rawB, false);
+          const newHW = Math.max(15, (sx.val - L0) / 2);
+          const newR  = Math.max(10, (sy.val - T0) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = newHW / newR;
+          ab.x = L0 + newHW; ab.y = T0 + newR;                  // top-left fixed
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
+        } else if (c==='sw') {
+          const rawL  = L0 + 2*dx;
+          const rawB  = T0 + 2*(br + dy);
+          const sx    = _sE(rawL, true);  const sy = _sE(rawB, false);
+          const newHW = Math.max(15, (R0 - sx.val) / 2);
+          const newR  = Math.max(10, (sy.val - T0) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = newHW / newR;
+          ab.x = R0 - newHW; ab.y = T0 + newR;                  // top-right fixed
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
+        } else if (c==='ne') {
+          const rawR  = L0 + 2*(startHW + dx);
+          const rawT  = T0 + 2*dy;
+          const sx    = _sE(rawR, true);  const sy = _sE(rawT, false);
+          const newHW = Math.max(15, (sx.val - L0) / 2);
+          const newR  = Math.max(10, (B0 - sy.val) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = newHW / newR;
+          ab.x = L0 + newHW; ab.y = B0 - newR;                  // bottom-left fixed
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
+        } else if (c==='nw') {
+          const rawL  = L0 + 2*dx;
+          const rawT  = T0 + 2*dy;
+          const sx    = _sE(rawL, true);  const sy = _sE(rawT, false);
+          const newHW = Math.max(15, (R0 - sx.val) / 2);
+          const newR  = Math.max(10, (B0 - sy.val) / 2);
+          ab.r = newR; ab.baseR = newR; ab.aspect = newHW / newR;
+          ab.x = R0 - newHW; ab.y = B0 - newR;                  // bottom-right fixed
+          if (sx.guide !== null) _guides.push({axis:'x', pos:sx.guide, margin:false});
+          if (sy.guide !== null) _guides.push({axis:'y', pos:sy.guide, margin:false});
         }
+        // Phase 7A.3: Brandcenter rule — absolute frame radius = CW*0.03, independent of r
+        // Recalculated AFTER final r is known (post-snap, post-clamp). Frame-only.
+        if (ab.kind === 'frame') {
+          ab.cornerR = Math.round(CW * 0.03 / ab.r * 100) / 100;
+        }
+        snapGuides = _guides;
       } else {
         // Uniform resize for circles / aiLabel
         const dist = (dx*signX + dy*signY) * 0.5;
@@ -6312,7 +6386,9 @@ document.getElementById('customFmtBtn').addEventListener('click',()=>{
 
 function setCustomFormat(w,h) {
   const area=canvas.parentElement;
-  const maxW=area.clientWidth-40, maxH=area.clientHeight-60;
+  const _aCS=getComputedStyle(area);
+  const maxW=area.clientWidth -parseFloat(_aCS.paddingLeft)-parseFloat(_aCS.paddingRight);
+  const maxH=area.clientHeight-parseFloat(_aCS.paddingTop) -parseFloat(_aCS.paddingBottom);
   const scale=Math.min(maxW/w, maxH/h, 1);
   CW=Math.round(w*scale); CH=Math.round(h*scale);
   S.format='custom';
@@ -8605,17 +8681,23 @@ if (!fontLib.length && typeof EMBEDDED_FONTS !== 'undefined') fontLib = EMBEDDED
 // ────────────────────────────────────────────────────
 // EXPORT
 // ────────────────────────────────────────────────────
-(document.getElementById('expPng')||{addEventListener:()=>{}}).addEventListener('click',()=>{
-  document.getElementById('expPng').classList.add('active');
-  document.getElementById('expJpg').classList.remove('active');
-  S.exportFmt='png';
-});
-(document.getElementById('expJpg')||{addEventListener:()=>{}}).addEventListener('click',()=>{
-  document.getElementById('expJpg').classList.add('active');
-  document.getElementById('expPng').classList.remove('active');
-  S.exportFmt='jpg';
-});
-S.exportFmt='png';
+function updateExportFormatUI() {
+  const isPng = S.exportFmt !== 'jpg';
+  const elPng = document.getElementById('expPng');
+  const elJpg = document.getElementById('expJpg');
+  if (!elPng || !elJpg) return;
+  elPng.classList.toggle('active', isPng);
+  elJpg.classList.toggle('active', !isPng);
+  elPng.style.borderColor = isPng  ? '#3878f0' : '#333';
+  elPng.style.background  = isPng  ? '#1e2a4a' : 'transparent';
+  elPng.style.color       = isPng  ? '#fff'    : '#aaa';
+  elJpg.style.borderColor = !isPng ? '#3878f0' : '#333';
+  elJpg.style.background  = !isPng ? '#1e2a4a' : 'transparent';
+  elJpg.style.color       = !isPng ? '#fff'    : '#aaa';
+}
+document.getElementById('expPng').addEventListener('click', () => { S.exportFmt = 'png'; updateExportFormatUI(); });
+document.getElementById('expJpg').addEventListener('click', () => { S.exportFmt = 'jpg'; updateExportFormatUI(); });
+S.exportFmt = S.exportFmt || 'png';
 
 (document.getElementById('exportBtn')||{addEventListener:()=>{}}).addEventListener('click',()=>{
   let EW, EH;
@@ -9430,9 +9512,9 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
     <!-- Format -->
     <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">FORMAT</div>
     <div style="display:flex;gap:6px;margin-bottom:16px;">
-      <button id="expPng" onclick="S.exportFmt='png';document.getElementById('expPng').classList.add('active');document.getElementById('expJpg').classList.remove('active');"
+      <button id="expPng"
         style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #3878f0;background:#1e2a4a;color:#fff;font-size:12px;font-weight:700;cursor:pointer;" class="active">PNG</button>
-      <button id="expJpg" onclick="S.exportFmt='jpg';document.getElementById('expJpg').classList.add('active');document.getElementById('expPng').classList.remove('active');"
+      <button id="expJpg"
         style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #333;background:transparent;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;">JPG</button>
     </div>
     <!-- Produktname -->
