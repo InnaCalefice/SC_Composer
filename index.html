@@ -738,7 +738,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         In Entwicklung
       </div>
       <div id="layoutStyleGrid" class="lib-grid" style="margin-bottom:4px;">
-        <div class="layout-style-card" onclick="applyLayoutStyle('split')" title="Hintergrund-Teilung">
+        <div class="layout-style-card" onclick="applyLayoutStyle('split')" title="Split">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
             <defs><linearGradient id="lg1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#9B59B6"/></linearGradient></defs>
             <rect width="60" height="80" fill="url(#lg1a)"/>
@@ -765,15 +765,29 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
             <rect x="4" y="62" width="28" height="2.2" rx="1" fill="#040D33" opacity="0.55"/>
             <rect x="4" y="66" width="20" height="2.2" rx="1" fill="#040D33" opacity="0.55"/>
           </svg>
-          <div class="layout-style-label">Hintergrund-Teilung</div>
+          <div class="layout-style-label">Split</div>
         </div>
         <div class="layout-style-card" onclick="applyLayoutStyle('fullbleed')" title="Offer Hero">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#1FBFFF"/></linearGradient></defs>
-            <rect width="60" height="80" fill="url(#lg2)"/>
-            <circle cx="30" cy="32" r="14" fill="white" opacity="0.12"/>
-            <rect x="8" y="52" width="34" height="5" rx="2.5" fill="white" opacity="0.9"/>
-            <rect x="8" y="60" width="24" height="3" rx="1.5" fill="white" opacity="0.5"/>
+            <defs>
+              <linearGradient id="lg2bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3F5FF"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+              <linearGradient id="lg2stripe" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F20505"/><stop offset="0.34" stop-color="#0445C8"/><stop offset="0.72" stop-color="#1FB9FF"/><stop offset="1" stop-color="#033AAA"/></linearGradient>
+            </defs>
+            <rect width="60" height="80" fill="url(#lg2bg)"/>
+            <!-- semantic type stack -->
+            <rect x="6" y="10" width="24" height="4.5" rx="1.2" fill="#040D33"/>
+            <rect x="6" y="17" width="18" height="2.3" rx="1" fill="#040D33" opacity="0.65"/>
+            <rect x="6" y="21" width="21" height="2.3" rx="1" fill="#040D33" opacity="0.65"/>
+            <!-- product hero -->
+            <ellipse cx="30" cy="55" rx="16" ry="3.2" fill="#040D33" opacity="0.10"/>
+            <rect x="16" y="39" width="25" height="15" rx="6" fill="#E8ECEF" stroke="#C6CDD3" stroke-width="0.8"/>
+            <path d="M18 48c6 2.8 15 2.8 21 0" fill="none" stroke="#B8C1C8" stroke-width="0.9"/>
+            <!-- price ribbon -->
+            <circle cx="47" cy="35" r="8.5" fill="#0A4EDB"/>
+            <text x="43.2" y="38.2" font-family="Arial,sans-serif" font-size="8.8" font-weight="700" fill="#fff">0.–</text>
+            <text x="49.2" y="33.2" font-family="Arial,sans-serif" font-size="3.2" font-weight="700" fill="#fff">/Mt</text>
+            <!-- swisscom stripe -->
+            <path d="M0 69 L60 55" fill="none" stroke="url(#lg2stripe)" stroke-width="2.3"/>
           </svg>
           <div class="layout-style-label">Offer Hero</div>
         </div>
@@ -1003,6 +1017,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
       <button class="fmt-btn active" data-ratio="1:1"><span class="fmt-px">360 × 360</span><span class="fmt-ratio">1:1</span></button>
       <button class="fmt-btn" data-ratio="4:3"><span class="fmt-px">1200 × 900</span><span class="fmt-ratio">4:3</span></button>
       <button class="fmt-btn" data-ratio="16:9"><span class="fmt-px">1200 × 675</span><span class="fmt-ratio">16:9</span></button>
+      <button class="fmt-btn" data-ratio="2:1"><span class="fmt-px">1800 × 900</span><span class="fmt-ratio">2:1</span></button>
       <button class="fmt-btn" data-ratio="3:4"><span class="fmt-px">900 × 1200</span><span class="fmt-ratio">3:4</span></button>
       <button class="fmt-btn" id="customFmtBtn">Eigenes</button>
       <div class="fmt-sep"></div>
@@ -1559,7 +1574,7 @@ let multiDragGroupStart = null; // Phase 5C.1: initial combined group bounds {cx
 const SW = { red:'#E4003A', blue:'#0028A5', navy:'#001155' };
 
 const FORMATS = {
-  '1:1':{w:1,h:1}, '4:3':{w:4,h:3}, '16:9':{w:16,h:9}, '3:4':{w:3,h:4},
+  '1:1':{w:1,h:1}, '4:3':{w:4,h:3}, '16:9':{w:16,h:9}, '2:1':{w:2,h:1}, '3:4':{w:3,h:4},
 };
 
 // Corporate color palette for the circle shape
@@ -2467,6 +2482,7 @@ const DOCUMENT_FORMATS = {
   squareStd:    { physW: 1200, physH: 1200, label: '1200 × 1200', ratioLabel: '1:1'  },
   landscape43:  { physW: 1200, physH:  900, label: '1200 × 900',  ratioLabel: '4:3'  },
   landscape169: { physW: 1200, physH:  675, label: '1200 × 675',  ratioLabel: '16:9' },
+  landscape21:  { physW: 1800, physH:  900, label: '1800 × 900',  ratioLabel: '2:1'  },
   portrait34:   { physW:  900, physH: 1200, label: '900 × 1200',  ratioLabel: '3:4'  },
   squareMini:   { physW:  360, physH:  360, label: '360 × 360',   ratioLabel: '1:1'  },
 };
@@ -2477,6 +2493,7 @@ const LEGACY_TO_DOCUMENT_FORMAT = {
   '1:1':  'squareStd',
   '4:3':  'landscape43',
   '16:9': 'landscape169',
+  '2:1':  'landscape21',
   '3:4':  'portrait34',
 };
 
@@ -2736,11 +2753,17 @@ function setFormat(ratio) {
   if (resSel) {
     const cur = +resSel.value;
     if (ratio === '1:1') {
-      // Square: default to 360 px
-      if (cur === 1200 || cur === 360) resSel.value = '360';
+      // Square: default to 360 px. Returning from the dedicated 2:1 minimum
+      // should also restore the square default.
+      if (cur === 1200 || cur === 1800 || cur === 360) resSel.value = '360';
+    } else if (ratio === '2:1') {
+      // 2:1 is a production format with a requested minimum of 1800 × 900.
+      // Keep larger user choices, but never silently export below the minimum.
+      if (cur < 1800) resSel.value = '1800';
     } else {
-      // Other formats: bump up from 360 to 1200
-      if (cur === 360) resSel.value = '1200';
+      // Other standard formats: bump up from Mini; when leaving the dedicated
+      // 2:1 default, return to the normal 1200 px default.
+      if (cur === 360 || cur === 1800) resSel.value = '1200';
     }
   }
   const {w,h}=FORMATS[ratio];
@@ -4798,7 +4821,7 @@ function applyProductBlob(blob) {
         // ── Full Bleed: auto-fit canvas to image aspect ratio ──
         if (S.layoutStyle === 'fullbleed' && !(typeof LAYOUT_MODELS !== 'undefined' && LAYOUT_MODELS.fullbleed)) {
           const imgAr = img.naturalWidth / img.naturalHeight;
-          const candidates = [['1:1',1],['4:3',4/3],['16:9',16/9],['3:4',3/4]];
+          const candidates = [['1:1',1],['4:3',4/3],['16:9',16/9],['2:1',2],['3:4',3/4]];
           let bestKey = null, bestDiff = Infinity;
           candidates.forEach(([key, ar]) => {
             const d = Math.abs(imgAr - ar);
@@ -10308,7 +10331,7 @@ const LAYOUT_MODELS = Object.freeze({
     // a calm content field below. Values are format-relative; the media object's
     // own aspect ratio is preserved by _layoutReflowSplit().
     media: { top:0.14, bottom:0.66, width:0.58 },
-    badge: { anchor:'media-top-right', xOverlap:0.90, yOverlap:0.35, r:0.14, text1:'CHF 29.–', text2:'/Mt.', color:'#E4003A' },
+    badge: { anchor:'media-top-right', xOverlap:0.90, yOverlap:0.35, r:0.14, priceMode:true, priceKind:'mt', text1:'0.–', text2:'', color:'#E4003A' },
     textRegion: { top:0.72, width:0.84 },
     textStack: [
       { role:'subheadline', text:LAYOUT_PLACEHOLDERS.subheadline, color:'#040D33' },
@@ -10820,7 +10843,7 @@ function applyDeclarativeLayout(style) {
       if(!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
     }
     const br=model.badge;
-    S.badge={x:0,y:0,r:1,text1:br.text1,text2:br.text2,fill:{type:'solid',color:br.color},fg:'#ffffff',kind:'circle',shape:'circle',opacity:1,_fromLayout:true,_layoutManaged:true,_layoutStyle:'split',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+    S.badge={x:0,y:0,r:1,text1:br.text1,text2:br.text2||'',priceMode:br.priceMode===true,priceKind:br.priceKind||'mt',fill:{type:'solid',color:br.color},fg:'#ffffff',kind:'circle',shape:'circle',opacity:1,_fromLayout:true,_layoutManaged:true,_layoutStyle:'split',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
 
     const safe=_layoutSafeDoc(), regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width??0.86));
     let y=DH*(model.textRegion?.top??0.57), prevRole=null;
@@ -11155,6 +11178,7 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
       <option value="360">360 px (Mini)</option>
       <option value="800">800 px (Klein)</option>
       <option value="1200" selected>1200 px (Standard)</option>
+      <option value="1800">1800 px (2:1 Minimum)</option>
       <option value="2000">2000 px (Gross)</option>
       <option value="3000">3000 px (Druck)</option>
     </select>
