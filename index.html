@@ -197,9 +197,11 @@ header .spacer { flex:1; min-width:12px; }
 /* ── Canvas area ── */
 .canvas-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-workspace); background-image:radial-gradient(ellipse at 50% 38%,#1a1a1a 0%,#0a0a0a 65%,#080808 100%); position:relative; padding:24px; overflow:hidden; min-width:0; }
 .format-bar { position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:1px; background:var(--surface-panel); border:1px solid var(--border); border-radius:10px; padding:3px; z-index:10; box-shadow:0 2px 10px rgba(0,0,0,.45); }
-.fmt-btn { padding:4px 9px; border-radius:7px; border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:var(--font-sm); font-weight:600; transition:all .15s; white-space:nowrap; }
+.fmt-btn { padding:4px 9px; border-radius:7px; border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:var(--font-sm); font-weight:600; transition:all .15s; text-align:center; line-height:1.2; }
 .fmt-btn:hover { color:var(--text-secondary); background:var(--surface-elevated); }
 .fmt-btn.active { background:var(--surface-elevated); color:var(--text-primary); box-shadow:0 1px 3px rgba(0,0,0,.35); }
+.fmt-px { display:block; font-size:10px; font-weight:700; white-space:nowrap; letter-spacing:-.1px; }
+.fmt-ratio { display:block; font-size:9px; font-weight:500; opacity:.55; white-space:nowrap; margin-top:1px; }
 #mainCanvas { border-radius:10px; box-shadow:0 0 0 1px var(--border),0 20px 60px rgba(0,0,0,.7); user-select:none; -webkit-user-drag:none; cursor:default; max-width:100%; display:block; }
 
 /* ── Properties ── */
@@ -231,6 +233,16 @@ header .spacer { flex:1; min-width:12px; }
 .pi:focus { border-color:var(--interactive); box-shadow:0 0 0 2px var(--interactive-subtle); }
 .pi:hover:not(:focus) { border-color:var(--border-strong); }
 .pi::placeholder { color:var(--text-muted); }
+#ftTextInput {
+  height:auto;
+  min-height:76px;
+  max-height:180px;
+  padding:10px 12px;
+  line-height:1.35;
+  resize:vertical;
+  overflow-y:auto;
+  white-space:pre-wrap;
+}
 
 .prop-row { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:26px; }
 .prop-label { font-size:var(--font-base); color:var(--text-secondary); flex-shrink:0; }
@@ -755,7 +767,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           </svg>
           <div class="layout-style-label">Hintergrund-Teilung</div>
         </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleed')" title="Full Bleed Imagery">
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleed')" title="Offer Hero">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
             <defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#1FBFFF"/></linearGradient></defs>
             <rect width="60" height="80" fill="url(#lg2)"/>
@@ -763,7 +775,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
             <rect x="8" y="52" width="34" height="5" rx="2.5" fill="white" opacity="0.9"/>
             <rect x="8" y="60" width="24" height="3" rx="1.5" fill="white" opacity="0.5"/>
           </svg>
-          <div class="layout-style-label">Full Bleed</div>
+          <div class="layout-style-label">Offer Hero</div>
         </div>
         <div class="layout-style-card" onclick="applyLayoutStyle('typeimage')" title="Type and Image">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
@@ -988,11 +1000,10 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
   <!-- CENTER: Canvas -->
   <div class="canvas-area">
     <div class="format-bar">
-      <button class="fmt-btn active" data-ratio="1:1">1:1</button>
-      <button class="fmt-btn" data-ratio="4:3">4:3</button>
-      <button class="fmt-btn" data-ratio="16:9">16:9</button>
-      <button class="fmt-btn" data-ratio="3:4">3:4</button>
-      <button class="fmt-btn" id="fmt1200btn" title="1200 × 667 px">1200×667</button>
+      <button class="fmt-btn active" data-ratio="1:1"><span class="fmt-px">360 × 360</span><span class="fmt-ratio">1:1</span></button>
+      <button class="fmt-btn" data-ratio="4:3"><span class="fmt-px">1200 × 900</span><span class="fmt-ratio">4:3</span></button>
+      <button class="fmt-btn" data-ratio="16:9"><span class="fmt-px">1200 × 675</span><span class="fmt-ratio">16:9</span></button>
+      <button class="fmt-btn" data-ratio="3:4"><span class="fmt-px">900 × 1200</span><span class="fmt-ratio">3:4</span></button>
       <button class="fmt-btn" id="customFmtBtn">Eigenes</button>
       <div class="fmt-sep"></div>
       <button class="fmt-btn" id="zoomOut" title="Verkleinern" style="padding:4px 7px;">−</button>
@@ -1163,6 +1174,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           <input type="range" id="gsOffset" min="-50" max="50" value="0">
         </div>
       </div>
+
       <!-- Filter sub-panel (inline, collapsible) -->
       <div class="isp-sub">
         <div id="filterToggleRow" class="isp-sub-header">
@@ -1415,7 +1427,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         
     <div class="prop-section collapsed" data-ctx="freetext" style="display:none">
       <div class="prop-title">Freitext</div>
-      <textarea class="pi" id="ftTextInput" rows="3" placeholder="Text (Enter = neue Zeile)" style="resize:none;line-height:1.4;padding:6px 8px;font-family:inherit;width:100%;box-sizing:border-box;"></textarea>
+      <textarea class="pi" id="ftTextInput" rows="3" placeholder="Text (Enter = neue Zeile)"></textarea>
       <div class="prop-row" style="margin-top:6px;">
         <span class="prop-label">Farbe</span>
         <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
@@ -1427,6 +1439,14 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           <div id="ftGradBtn" title="Swisscom Verlauf" style="width:22px;height:16px;border-radius:3px;cursor:pointer;border:2px solid transparent;background:linear-gradient(180deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
         </div>
       </div>
+      <div class="prop-row" id="ftGradientPresetRow" style="margin-top:4px;display:none;">
+        <span class="prop-label">Verlauf</span>
+        <select id="ftGradientPreset" class="pi" style="flex:1;font-size:12px;">
+          <option value="brand">Brand · 86°</option>
+          <option value="accent">Accent · 95°</option>
+          <option value="diagonal">Diagonal · 109.42°</option>
+        </select>
+      </div>
       <div class="prop-row" style="margin-top:4px;">
         <span class="prop-label">Grösse</span>
         <span class="prop-val" id="ftSizeVal">32px</span>
@@ -1436,11 +1456,12 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         <span class="prop-label">Stil</span>
         <select id="ftStyleSelect" class="pi" style="flex:1;font-size:12px;">
           <option value="custom">Individuell</option>
-          <option value="headline">Headline (W7)</option>
-          <option value="subheadline">Sub-Headline (W6)</option>
-          <option value="lead">Lead / Intro (W5)</option>
-          <option value="body">Fliesstext (W4)</option>
-          <option value="cta">CTA (W6)</option>
+          <option value="headline">Headline</option>
+          <option value="expressiveHeadline">Expressive Headline</option>
+          <option value="subheadline">Sub-Headline</option>
+          <option value="lead">Lead</option>
+          <option value="body">Body Text</option>
+          <option value="cta">CTA</option>
         </select>
       </div>
       <div class="prop-row" style="margin-top:4px;">
@@ -1451,6 +1472,14 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           <option value="500">W5 Plain</option>
           <option value="400">W4 Semilight</option>
         </select>
+      </div>
+      <div class="prop-row" style="margin-top:4px;">
+        <span class="prop-label">Ausrichtung</span>
+        <div style="display:flex;gap:3px;">
+          <button id="ftAlignLeft"   class="fmt-btn active" title="Links"     aria-label="Links"     style="padding:4px 7px;line-height:0;"><svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0"  width="14" height="2" rx="1" fill="currentColor"/><rect x="0" y="5"  width="10" height="2" rx="1" fill="currentColor"/><rect x="0" y="10" width="12" height="2" rx="1" fill="currentColor"/></svg></button>
+          <button id="ftAlignCenter" class="fmt-btn"        title="Zentriert" aria-label="Zentriert" style="padding:4px 7px;line-height:0;"><svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0"  width="14" height="2" rx="1" fill="currentColor"/><rect x="2" y="5"  width="10" height="2" rx="1" fill="currentColor"/><rect x="1" y="10" width="12" height="2" rx="1" fill="currentColor"/></svg></button>
+          <button id="ftAlignRight"  class="fmt-btn"        title="Rechts"    aria-label="Rechts"    style="padding:4px 7px;line-height:0;"><svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0"  width="14" height="2" rx="1" fill="currentColor"/><rect x="4" y="5"  width="10" height="2" rx="1" fill="currentColor"/><rect x="2" y="10" width="12" height="2" rx="1" fill="currentColor"/></svg></button>
+        </div>
       </div>
       <div class="divider" style="margin:8px 0 4px;"></div>
       <div class="toggle-row">
@@ -1689,18 +1718,96 @@ function hitBadge2(mx,my) {
   return Math.hypot(mx-S.badge2.x,my-S.badge2.y)<=S.badge2.r*1.2;
 }
 
+// ── Context-sensitive default color for NEW FreeText only ────────────────
+// Light preset/background → Swisscom navy; dark preset/background → white.
+// Existing text is never recolored when the background changes.
+function defaultFreeTextColorForBackground() {
+  if (!S.bg || S.bg.type === 'image') return '#ffffff';
+
+  function parseCssColor(col) {
+    if (!col || typeof col !== 'string') return null;
+    const v = col.trim();
+    let m;
+    if ((m = v.match(/^#([0-9a-f]{6})$/i))) {
+      const n = parseInt(m[1], 16);
+      return {r:(n>>16)&255, g:(n>>8)&255, b:n&255, a:1};
+    }
+    if ((m = v.match(/^#([0-9a-f]{3})$/i))) {
+      const h=m[1];
+      return {r:parseInt(h[0]+h[0],16), g:parseInt(h[1]+h[1],16), b:parseInt(h[2]+h[2],16), a:1};
+    }
+    if ((m = v.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i))) {
+      return {r:+m[1], g:+m[2], b:+m[3], a:m[4] == null ? 1 : +m[4]};
+    }
+    return null;
+  }
+  function mix(a,b,t) {
+    return {
+      r:a.r+(b.r-a.r)*t, g:a.g+(b.g-a.g)*t, b:a.b+(b.b-a.b)*t,
+      a:a.a+(b.a-a.a)*t
+    };
+  }
+  function composite(base, over) {
+    const oa=Math.max(0,Math.min(1,over.a)), ba=Math.max(0,Math.min(1,base.a));
+    const a=oa+ba*(1-oa);
+    if (a <= 0) return {r:255,g:255,b:255,a:0};
+    return {
+      r:(over.r*oa + base.r*ba*(1-oa))/a,
+      g:(over.g*oa + base.g*ba*(1-oa))/a,
+      b:(over.b*oa + base.b*ba*(1-oa))/a,
+      a
+    };
+  }
+  function sampleLinearCenter(layer) {
+    const stops=(layer.stops||[]).slice().sort((a,b)=>a.p-b.p);
+    if (!stops.length) return null;
+    const t=50;
+    let lo=stops[0], hi=stops[stops.length-1];
+    for (let i=0;i<stops.length-1;i++) {
+      if (t>=stops[i].p && t<=stops[i+1].p) { lo=stops[i]; hi=stops[i+1]; break; }
+    }
+    const ca=parseCssColor(lo.c), cb=parseCssColor(hi.c);
+    if (!ca || !cb) return ca || cb;
+    const span=(hi.p-lo.p)||1;
+    return mix(ca,cb,Math.max(0,Math.min(1,(t-lo.p)/span)));
+  }
+
+  if (!Array.isArray(S.bg.layers)) return '#ffffff';
+  let sample={r:255,g:255,b:255,a:0};
+  let sawColor=false;
+  for (const layer of S.bg.layers) {
+    let c=null;
+    if (layer.type==='solid') c=parseCssColor(layer.color);
+    else if (layer.type==='linear') c=sampleLinearCenter(layer);
+    if (c) { sample=composite(sample,c); sawColor=true; }
+  }
+  if (!sawColor) return '#ffffff';
+
+  // Composite any remaining transparency over white, matching light-canvas perception.
+  sample=composite({r:255,g:255,b:255,a:1}, sample);
+  const srgb=[sample.r,sample.g,sample.b].map(v=>{
+    v=Math.max(0,Math.min(255,v))/255;
+    return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+  });
+  const lum=0.2126*srgb[0]+0.7152*srgb[1]+0.0722*srgb[2];
+  return lum >= 0.55 ? '#001155' : '#ffffff';
+}
+
 // ── Global: add a free text block at canvas centre ──────────────────────
 function addFreeTextBlock() {
   pushUndo();
   if (!S.freeTexts) S.freeTexts = {};
   const id = 'ft_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   S.freeTexts[id] = {
-    id, text: 'Text', x: Math.round(CW * 0.1), y: Math.round(CH * 0.45),
-    fontSize: Math.max(2, Math.round(70 * CW / 1200)),
-    color: '#ffffff', fontWeight: '700', opacity: 1,
-    lineHeightFactor: 82/70,
+    // Phase 7X.3B1: creation coords in DW/DH document space (not viewport CW/CH)
+    id, text: 'Text', x: Math.round(DW * 0.1), y: Math.round(DH * 0.45),
+    fontSize: Math.max(2, Math.round(FT_STYLES.headline.exportPx * CW / DW)), // Typography v2: role-driven design px
+    color: defaultFreeTextColorForBackground(), fontWeight: FT_STYLES.headline.defaultWeight, opacity: 1,
+    lineHeightFactor: FT_STYLES.headline.lineHeightPx / FT_STYLES.headline.exportPx, // Phase 7T.3B: derived from FT_STYLES
+    trackingPx: FT_STYLES.headline.trackingPx, // Typography v2: SDX design-pixel tracking
     stylePreset: 'headline',
     maxWidth: null, // auto: handle sits at actual text width until user drags it wider
+    _roleSize: true, // Phase 7B.4A: font size tracks semantic role on format change
     glow: {enabled:false,opacity:0.86,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}
   };
   S.layerOrder.push(id);
@@ -2282,39 +2389,56 @@ function rebuildLayerPanel() {
     if (id==='aiLabel')  return !!S.aiLabel;
     if (id==='stripe')   return S.stripe;
     if (id==='label')    return !!(S.label?.text1||S.label?.text2);
+    if (id.startsWith('ft_')) return !!(S.freeTexts && S.freeTexts[id]);
     return false;
   });
   if (!active.length) { panel.innerHTML='<div style="font-size:10px;color:#555;padding:2px 0">Noch keine Elemente</div>'; return; }
   [...active].reverse().forEach((id, vi) => {
     const realIdx = active.length - 1 - vi; // index in active array
     const row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:5px;padding:3px 5px;background:#1a1a1a;border-radius:5px;';
+    row.style.cssText='display:flex;align-items:center;gap:6px;min-height:32px;padding:3px 5px 3px 8px;background:#1a1a1a;border:1px solid #252525;border-radius:6px;';
     const lbl = document.createElement('span');
-    lbl.textContent = LAYER_LABELS[id] || (id.startsWith('xbadge_') ? 'Ribbon ' + (parseInt(id.split('_')[1]) + 3) : id);
+    if (id.startsWith('ft_')) {
+      const ft = S.freeTexts?.[id];
+      const roleLabel = FT_STYLES?.[ft?.stylePreset]?.label || 'Text';
+      const preview = (ft?.text || '').split('\n')[0].trim();
+      lbl.textContent = preview ? `${roleLabel}: ${preview.slice(0,18)}` : roleLabel;
+    } else {
+      lbl.textContent = LAYER_LABELS[id] || (id.startsWith('xbadge_') ? 'Ribbon ' + (parseInt(id.split('_')[1]) + 3) : id);
+    }
     lbl.style.cssText='flex:1;font-size:11px;color:#ccd;';
     const up = document.createElement('button');
     up.textContent='↑'; up.title='Nach oben';
-    up.style.cssText='background:none;border:none;color:#3878f0;cursor:pointer;font-size:13px;padding:0 2px;';
-    up.disabled = (vi === 0);
+    up.style.cssText='width:28px;height:26px;background:#232323;border:1px solid #303030;border-radius:5px;color:#6ea0ff;cursor:pointer;font-size:14px;padding:0;';
+    const ai = active.indexOf(id);
+    up.disabled = (ai === active.length - 1);
     up.style.opacity = up.disabled ? '0.25' : '1';
     up.onclick = () => {
-      // Move this layer up in stack (later in layerOrder = on top)
-      const io = S.layerOrder.indexOf(id);
-      if (io < S.layerOrder.length - 1) {
-        [S.layerOrder[io], S.layerOrder[io+1]] = [S.layerOrder[io+1], S.layerOrder[io]];
-        rebuildLayerPanel(); render();
+      // Move relative to the next ACTIVE layer, skipping dormant/null slots.
+      const cur = active.indexOf(id);
+      if (cur >= 0 && cur < active.length - 1) {
+        const other = active[cur + 1];
+        const io = S.layerOrder.indexOf(id), jo = S.layerOrder.indexOf(other);
+        if (io >= 0 && jo >= 0) {
+          [S.layerOrder[io], S.layerOrder[jo]] = [S.layerOrder[jo], S.layerOrder[io]];
+          rebuildLayerPanel(); render();
+        }
       }
     };
     const dn = document.createElement('button');
     dn.textContent='↓'; dn.title='Nach unten';
-    dn.style.cssText='background:none;border:none;color:#3878f0;cursor:pointer;font-size:13px;padding:0 2px;';
-    dn.disabled = (vi === active.length - 1);
+    dn.style.cssText='width:28px;height:26px;background:#232323;border:1px solid #303030;border-radius:5px;color:#6ea0ff;cursor:pointer;font-size:14px;padding:0;';
+    dn.disabled = (ai === 0);
     dn.style.opacity = dn.disabled ? '0.25' : '1';
     dn.onclick = () => {
-      const io = S.layerOrder.indexOf(id);
-      if (io > 0) {
-        [S.layerOrder[io], S.layerOrder[io-1]] = [S.layerOrder[io-1], S.layerOrder[io]];
-        rebuildLayerPanel(); render();
+      const cur = active.indexOf(id);
+      if (cur > 0) {
+        const other = active[cur - 1];
+        const io = S.layerOrder.indexOf(id), jo = S.layerOrder.indexOf(other);
+        if (io >= 0 && jo >= 0) {
+          [S.layerOrder[io], S.layerOrder[jo]] = [S.layerOrder[jo], S.layerOrder[io]];
+          rebuildLayerPanel(); render();
+        }
       }
     };
     row.appendChild(lbl); row.appendChild(up); row.appendChild(dn);
@@ -2324,38 +2448,299 @@ function rebuildLayerPanel() {
 
 
 
+// Phase 7B.10A — Retina / logical-display typography constants
+// All Composer exports are @2× Retina assets. Physical export ÷ RETINA_SCALE = intended CSS display width.
+// FT_STYLES.exportPx = design-pixel value. ft.fontSize = round(exportPx * CW / DW). // Phase 7T.2
+const RETINA_SCALE = 2;
+const CANONICAL_DISPLAY_W = 1200 / RETINA_SCALE; // = 600 CSS px
+
 let CW=600, CH=600;
+
+// ── Phase 7X.1 — Fixed Document Model Foundation ─────────────────────────────
+// FOUNDATION STATE ONLY. DW/DH do NOT participate in any current rendering,
+// geometry, interaction, or export calculation. Zero behavioral change.
+// These exist for inspection and future migration phases only.
+
+// Authoritative document-format table. Physical dimensions are integers and
+// are the source of truth. Logical dimensions = physW / RETINA_SCALE.
+const DOCUMENT_FORMATS = {
+  squareStd:    { physW: 1200, physH: 1200, label: '1200 × 1200', ratioLabel: '1:1'  },
+  landscape43:  { physW: 1200, physH:  900, label: '1200 × 900',  ratioLabel: '4:3'  },
+  landscape169: { physW: 1200, physH:  675, label: '1200 × 675',  ratioLabel: '16:9' },
+  portrait34:   { physW:  900, physH: 1200, label: '900 × 1200',  ratioLabel: '3:4'  },
+  squareMini:   { physW:  360, physH:  360, label: '360 × 360',   ratioLabel: '1:1'  },
+};
+
+// Legacy format-ID → document-format-ID mapping.
+// squareMini is intentionally NOT mapped to legacy '1:1'.
+const LEGACY_TO_DOCUMENT_FORMAT = {
+  '1:1':  'squareStd',
+  '4:3':  'landscape43',
+  '16:9': 'landscape169',
+  '3:4':  'portrait34',
+};
+
+// Pure helpers — no DOM access, no state mutation, no side effects.
+function getDocumentFormat(docFormatId) {
+  return DOCUMENT_FORMATS[docFormatId] || null;
+}
+function getDocumentDimensions(docFormatId) {
+  const f = getDocumentFormat(docFormatId);
+  if (!f) return null;
+  return { dw: f.physW / RETINA_SCALE, dh: f.physH / RETINA_SCALE };
+}
+function getDocumentFormatId(legacyFormat) {
+  return LEGACY_TO_DOCUMENT_FORMAT[legacyFormat] || null;
+}
+
+// Foundation document dimensions. In 7X.1 these were observational only.
+// In 7X.2 they drive PW/PH/previewScale. Must NOT drive CW/CH or object geometry yet.
+let DW = 600;
+let DH = 600;
+
+// Phase 7X.2 — Preview space state.
+// PW/PH are the CSS screen dimensions of the preview canvas.
+// previewScale = PW/DW = viewport-fit scale from document → screen.
+// These are SEPARATE from CW/CH (the current object-coordinate space).
+let previewScale = 1;
+let PW = 600;
+let PH = 600;
+
+// Compute preview geometry from DW/DH + available panel area. Pure — no mutation.
+function computePreviewGeometry() {
+  const area = canvas.parentElement;
+  if (!area) return null;
+  const cs = getComputedStyle(area);
+  const maxW = area.clientWidth  - parseFloat(cs.paddingLeft  || 0) - parseFloat(cs.paddingRight  || 0);
+  const maxH = area.clientHeight - parseFloat(cs.paddingTop   || 0) - parseFloat(cs.paddingBottom || 0);
+  // Mirror the existing setFormat clamping logic applied to DW/DH rather than FORMATS aspect ratio.
+  let pw, ph;
+  if (DW >= DH) {
+    pw = Math.min(maxW, 720); ph = Math.round(pw * DH / DW);
+    if (ph > maxH) { ph = Math.min(maxH, 650); pw = Math.round(ph * DW / DH); }
+  } else {
+    ph = Math.min(maxH, 650); pw = Math.round(ph * DW / DH);
+    if (pw > maxW) { pw = Math.min(maxW, 720); ph = Math.round(pw * DH / DW); }
+  }
+  const scale = DW > 0 ? pw / DW : 1;
+  return { scale, pw, ph };
+}
+
+// Apply computed preview geometry to module state (PW/PH/previewScale only).
+function syncPreviewGeometry() {
+  const g = computePreviewGeometry();
+  if (!g) return false;
+  previewScale = g.scale;
+  PW = g.pw;
+  PH = g.ph;
+  return true;
+}
+
+// Sync DW/DH from the current legacy format ID. Side-effect-free except
+// for assigning DW/DH, which are unused by all current code paths.
+function syncDocumentDimensionsFromLegacyFormat(legacyFormat) {
+  const docId = getDocumentFormatId(legacyFormat);
+  const dims  = docId ? getDocumentDimensions(docId) : null;
+  if (!dims) return false;
+  DW = dims.dw;
+  DH = dims.dh;
+  return true;
+}
+
+// Read-only debug utility — returns the full document-model table for inspection.
+// Does not log, mutate state, or affect rendering.
+function auditDocumentModel() {
+  return Object.fromEntries(
+    Object.entries(DOCUMENT_FORMATS).map(([id, f]) => [
+      id, { physical: [f.physW, f.physH], logical: [f.physW / RETINA_SCALE, f.physH / RETINA_SCALE] }
+    ])
+  );
+}
+// ── End Phase 7X.1 foundation ────────────────────────────────────────────────
+
 const canvas = document.getElementById('mainCanvas');
 const ctx    = canvas.getContext('2d');
 const DPR = () => Math.round(window.devicePixelRatio || 1);
 
 function setupCanvas() {
   const dpr = DPR();
-  canvas.width  = CW * dpr;
-  canvas.height = CH * dpr;
-  canvas.style.width  = CW + 'px';
-  canvas.style.height = CH + 'px';
-  canvas.style.aspectRatio = CW + ' / ' + CH;
+  // Phase 7X.2: canvas screen dimensions are PW×PH (preview space), not CW×CH (object space).
+  // CW/CH remain the object-coordinate system used by all geometry and rendering.
+  canvas.width  = Math.round(PW * dpr);
+  canvas.height = Math.round(PH * dpr);
+  canvas.style.width  = PW + 'px';
+  canvas.style.height = PH + 'px';
+  canvas.style.aspectRatio = PW + ' / ' + PH;
 }
 const imgCache = {};
 
 // ────────────────────────────────────────────────────
 // CANVAS SIZE
 // ────────────────────────────────────────────────────
+// Phase 7A.7 — Frame-specific format transform
+// Anchor tolerance: 2 canvas units (handles integer rounding from Math.round)
+const _FRAME_TOL = 2;
+
+function _transformFrameForFormat(fr, oldCW, oldCH, newCW, newCH) {
+  // Old safe area
+  const oldSafeM  = Math.round(Math.min(oldCW, oldCH) * 0.06);
+  const oldSafeL  = oldSafeM,      oldSafeR  = oldCW - oldSafeM;
+  const oldSafeT  = oldSafeM,      oldSafeB  = oldCH - oldSafeM;
+  const oldUsableW = oldSafeR - oldSafeL;
+  const oldUsableH = oldSafeB - oldSafeT;
+
+  // Old frame bounds from center model
+  const hw = fr.r * (fr.aspect || 1);
+  const L = fr.x - hw, R = fr.x + hw;
+  const T = fr.y - fr.r, B = fr.y + fr.r;
+  const oldW = R - L, oldH = B - T;
+
+  // Anchor detection
+  const anchorL = Math.abs(L - oldSafeL) <= _FRAME_TOL;
+  const anchorR = Math.abs(R - oldSafeR) <= _FRAME_TOL;
+  const anchorT = Math.abs(T - oldSafeT) <= _FRAME_TOL;
+  const anchorB = Math.abs(B - oldSafeB) <= _FRAME_TOL;
+
+  // Proportional size relative to old usable safe area
+  const wRatio = oldUsableW > 0 ? oldW / oldUsableW : 1;
+  const hRatio = oldUsableH > 0 ? oldH / oldUsableH : 1;
+
+  // New safe area
+  const newSafeM  = Math.round(Math.min(newCW, newCH) * 0.06);
+  const newSafeL  = newSafeM,      newSafeR  = newCW - newSafeM;
+  const newSafeT  = newSafeM,      newSafeB  = newCH - newSafeM;
+  const newUsableW = newSafeR - newSafeL;
+  const newUsableH = newSafeB - newSafeT;
+
+  // Candidate dimensions (proportion-scaled, minimum 20px each axis)
+  const MIN_HALF = 10;
+  const candW = Math.max(MIN_HALF * 2, wRatio * newUsableW);
+  const candH = Math.max(MIN_HALF * 2, hRatio * newUsableH);
+
+  // ── Horizontal ──
+  let newL, newR;
+  if (anchorL && anchorR) {
+    newL = newSafeL; newR = newSafeR;                        // Case 1: full-width
+  } else if (anchorL && !anchorR) {
+    newL = newSafeL; newR = newL + candW;                    // Case 2: left-anchored
+  } else if (!anchorL && anchorR) {
+    newR = newSafeR; newL = newR - candW;                    // Case 3: right-anchored
+  } else {
+    const nx = oldUsableW > 0 ? (fr.x - oldSafeL) / oldUsableW : 0.5; // Case 4: free
+    const newCX = newSafeL + nx * newUsableW;
+    newL = newCX - candW / 2; newR = newL + candW;
+  }
+
+  // ── Vertical ──
+  let newT, newB;
+  if (anchorT && anchorB) {
+    newT = newSafeT; newB = newSafeB;                        // Case 1: full-height
+  } else if (anchorB && !anchorT) {
+    newB = newSafeB; newT = newB - candH;                    // Case 2: bottom-anchored (default)
+  } else if (anchorT && !anchorB) {
+    newT = newSafeT; newB = newT + candH;                    // Case 3: top-anchored
+  } else {
+    const ny = oldUsableH > 0 ? (fr.y - oldSafeT) / oldUsableH : 0.5; // Case 4: free
+    const newCY = newSafeT + ny * newUsableH;
+    newT = newCY - candH / 2; newB = newT + candH;
+  }
+
+  // Sanity: no negative/zero dimensions
+  if (newR - newL < MIN_HALF * 2) newR = newL + MIN_HALF * 2;
+  if (newB - newT < MIN_HALF * 2) newB = newT + MIN_HALF * 2;
+
+  // Reconstruct center-based model
+  fr.x      = Math.round((newL + newR) / 2);
+  fr.y      = Math.round((newT + newB) / 2);
+  fr.r      = Math.round((newB - newT) / 2);
+  fr.baseR  = fr.r;
+  const newHW = Math.round((newR - newL) / 2);
+  fr.aspect = fr.r > 0 ? newHW / fr.r : 1;
+
+  // Brand corner radius: absolute = newCW*0.03, stored relative to r
+  fr.cornerR = Math.round((newCW * 0.03 / fr.r) * 100) / 100;
+}
+// ────────────────────────────────────────────────────
+// Phase 7X.3B3 — Model E badge/ribbon reprojection across format changes.
+// For objects near a Safe Area edge: preserves the visual gap to that edge.
+// For floating objects: falls back to safe-area-normalized center (v1.0.38).
+// Must be called before b.r / b.baseR are mutated. scaleBaseR: true for
+// named badge/badge2/aiLabel (which store baseR), false for extraBadges.
+function _reprojBadgeModelE(b, prevCW, prevCH, CW, CH, sm, scaleBaseR) {
+  if (!b || b.kind === 'frame') return; // frames handled by Phase 7A.7
+  const oldR = b.r || 0, oldX = b.x || 0, oldY = b.y || 0;
+  // Half-extents by kind — matches badgeBounds() conventions
+  const _asp = b.aspect || (b.kind === 'sticker' ? 2.5 : b.kind === 'svgshape' ? 1 : 2);
+  const hwO = (b.kind === 'circle' || b.kind === 'image') ? oldR : oldR * _asp;
+  const hhO = (b.kind === 'image' && b.ar) ? oldR * b.ar : oldR;
+  // Safe area margins and edges (old and new)
+  const safeOld = Math.round(Math.min(prevCW, prevCH) * 0.06);
+  const safeNew = Math.round(Math.min(CW, CH)         * 0.06);
+  const sROld = prevCW - safeOld, sTOld = safeOld, sBOld = prevCH - safeOld;
+  const sRNew = CW     - safeNew, sTNew = safeNew,  sBNew = CH     - safeNew;
+  // Visual edge gaps (negative = intentional bleed past Safe Area boundary)
+  const rightGap  = sROld - (oldX + hwO);
+  const leftGap   = (oldX - hwO) - safeOld;
+  const topGap    = (oldY - hhO) - sTOld;
+  const bottomGap = sBOld - (oldY + hhO);
+  // Object-aware edge-near threshold (conservative, capped at 12% of min canvas dimension)
+  const halfMin = Math.min(hwO, hhO);
+  const edgeThreshold = Math.min(
+    Math.max(safeOld, halfMin * 0.75),
+    Math.min(prevCW, prevCH) * 0.12
+  );
+  // Infer X anchor from nearest safe edge
+  const absR = Math.abs(rightGap), absL = Math.abs(leftGap);
+  const anchorX = (absR < absL && absR <= edgeThreshold) ? 'right'
+                : (absL < absR && absL <= edgeThreshold) ? 'left' : 'center';
+  // Infer Y anchor from nearest safe edge
+  const absT = Math.abs(topGap), absB = Math.abs(bottomGap);
+  const anchorY = (absT < absB && absT <= edgeThreshold) ? 'top'
+                : (absB < absT && absB <= edgeThreshold) ? 'bottom' : 'center';
+  // Resize using captured old values
+  if (oldR)                   b.r     = Math.round(oldR    * sm);
+  if (scaleBaseR && b.baseR)  b.baseR = Math.round(b.baseR * sm);
+  // New half-extents after resize (same kind formulas)
+  const hwN = (b.kind === 'circle' || b.kind === 'image') ? b.r : b.r * _asp;
+  const hhN = (b.kind === 'image' && b.ar) ? b.r * b.ar : b.r;
+  // Reposition X
+  if      (anchorX === 'right')  b.x = Math.round((sRNew - rightGap) - hwN);
+  else if (anchorX === 'left')   b.x = Math.round((safeNew + leftGap) + hwN);
+  else { // normalized-center fallback (v1.0.38 behavior)
+    const iWo = prevCW - 2 * safeOld, iWn = CW - 2 * safeNew;
+    b.x = Math.round(safeNew + (iWo > 0 ? (oldX - safeOld) / iWo : 0.5) * iWn);
+  }
+  // Reposition Y
+  if      (anchorY === 'top')    b.y = Math.round((sTNew + topGap) + hhN);
+  else if (anchorY === 'bottom') b.y = Math.round((sBNew - bottomGap) - hhN);
+  else { // normalized-center fallback (v1.0.38 behavior)
+    const iHo = prevCH - 2 * safeOld, iHn = CH - 2 * safeNew;
+    b.y = Math.round(safeNew + (iHo > 0 ? (oldY - safeOld) / iHo : 0.5) * iHn);
+  }
+}
+
 function setFormat(ratio) {
   const prevCW = CW, prevCH = CH; // capture before resize
+  // Phase 7X.3B1: capture prevDW/prevDH before syncDocumentDimensions updates them
+  const prevDW = DW, prevDH = DH;
+  // Phase 8L.2A compatibility: detached layout text from an earlier session/build may
+  // not yet have anchor metadata. Capture it while the OLD document geometry is active.
+  Object.values(S.freeTexts || {}).forEach(ft => {
+    if (ft?._layoutManaged === true && ft._layoutAttached === false && (!ft._manualLayoutAnchor || ft._manualLayoutAnchor.v !== 2)) _captureManualLayoutAnchor(ft);
+  });
   S.format=ratio;
+  syncDocumentDimensionsFromLegacyFormat(ratio); // Phase 7X.1: update DW/DH
   safeLS.set('swc_format', ratio);
   // Auto-adjust default export resolution per format
   const resSel = document.getElementById('exportRes');
   if (resSel) {
     const cur = +resSel.value;
     if (ratio === '1:1') {
-      // Square: default to 380 px
-      if (cur === 1200 || cur === 380) resSel.value = '380';
+      // Square: default to 360 px
+      if (cur === 1200 || cur === 360) resSel.value = '360';
     } else {
-      // Other formats: bump up from 380 to 1200
-      if (cur === 380) resSel.value = '1200';
+      // Other formats: bump up from 360 to 1200
+      if (cur === 360) resSel.value = '1200';
     }
   }
   const {w,h}=FORMATS[ratio];
@@ -2370,6 +2755,7 @@ function setFormat(ratio) {
     CH=Math.min(maxH,650); CW=Math.round(CH*w/h);
     if (CW>maxW) { CW=maxW; CH=Math.round(CW*h/w); }
   }
+  syncPreviewGeometry(); // Phase 7X.2: compute PW/PH from DW/DH + viewport (DW/DH already synced above)
   setupCanvas();
   // Scale all elements proportionally — never re-apply layout (would wipe user edits)
   const sx = prevCW > 0 ? CW / prevCW : 1;
@@ -2379,41 +2765,63 @@ function setFormat(ratio) {
   const newMin  = Math.min(CW, CH);
   const sm = prevMin > 0 ? newMin / prevMin : 1;
 
+  // Phase 7A.7 — collect frames before generic transform (references, not copies)
+  const _frames7 = [];
+  ['badge','badge2'].forEach(k => { if (S[k] && S[k].kind === 'frame') _frames7.push(S[k]); });
+  (S.extraBadges || []).forEach(b => { if (b && b.kind === 'frame') _frames7.push(b); });
+
+  // Phase 7X.3B1: freeText x/y/maxWidth live in DW/DH space — scale by DW/DH ratio
+  const sxDoc = prevDW > 0 ? DW / prevDW : 1;
+  const syDoc = prevDH > 0 ? DH / prevDH : 1;
   if (S.freeTexts) {
     Object.values(S.freeTexts).forEach(ft => {
-      ft.x = Math.round(ft.x * sx);
-      ft.y = Math.round(ft.y * sy);
-      ft.fontSize = Math.round(ft.fontSize * sm);
-      if (ft.maxWidth) ft.maxWidth = Math.round(ft.maxWidth * sx);
+      ft.x = Math.round(ft.x * sxDoc);
+      ft.y = Math.round(ft.y * syDoc);
+      // Phase 7B.4A: role-driven font size recomputed from canonical; customized uses sm
+      // Phase 7T.2: denominator is DW (= physW / RETINA_SCALE), not CANONICAL_DISPLAY_W
+      if (ft._roleSize === true && ft.stylePreset && FT_STYLES[ft.stylePreset]) {
+        ft.fontSize = Math.round(FT_STYLES[ft.stylePreset].exportPx * CW / DW);
+      } else {
+        ft.fontSize = Math.round(ft.fontSize * sm);
+      }
+      if (ft.maxWidth) ft.maxWidth = Math.round(ft.maxWidth * sxDoc);
     });
   }
+  // Phase 7X.3B3 — Model E: edge-gap preservation for edge-near badges,
+  // normalized-center fallback for floating badges. Frames stay on Phase 7A.7.
   ['badge','badge2','aiLabel'].forEach(k => {
-    if (S[k]) {
-      S[k].x = Math.round(S[k].x * sx);
-      S[k].y = Math.round(S[k].y * sy);
-      if (S[k].r)     S[k].r     = Math.round(S[k].r     * sm);
-      if (S[k].baseR) S[k].baseR = Math.round(S[k].baseR * sm);
-    }
+    if (S[k]) _reprojBadgeModelE(S[k], prevCW, prevCH, CW, CH, sm, true);
   });
   (S.extraBadges || []).forEach(b => {
-    if (!b) return;
-    b.x = Math.round(b.x * sx); b.y = Math.round(b.y * sy);
-    if (b.r) b.r = Math.round(b.r * sm);
+    if (b) _reprojBadgeModelE(b, prevCW, prevCH, CW, CH, sm, false);
   });
   if (S.label) {
     S.label.x = Math.round(S.label.x * sx);
     S.label.y = Math.round(S.label.y * sy);
   }
-  // Product: position by sx/sy, size by sm (maintains aspect ratio, round-trips)
+  // Product: scale center by sx/sy, size by sm — preserves visual center across aspect-ratio changes.
+  // Capture old center BEFORE scaling p.w/p.h; recompute p.x/p.y from new center and new size.
   ['product','product2'].forEach(k => {
     const p = S[k]; if (!p) return;
-    p.x = Math.round(p.x * sx);
-    p.y = Math.round(p.y * sy);
+    const cxOld = p.x + p.w / 2;
+    const cyOld = p.y + p.h / 2;
     p.w = Math.round(p.w * sm);
     p.h = Math.round(p.h * sm);
     p.baseW = Math.round((p.baseW || p.w) * sm);
     p.baseH = Math.round((p.baseH || p.h) * sm);
+    p.x = Math.round(cxOld * sx - p.w / 2);
+    p.y = Math.round(cyOld * sy - p.h / 2);
   });
+  // Phase 7A.7 — apply frame-specific safe-area-aware transform
+  _frames7.forEach(fr => _transformFrameForFormat(fr, prevCW, prevCH, CW, CH));
+  // Phase 8L.2: declarative layouts reflow attached objects from safe-area anchors/rhythm.
+  // Detached (user-edited) objects keep the generic proportional transform above.
+  if (S.layoutStyle && typeof reflowDeclarativeLayout === 'function' && LAYOUT_MODELS?.[S.layoutStyle]) {
+    reflowDeclarativeLayout(S.layoutStyle);
+  }
+  // Phase 8L.2A: attached objects follow semantic layout anchors; detached objects
+  // follow the manual visual anchor captured when the user moved/resized them.
+  _projectDetachedLayoutTexts();
   render();
 }
 
@@ -2885,21 +3293,87 @@ function syncFtProps() {
   const picker = document.getElementById('ftColorPicker');
   const slider = document.getElementById('ftSizeSlider');
   const sizeVal = document.getElementById('ftSizeVal');
-  if (inp) inp.value = ft.text || '';
+  if (inp) {
+    inp.value = ft.text || '';
+    // Inspector FreeText field: show multiline copy without being trapped in a 1-line control.
+    inp.style.height = 'auto';
+    inp.style.height = Math.min(180, Math.max(76, inp.scrollHeight)) + 'px';
+  }
   if (picker) picker.value = ft.color || '#040D33';
   if (swatch) swatch.style.background = ft.color || '#040D33';
-  const _epx = Math.round((ft.fontSize || 32) * 1200 / CW);
+  const _epx = Math.round((ft.fontSize || 32) * DW / CW); // Phase 7B.10A: display logical px
   if (slider) slider.value = _epx;
   if (sizeVal) sizeVal.textContent = _epx + 'px';
   const styleSel = document.getElementById('ftStyleSelect');
   const weightSel = document.getElementById('ftWeightSelect');
+  const _styleKey = ft.stylePreset || 'custom';
+  if (styleSel) styleSel.value = _styleKey;
+  updateWeightOptions(_styleKey);
   if (weightSel) weightSel.value = String(ft.fontWeight || '700');
-  if (styleSel) styleSel.value = ft.stylePreset || 'custom';
+  // Sync alignment buttons
+  const _alMap = {left:'ftAlignLeft', center:'ftAlignCenter', right:'ftAlignRight'};
+  Object.values(_alMap).forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  const _alBtn = document.getElementById(_alMap[ft.alignment||'left']);
+  if (_alBtn) _alBtn.classList.add('active');
   const gb = document.getElementById('ftGradBtn');
   if (gb) gb.style.borderColor = ft.fgGradient ? '#3878f0' : 'transparent';
+  const gpRow = document.getElementById('ftGradientPresetRow');
+  const gpSel = document.getElementById('ftGradientPreset');
+  if (gpRow) gpRow.style.display = ft.fgGradient ? 'flex' : 'none';
+  if (gpSel) gpSel.value = ft.gradientPreset || 'brand';
   if (typeof syncGlowUI === 'function') syncGlowUI();
   // Expand the section
   document.querySelectorAll('.prop-section[data-ctx="freetext"]').forEach(s => s.classList.remove('collapsed'));
+}
+
+// FT_ROLE_WEIGHTS removed — Phase 7T.3B: allowedWeights now read from FT_STYLES directly
+const FT_WEIGHT_LABELS = [
+  {v:'700', l:'W7 Bold'},
+  {v:'600', l:'W6 Semibold'},
+  {v:'500', l:'W5 Plain'},
+  {v:'400', l:'W4 Semilight'},
+];
+function updateWeightOptions(styleKey) {
+  const sel = document.getElementById('ftWeightSelect');
+  if (!sel) return;
+  const role = FT_STYLES[styleKey]; // Phase 7T.3B: read from FT_STYLES (FT_ROLE_WEIGHTS removed)
+  const allowed = role ? role.allowedWeights : FT_WEIGHT_LABELS.map(w => w.v);
+  const prev = sel.value;
+  sel.innerHTML = '';
+  FT_WEIGHT_LABELS.filter(w => allowed.includes(w.v)).forEach(w => {
+    const o = document.createElement('option');
+    o.value = w.v; o.textContent = w.l;
+    sel.appendChild(o);
+  });
+  if (allowed.includes(prev)) sel.value = prev;
+  else sel.value = sel.options[0]?.value || '700';
+}
+
+// Paragraph style presets — module-scope so setFormat/setCustomFormat can access them
+// exportPx = design-pixel size. ft.fontSize = round(exportPx * CW / DW). // Phase 7T.2
+// lineHeightPx = design-pixel line height. ft.lineHeightFactor = lineHeightPx / exportPx. // Phase 7T.3B
+const FT_STYLES = {
+  // Typography v2 — SDX size/leading/tracking tokens + Brandcenter role weights.
+  // trackingPx is stored in design-pixel units and scaled with W/DW at render time.
+  // Expressive Headline is an art-directed variant of Headline with tighter leading.
+  headline:            { label:'Headline',            defaultWeight:'600', allowedWeights:['600','700'],       exportPx: 80, lineHeightPx: 88, trackingPx: -1.6 },
+  expressiveHeadline: { label:'Expressive Headline', defaultWeight:'600', allowedWeights:['600','700'],       exportPx: 80, lineHeightPx: 68, trackingPx: -0.8 },
+  subheadline: { label:'Subheadline',  defaultWeight:'600', allowedWeights:['500','600','700'], exportPx: 40, lineHeightPx: 48, trackingPx: -0.8 },
+  lead:        { label:'Lead',         defaultWeight:'500', allowedWeights:['500'],             exportPx: 20, lineHeightPx: 28, trackingPx: -0.1 },
+  body:        { label:'Body',         defaultWeight:'400', allowedWeights:['400'],             exportPx: 16, lineHeightPx: 24, trackingPx:  0.0 },
+  cta:         { label:'CTA',          defaultWeight:'600', allowedWeights:['600'],             exportPx: 18, lineHeightPx: 24, trackingPx:  0.0 },
+};
+
+
+function getFtTrackingPx(ft) {
+  if (Number.isFinite(ft?.trackingPx)) return ft.trackingPx;
+  const role = ft?.stylePreset && FT_STYLES[ft.stylePreset];
+  return Number.isFinite(role?.trackingPx) ? role.trackingPx : 0;
+}
+function applyFtCanvasTracking(ctx, ft, designToCanvasScale) {
+  const px = getFtTrackingPx(ft) * (Number.isFinite(designToCanvasScale) ? designToCanvasScale : 1);
+  if (ctx && 'letterSpacing' in ctx) ctx.letterSpacing = `${px}px`;
+  return px;
 }
 
 // Wire up freetext prop panel controls (called once on load)
@@ -2912,18 +3386,10 @@ function syncFtProps() {
   const delBtn = document.getElementById('ftDeleteBtn');
   const ftStyleSel = document.getElementById('ftStyleSelect');
   const ftWeightSel = document.getElementById('ftWeightSelect');
-  // Paragraph style presets — absolute export-px sizes (reference: 1200px wide export)
-  const FT_STYLES = {
-    headline:    { weight:'700', exportPx: 70,  lh: 82/70  },
-    subheadline: { weight:'500', exportPx: 44,  lh: 52/44  },
-    lead:        { weight:'500', exportPx: 32,  lh: 40/32  },
-    body:        { weight:'400', exportPx: 18,  lh: 24/18  },
-    cta:         { weight:'600', exportPx: 18,  lh: 24/18  },
-  };
-  // Convert export px → canvas preview px
-  function exportPxToCanvas(epx) { return Math.max(4, Math.round(epx * CW / 1200)); }
-  // Convert canvas px → export px
-  function canvasToExportPx(cpx) { return Math.round(cpx * 1200 / CW); }
+  // Convert design px → canvas-space px: round(epx * CW / DW). // Phase 7T.2
+  function exportPxToCanvas(epx) { return Math.max(4, Math.round(epx * CW / DW)); }
+  // Convert canvas-space px → design px: round(cpx * DW / CW). // Phase 7T.2
+  function canvasToExportPx(cpx) { return Math.round(cpx * DW / CW); }
   function currentFt() {
     const id = S.selected;
     return (id && id.startsWith('ft_') && S.freeTexts) ? S.freeTexts[id] : null;
@@ -2941,7 +3407,7 @@ function syncFtProps() {
       d.style.cssText = `width:16px;height:16px;border-radius:3px;background:${c};cursor:pointer;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;`;
       d.addEventListener('click', () => {
         const ft=currentFt(); if(!ft) return;
-        ft.color = c; ft.fgGradient = false;
+        ft.color = c; ft.fgGradient = false; ft.gradientRange = null;
         if(picker) picker.value = c;
         if(swatch) swatch.style.background = c;
         if(gradBtn) gradBtn.style.borderColor = 'transparent';
@@ -2953,41 +3419,109 @@ function syncFtProps() {
   const gradBtn = document.getElementById('ftGradBtn');
   if (gradBtn) gradBtn.addEventListener('click', () => {
     const ft=currentFt(); if(!ft) return;
-    ft.fgGradient = !ft.fgGradient;
+    const sel = _ftEditorSel;
+    const validSel = sel && sel.ftId === ft.id && sel.end > sel.start;
+    // The inline editor opens with Select All. Treat a full-text selection as the
+    // legacy whole-text mode, not as an inline range.
+    const isFullText = validSel && sel.start === 0 && sel.end === (ft.text || '').length;
+    const hasInlineRange = validSel && !isFullText;
+
+    if (hasInlineRange) {
+      const sameRange = ft.fgGradient && ft.gradientRange &&
+        ft.gradientRange.start === sel.start && ft.gradientRange.end === sel.end;
+      if (sameRange) {
+        ft.fgGradient = false;
+        ft.gradientRange = null;
+      } else {
+        ft.fgGradient = true;
+        ft.gradientRange = { start: sel.start, end: sel.end };
+      }
+    } else {
+      ft.fgGradient = !ft.fgGradient;
+      ft.gradientRange = null;
+    }
+    // Consume cached selection so a later inspector click cannot reuse stale offsets.
+    _ftEditorSel = null;
     gradBtn.style.borderColor = ft.fgGradient ? '#3878f0' : 'transparent';
+    const gpRow = document.getElementById('ftGradientPresetRow');
+    const gpSel = document.getElementById('ftGradientPreset');
+    if (gpRow) gpRow.style.display = ft.fgGradient ? 'flex' : 'none';
+    if (gpSel) gpSel.value = ft.gradientPreset || 'brand';
     render();
   });
 
-  if (inp) inp.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.text=inp.value; render();} });
-  if (picker) picker.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.color=picker.value; ft.fgGradient=false; if(swatch)swatch.style.background=picker.value; if(gradBtn)gradBtn.style.borderColor='transparent'; render();} });
+  const gradPresetSel = document.getElementById('ftGradientPreset');
+  if (gradPresetSel) gradPresetSel.addEventListener('change', () => {
+    const ft = currentFt(); if (!ft) return;
+    ft.gradientPreset = gradPresetSel.value || 'brand';
+    if (!ft.fgGradient) {
+      ft.fgGradient = true;
+      ft.gradientRange = null;
+      if (gradBtn) gradBtn.style.borderColor = '#3878f0';
+      const gpRow = document.getElementById('ftGradientPresetRow');
+      if (gpRow) gpRow.style.display = 'flex';
+    }
+    render();
+  });
+
+
+  // Tab inside the inspector text field = deterministic text indent, not focus navigation.
+  // Store four normal spaces rather than a literal \t so Canvas text metrics stay predictable.
+  if (inp) inp.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Tab') return;
+    ev.preventDefault();
+    const start = inp.selectionStart ?? 0;
+    const end = inp.selectionEnd ?? start;
+    inp.setRangeText('    ', start, end, 'end');
+    inp.dispatchEvent(new Event('input', { bubbles:true }));
+  });
+  if (inp) inp.addEventListener('input', () => {
+    const ft=currentFt();
+    if(ft){ ft.text=inp.value; ft.gradientRange=null; _reflowLayoutForFt(ft); render(); }
+    inp.style.height = 'auto';
+    inp.style.height = Math.min(180, Math.max(76, inp.scrollHeight)) + 'px';
+  });
+  if (picker) picker.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.color=picker.value; ft.fgGradient=false; ft.gradientRange=null; if(swatch)swatch.style.background=picker.value; if(gradBtn)gradBtn.style.borderColor='transparent'; render();} });
   if (swatch) swatch.addEventListener('click', () => picker && picker.click());
-  if (slider) slider.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.fontSize=Math.max(2,Math.round(parseInt(slider.value)*CW/1200)); if(sizeVal)sizeVal.textContent=slider.value+'px'; render();} });
+  if (slider) slider.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.fontSize=Math.max(2,Math.round(parseInt(slider.value)*CW/DW)); ft._roleSize=false; if(sizeVal)sizeVal.textContent=slider.value+'px'; _reflowLayoutForFt(ft); render();} }); // Phase 7B.10A
   if (ftStyleSel) ftStyleSel.addEventListener('change', () => {
     const ft = currentFt(); if(!ft) return;
     const preset = FT_STYLES[ftStyleSel.value];
     if (preset) {
-      ft.fontWeight = preset.weight;
+      // Preserve weight if valid for the new role, else fall back to defaultWeight
+      ft.fontWeight = preset.allowedWeights.includes(ft.fontWeight) ? ft.fontWeight : preset.defaultWeight;
       ft.stylePreset = ftStyleSel.value;
-      if (preset.lh) ft.lineHeightFactor = preset.lh;
-      if(ftWeightSel) ftWeightSel.value = preset.weight;
+      if (preset.lineHeightPx && preset.exportPx) ft.lineHeightFactor = preset.lineHeightPx / preset.exportPx; // Phase 7T.3B
+      ft.trackingPx = Number.isFinite(preset.trackingPx) ? preset.trackingPx : 0; // Typography v2
       if (preset.exportPx) {
         ft.fontSize = exportPxToCanvas(preset.exportPx);
+        ft._roleSize = true; // Phase 7B.4A: user explicitly selected a role — restore semantic sizing
         const sl = document.getElementById('ftSizeSlider');
         const sv = document.getElementById('ftSizeVal');
         if(sl) sl.value = preset.exportPx;
         if(sv) sv.textContent = preset.exportPx + 'px';
       }
+      updateWeightOptions(ftStyleSel.value);
+      if(ftWeightSel) ftWeightSel.value = ft.fontWeight;
     } else {
       ft.stylePreset = 'custom';
+      ft._roleSize = false; // Phase 7B.4A: custom style — no role-driven sizing
+      updateWeightOptions('custom');
     }
+    _reflowLayoutForFt(ft);
     render();
   });
   if (ftWeightSel) ftWeightSel.addEventListener('change', () => {
     const ft=currentFt(); if(!ft) return;
     ft.fontWeight = ftWeightSel.value;
-    ft.stylePreset = 'custom';
-    if(ftStyleSel) ftStyleSel.value = 'custom';
+    // Weight can change glyph metrics/wrapping; attached stacks reflow downstream items.
+    _reflowLayoutForFt(ft);
+    // Weight change within a role keeps the role — no stylePreset reset
     render();
+    // Hotfix: canvas silently falls back to Helvetica Neue if the new TheSansB weight
+    // hasn't been loaded yet (CSS Font Loading API is async even for base64 data: URLs).
+    // Re-render once the font is confirmed loaded — resolves immediately on subsequent calls.
+    document.fonts.load(`${ftWeightSel.value} 1em "TheSansB"`).then(() => render());
   });
   if (delBtn) delBtn.addEventListener('click', () => {
     const id=S.selected; if(!id||!id.startsWith('ft_')) return;
@@ -3006,6 +3540,20 @@ function syncFtProps() {
     S.layerOrder.push(newId);
     S.selected = newId;
     syncFtProps(); render();
+  });
+  // Alignment buttons
+  const _alBtnMap = {left:'ftAlignLeft', center:'ftAlignCenter', right:'ftAlignRight'};
+  Object.entries(_alBtnMap).forEach(([al, btnId]) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const ft = currentFt(); if (!ft) return;
+      pushUndo();
+      ft.alignment = al;
+      Object.values(_alBtnMap).forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+      btn.classList.add('active');
+      render();
+    });
   });
   // Paragraph styles handled via ftStyleSel + ftWeightSel
 })();
@@ -4248,7 +4796,7 @@ function applyProductBlob(blob) {
         });
         const szVl=document.getElementById('sizeVal'); if(szVl) szVl.textContent='100%';
         // ── Full Bleed: auto-fit canvas to image aspect ratio ──
-        if (S.layoutStyle === 'fullbleed') {
+        if (S.layoutStyle === 'fullbleed' && !(typeof LAYOUT_MODELS !== 'undefined' && LAYOUT_MODELS.fullbleed)) {
           const imgAr = img.naturalWidth / img.naturalHeight;
           const candidates = [['1:1',1],['4:3',4/3],['16:9',16/9],['3:4',3/4]];
           let bestKey = null, bestDiff = Infinity;
@@ -4297,6 +4845,19 @@ function applyProductBlob(blob) {
           S.product.cropL = 0; S.product.cropR = 0;
           S.product.cornerRadius = Math.round(Math.min(CW, CH) * 0.04);
           S.product.frameBorder = false;
+        }
+        // Declarative layouts own the default media geometry. The generic upload path
+        // intentionally starts large (80–90% canvas), so hand the real image back to
+        // the active layout after crop detection instead of keeping that upload size.
+        if (S.layoutStyle === 'split' && S.product && typeof reflowDeclarativeLayout === 'function') {
+          S.product._layoutManaged = true;
+          S.product._layoutStyle = 'split';
+          reflowDeclarativeLayout('split');
+        }
+        if (S.layoutStyle === 'fullbleed' && S.product && typeof LAYOUT_MODELS !== 'undefined' && LAYOUT_MODELS.fullbleed && typeof reflowDeclarativeLayout === 'function') {
+          S.product._layoutManaged = true;
+          S.product._layoutStyle = 'fullbleed';
+          reflowDeclarativeLayout('fullbleed');
         }
         setStatus('Fertig ✓','ok'); setProgress(-1);
         S.selected='product';
@@ -4555,19 +5116,29 @@ function hitFreeText(mx, my) {
   if (!S.freeTexts) return null;
   const order = [...S.layerOrder].reverse();
   const mctx = document.createElement('canvas').getContext('2d');
+  // Phase hotfix: primary callers pass DW/DH-space mx/my (docXY); ft.x/ft.y/ft.maxWidth are DW-space.
+  // Work in CW-space throughout: convert DW inputs → CW, use widthScale=CW/DW so ft.maxWidth
+  // is measured in CW-space, consistent with fontScale=1 (ft.fontSize is CW-space).
+  const _scX = DW > 0 ? CW / DW : 1, _scY = DH > 0 ? CH / DH : 1;
+  const mxCW = mx * _scX, myCW = my * _scY;
   for (const id of order) {
     if (!id.startsWith('ft_')) continue;
     const ft = S.freeTexts[id];
     if (!ft) continue;
-    const lines = (ft.text||'').split('\n');
-    const fs = ft.fontSize || 32;
+    const fs = ft.fontSize || 32;  // CW-space (ft.fontSize is CW-space post-7T.2)
+    // fontScale=1 → text measured in CW-space px; widthScale=CW/DW → maxWidth converted DW→CW
+    const lines = wrapFtLines(ft, mctx, 1, _scX);
     const lineH = fs * (ft.lineHeightFactor || 1.2);
-    const h = lines.length * lineH;
-    // measure actual text width
-    mctx.font = `${ft.fontWeight||'700'} ${fs}px 'TheSansB',Arial`;
-    const w = Math.max(30, Math.max(...lines.map(l => mctx.measureText(l).width)));
-    const pad = fs * 0.15; // small padding only
-    if (mx >= ft.x - pad && mx <= ft.x + w + pad && my >= ft.y - pad && my <= ft.y + h + pad) return id;
+    const h = lines.length * lineH;                             // CW-space
+    const textW = Math.max(30, Math.max(...lines.map(l => mctx.measureText(l).width)));  // CW-space
+    const xCW = ft.x * _scX, yCW = ft.y * _scY;               // DW-space → CW-space
+    const containerW = ft.maxWidth ? ft.maxWidth * _scX : textW;  // CW-space
+    const al = ft.alignment || 'left';
+    const hitLeft = al === 'center' ? xCW + (containerW - textW) / 2
+                  : al === 'right'  ? xCW + containerW - textW
+                  :                   xCW;
+    const pad = fs * 0.15;
+    if (mxCW >= hitLeft - pad && mxCW <= hitLeft + textW + pad && myCW >= yCW - pad && myCW <= yCW + h + pad) return id;
   }
   return null;
 }
@@ -4600,6 +5171,15 @@ function canvasXY(e) {
   const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
   return {x:cx*sx,y:cy*sy};
 }
+// Phase 7X.3B1: DW/DH document-space pointer mapping for freeText geometry.
+// freeText x/y/maxWidth live in DW×DH space; this converts screen → document space.
+function docXY(e) {
+  const r = canvas.getBoundingClientRect();
+  const sx = DW / r.width, sy = DH / r.height;
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+  const cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+  return { x: cx * sx, y: cy * sy };
+}
 
 canvas.addEventListener('mousedown',e=>{
   e.preventDefault();
@@ -4607,10 +5187,12 @@ canvas.addEventListener('mousedown',e=>{
   const _ed = document.getElementById('ftInlineEditor');
   if (_ed && _ed.style.display !== 'none') { _ed.blur(); }
   const {x,y}=canvasXY(e);
+  // Phase 7X.3B1: document-space coords for freeText operations
+  const {x:dox, y:doy}=docXY(e);
 
   // Phase 5C: Shift+click → toggle multi-selection
   if (e.shiftKey) {
-    const _hk = getHitKey(x, y);
+    const _hk = getHitKey(x, y, dox, doy);
     if (_hk) {
       if (multiSel.has(_hk)) { multiSel.delete(_hk); }
       else { multiSel.add(_hk); S.selected = _hk; }
@@ -4622,7 +5204,7 @@ canvas.addEventListener('mousedown',e=>{
 
   // Phase 5C: if multi-sel active, handle group-drag or clear on empty click
   if (multiSel.size >= 2) {
-    const _hk = getHitKey(x, y);
+    const _hk = getHitKey(x, y, dox, doy);
     if (_hk && multiSel.has(_hk)) {
       // Clicked inside selection → begin group drag
       pushUndo();
@@ -4672,22 +5254,25 @@ canvas.addEventListener('mousedown',e=>{
     }
     return;
   }
-  // ft resize handle
-  const ftResize = hitFtResizeHandle(x, y);
+  // ft resize handle — Phase 7X.3B1: use dox/doy (DW/DH document space)
+  const ftResize = hitFtResizeHandle(dox, doy);
   if (ftResize === 'right' || ftResize === 'bottom-right') {
     pushUndo();
     const ft = S.freeTexts[S.selected];
     S.dragging = true; S.resizing = true; S.resizeCorner = 'ft-' + ftResize;
-    S.dragStart = {x, y, origMaxW: ft.maxWidth || Math.round(CW * 0.82), origSize: ft.fontSize || 32, ftId: S.selected};
+    // Phase 7X.3B1: dragStart.x/y in DW space; origMaxW default in DW space
+    S.dragStart = {x: dox, y: doy, origMaxW: ft.maxWidth || Math.round(DW * 0.82), origSize: ft.fontSize || 32, ftId: S.selected};
     canvas.style.cursor = ftResize === 'right' ? 'ew-resize' : 'nwse-resize'; render(); return;
   }
-  const ftHit2 = hitFreeText(x, y);
+  // Phase 7X.3B1: use dox/doy (DW/DH document space) for freeText hit test
+  const ftHit2 = hitFreeText(dox, doy);
   if (ftHit2) {
     pushUndo();
     S.selected = ftHit2;
     S.dragging = true;
     const ft = S.freeTexts[ftHit2];
-    S.dragStart = {x, y, fx: ft.x, fy: ft.y};
+    // Phase 7X.3B1: dragStart.x/y in DW space (matches ft.x/ft.y coordinate space)
+    S.dragStart = {x: dox, y: doy, fx: ft.x, fy: ft.y};
     syncFtProps();
     render(); return;
   }
@@ -4762,6 +5347,8 @@ canvas.addEventListener('mousedown',e=>{
 canvas.addEventListener('mousemove',e=>{
   e.preventDefault();
   const {x,y}=canvasXY(e);
+  // Phase 7X.3B1: document-space coords for freeText operations
+  const {x:dox, y:doy}=docXY(e);
   // Phase 5C / 5C.1: group drag — snap combined bounds, apply one delta to all members
   if (S.dragging && S.dragStart && multiSel.size >= 2 && multiDragStartPos && multiDragGroupStart && multiSel.has(S.selected)) {
     const dx = x - S.dragStart.x, dy = y - S.dragStart.y;
@@ -4796,12 +5383,15 @@ canvas.addEventListener('mousemove',e=>{
     const dx=x-S.dragStart.x, dy=y-S.dragStart.y, c=S.resizeCorner;
     if ((c === 'ft-right' || c === 'ft-bottom-right') && S.dragStart.ftId && S.freeTexts?.[S.dragStart.ftId]) {
       const ft = S.freeTexts[S.dragStart.ftId];
+      // Phase 7X.3B1: delta in DW/DH document space (dragStart.x/y stored in DW space)
+      const dxDoc = dox - S.dragStart.x;
       if (c === 'ft-right') {
-        ft.maxWidth = Math.max(50, Math.round(S.dragStart.origMaxW + dx));
+        ft.maxWidth = Math.max(50, Math.min(Math.round(DW - ft.x), Math.round(S.dragStart.origMaxW + dxDoc)));
       } else {
         // bottom-right: drag right = wider, drag down = bigger font
-        ft.maxWidth = Math.max(50, Math.round(S.dragStart.origMaxW + dx));
-        ft.fontSize = Math.max(8, Math.round(S.dragStart.origSize + dy * 0.5));
+        ft.maxWidth = Math.max(50, Math.min(Math.round(DW - ft.x), Math.round(S.dragStart.origMaxW + dxDoc)));
+        ft.fontSize = Math.max(8, Math.round(S.dragStart.origSize + dy * 0.5)); // dy: CW-space, font-size sensitivity
+        ft._roleSize = false; // Phase 7B.4A: fontSize manually changed via drag
         syncFtProps();
       }
       render(); return;
@@ -4983,16 +5573,45 @@ canvas.addEventListener('mousemove',e=>{
       S.label.x = raw.x; S.label.y = raw.y; snapGuides = raw.guides;
     }
     if (S.selected && S.selected.startsWith('ft_') && S.freeTexts && S.freeTexts[S.selected]) {
+      // Phase 7X.3B1: DW/DH document-space delta (dragStart.x/y stored in DW space)
+      const dxDoc = dox - S.dragStart.x, dyDoc = doy - S.dragStart.y;
       if (S.resizeCorner === 'ft-right') {
-        // resize: set maxWidth based on drag distance
+        // resize: set maxWidth based on drag distance in document space
         const ft = S.freeTexts[S.dragStart.ftId];
-        const baseW = S.dragStart.origMaxW || ft.maxWidth || Math.round(CW * 0.82);
-        const newW = Math.max(50, baseW + dx);
+        if (ft && ft._layoutManaged) ft._layoutAttached = false; // Phase 8L.2: manual resize detaches from reflow
+        const baseW = S.dragStart.origMaxW || ft.maxWidth || Math.round(DW * 0.82);
+        const newW = Math.max(50, baseW + dxDoc);
         ft.maxWidth = Math.round(newW);
       } else {
         const ft = S.freeTexts[S.selected];
-        const rawFt = computeSnap(S.dragStart.fx + dx, S.dragStart.fy + dy, 0, 0, S.selected);
-        ft.x = rawFt.x; ft.y = rawFt.y; snapGuides = rawFt.guides;
+        if (ft && ft._layoutManaged) ft._layoutAttached = false; // Phase 8L.2: manual drag detaches from semantic anchor
+        // Phase 7X.3B2A (glyph fix): snap by actual rendered glyph bounds, not maxWidth container.
+        // glyphOffset is the alignment-dependent distance from container left to glyph left (DW units).
+        // This ensures left/center/right-aligned text all visually center/edge-snap correctly.
+        const _ftCtx = document.createElement('canvas').getContext('2d');
+        // Option A: fontScale=DW/CW → ft.fontSize (CW-space) → DW-space pixels for correct text measurement.
+        // geomScale=1 → ft.x/y/maxWidth remain in DW-space. All bounds values are then in DW-space.
+        const _ftFsc = CW > 0 ? DW / CW : 1, _ftFscY = CH > 0 ? DH / CH : 1;
+        const _ftBnds = getFtBounds(ft, _ftCtx, _ftFsc, _ftFscY, 1, 1);
+        const _glyphOff = _ftBnds.glyphX - ft.x; // DW-space: 0 for left, (cW-tW)/2 for center, cW-tW for right
+        const _hw = _ftBnds.w / 2;  // half GLYPH width in DW-space
+        const _hh = _ftBnds.h / 2;
+        // Proposed glyph center in DW space (from drag-start position + current delta)
+        const _cxDoc = S.dragStart.fx + dxDoc + _glyphOff + _hw;
+        const _cyDoc = S.dragStart.fy + dyDoc + _hh;
+        const rawFt = computeSnapDoc(_cxDoc, _cyDoc, _hw, _hh, S.selected);
+        // Convert snapped glyph center back to container left (ft.x semantics)
+        ft.x = Math.round(rawFt.x - _hw - _glyphOff);
+        ft.y = Math.round(rawFt.y - _hh);
+        snapGuides = rawFt.guides; // guides.pos already in CW-space — drawSnapGuides compatible
+        // Phase 8L.1 hotfix: constrain the visible glyph, not the maxWidth container.
+        // A wide layout-managed text region may legitimately extend beyond the canvas while
+        // its aligned glyphs remain inside. Clamping ft.x to DW-maxWidth made rightward drag
+        // appear blocked as soon as the container was wide (especially Type Only).
+        const _postB = getFtBounds(ft, _ftCtx, _ftFsc, _ftFscY, 1, 1);
+        if (_postB.glyphX < 0) ft.x += -_postB.glyphX;
+        if (_postB.glyphX + _postB.w > DW) ft.x -= (_postB.glyphX + _postB.w - DW);
+        ft.x = Math.round(ft.x);
       }
     }
     if (S.selected==='product'&&S.product) {
@@ -5016,14 +5635,16 @@ canvas.addEventListener('mousemove',e=>{
   const h=hitHandle(x,y);
   if (h) canvas.style.cursor=h+'-resize';
   else if (hitStripe(x,y)) canvas.style.cursor='ns-resize';
-  else if (hitFtResizeHandle(x,y)==='bottom-right') canvas.style.cursor='nwse-resize';
-  else if (hitFtResizeHandle(x,y)==='right') canvas.style.cursor='ew-resize';
-  else if (hitBadge(x,y)||hitBadge2(x,y)||hitAiLabel(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)||hitFreeText(x,y)||
+  // Phase 7X.3B1: freeText cursor/hover uses dox/doy (DW space)
+  else if (hitFtResizeHandle(dox,doy)==='bottom-right') canvas.style.cursor='nwse-resize';
+  else if (hitFtResizeHandle(dox,doy)==='right') canvas.style.cursor='ew-resize';
+  else if (hitBadge(x,y)||hitBadge2(x,y)||hitAiLabel(x,y)||hitProduct(x,y)||hitProduct2(x,y)||hitLabel(x,y)||hitFreeText(dox,doy)||
     (S.extraBadges||[]).some(b=>{if(!b)return false;if(b.kind==='image'&&b.priceMode)return Math.hypot(x-b.x,y-b.y)<=b.r*1.2;if(b.kind==='pill'||b.kind==='button'||b.kind==='frame'||b.kind==='sticker'||b.kind==='svgshape'){const bb=badgeBounds(b);return bb&&x>=bb.x&&x<=bb.x+bb.w&&y>=bb.y&&y<=bb.y+bb.h;}return Math.hypot(x-b.x,y-b.y)<=b.r*1.3;})
   ) canvas.style.cursor='grab';
   else canvas.style.cursor='default';
   // Phase 5A: hover object tracking — triggers canvas hover ring
-  { const _fth=hitFreeText(x,y);
+  // Phase 7X.3B1: freeText hover uses dox/doy (DW space)
+  { const _fth=hitFreeText(dox,doy);
     const _xbi=(S.extraBadges||[]).findIndex(b=>{if(!b)return false;if(b.kind==='image'&&b.priceMode)return Math.hypot(x-b.x,y-b.y)<=b.r*1.2;const bb=badgeBounds(b);return bb&&x>=bb.x&&x<=bb.x+bb.w&&y>=bb.y&&y<=bb.y+bb.h||Math.hypot(x-b.x,y-b.y)<=b.r*1.3;});
     const _nh=_fth||(hitBadge(x,y)&&'badge')||(hitBadge2(x,y)&&'badge2')||(hitAiLabel(x,y)&&'aiLabel')||(hitProduct(x,y)&&'product')||(hitProduct2(x,y)&&'product2')||(hitLabel(x,y)&&'label')||(_xbi>=0&&'xbadge_'+_xbi)||null;
     if (_nh!==hoverObj){hoverObj=_nh;render();}
@@ -5031,6 +5652,16 @@ canvas.addEventListener('mousemove',e=>{
 });
 
 const stopDrag=()=>{
+  // Phase 8L.2A: when a declarative-layout FreeText has been manually moved/resized,
+  // remember its VISUAL anchor semantics (edge gap / center / normalized position).
+  // This lets detached objects preserve their intent across aspect-ratio changes instead
+  // of merely scaling the old top-left coordinate.
+  if (S.selected && S.selected.startsWith('ft_')) {
+    const _ft = S.freeTexts?.[S.selected];
+    if (_ft && _ft._layoutManaged === true && _ft._layoutAttached === false && typeof _captureManualLayoutAnchor === 'function') {
+      _captureManualLayoutAnchor(_ft);
+    }
+  }
   S.dragging=S.resizing=false;S.resizeCorner=S.dragStart=null;cropDragging=null;multiDragStartPos=null;multiDragGroupStart=null;canvas.style.cursor='default';snapGuides=[];hoverObj=null;render();
 };
 canvas.addEventListener('mouseup',stopDrag);
@@ -5160,9 +5791,9 @@ canvas.addEventListener('drop', e => {
 
 // Double-click on canvas → apply crop (Photoshop-style confirm)
 canvas.addEventListener('dblclick', e => {
-  // Free text inline editing
-  const {x,y} = canvasXY(e);
-  const ftId = hitFreeText(x, y);
+  // Free text inline editing — Phase hotfix: use docXY (DW-space) to match hitFreeText contract
+  const {x: dox, y: doy} = docXY(e);
+  const ftId = hitFreeText(dox, doy);
   if (ftId && S.freeTexts && S.freeTexts[ftId]) {
     openFtInlineEditor(ftId);
     return;
@@ -5174,26 +5805,34 @@ canvas.addEventListener('dblclick', e => {
   document.getElementById('cropApplyBtn').click();
 });
 
+// Phase 7T.4B: cached textarea selection survives blur-before-inspector-click ordering.
+// Contract: character offsets in the raw ft.text string, scoped to one FreeText id.
+let _ftEditorSel = null;
+
 function openFtInlineEditor(ftId) {
   const ft = S.freeTexts[ftId];
   if (!ft) return;
   S.selected = ftId;
   const ed = document.getElementById('ftInlineEditor');
   const r = canvas.getBoundingClientRect();
-  const scaleX = r.width / CW;   // canvas CSS px per canvas unit
-  const scaleY = r.height / CH;
-  const fsScreen = Math.max(10, ft.fontSize * scaleX);
+  // Phase 7X.3B1: freeText coords are in DW/DH space; scale to screen using DW/DH
+  // Phase 7T.2: ft.fontSize is CW-space; geometry (x/y/maxWidth) is DW-space
+  const scaleX = r.width / DW;     // geometry: maps DW-space x/y/maxWidth to screen px
+  const scaleY = r.height / DH;
+  const scaleFontX = r.width / CW; // typography: maps CW-space ft.fontSize to screen px
+  const fsScreen = Math.max(10, ft.fontSize * scaleFontX);
   const left = r.left + ft.x * scaleX;
   const top  = r.top  + ft.y * scaleY;
-  // Extract CSS font-family name from S.fontName
-  const fam = (S.fontName||'Arial').replace(/^\s*"|"\s*,.*$/g,'').trim() || 'Arial';
-
-  // measure actual width/height for textarea
+  // measure actual width/height for textarea — use authoritative font stack
   const lines = (ft.text||'').split('\n');
   const mc2 = document.createElement('canvas').getContext('2d');
-  mc2.font = `${ft.fontWeight||'800'} ${fsScreen}px "${fam}",Arial`;
-  const w = Math.max(80, Math.max(...lines.map(l=>mc2.measureText(l).width)) + 16);
-  const h = lines.length * fsScreen * 1.22 + fsScreen * 0.5;
+  mc2.font = `${ft.fontWeight||'800'} ${fsScreen}px ${getFtFontName(ft)}`;
+  const trackingScreen = applyFtCanvasTracking(mc2, ft, scaleX);
+  const measuredW = Math.max(...lines.map(l => mc2.measureText(l).width));
+  const minW = Math.max(40, fsScreen);       // cursor-visible minimum
+  const w = Math.max(minW, measuredW + 16);  // 16px typing allowance
+  const lh = ft.lineHeightFactor || 1.2;
+  const h = lines.length * fsScreen * lh + fsScreen * 0.5;
 
   ed.value = ft.text || '';
   ed.style.cssText = [
@@ -5201,14 +5840,15 @@ function openFtInlineEditor(ftId) {
     `z-index:9999`,
     `left:${left}px`,
     `top:${top}px`,
-    `width:${Math.max(120, w)}px`,
+    `width:${w}px`,
     `min-height:${fsScreen * 1.4}px`,
     `height:${h}px`,
     `font-size:${fsScreen}px`,
     `font-weight:${ft.fontWeight||'800'}`,
-    `font-family:"${fam}",Helvetica,Arial,sans-serif`,
+    `font-family:${getFtFontName(ft)}`,
     `color:${ft.color||'#040D33'}`,
-    `line-height:1.2`,
+    `line-height:${ft.lineHeightFactor||1.2}`,
+    `letter-spacing:${trackingScreen}px`,
     `background:transparent`,
     `border:none`,
     `outline:1.5px solid rgba(56,120,240,0.5)`,
@@ -5220,7 +5860,8 @@ function openFtInlineEditor(ftId) {
     `border-radius:2px`,
     `caret-color:#3878f0`,
     `display:block`,
-    ft.maxWidth ? `white-space:pre-wrap;width:${Math.max(80, ft.maxWidth * scaleX)}px` : `white-space:pre`,
+    `text-align:${ft.alignment||'left'}`,
+    ft.maxWidth ? `white-space:pre-wrap;max-width:${ft.maxWidth * scaleX}px` : `white-space:pre`,
   ].join(';');
 
   // While editing: temporarily blank the canvas text so textarea is the only visual
@@ -5229,26 +5870,49 @@ function openFtInlineEditor(ftId) {
   S._editingFt = ftId; // render loop skips this id
   render();
 
+  const _cacheFtSelection = () => {
+    _ftEditorSel = { ftId, start: ed.selectionStart ?? 0, end: ed.selectionEnd ?? 0 };
+  };
+  ed.onselect = _cacheFtSelection;
+  ed.onkeyup = _cacheFtSelection;
+  ed.onmouseup = _cacheFtSelection;
+  ed.onpointerup = _cacheFtSelection;
+
   ed.oninput = () => {
     ft.text = ed.value;
+    // v1 policy: any text edit invalidates character-range formatting.
+    if (ft.gradientRange) ft.gradientRange = null;
+    _cacheFtSelection();
     const ls2 = ft.text.split('\n');
     // auto-grow width: collapse → read scrollWidth → expand
     ed.style.width = '1px';
     ed.style.width = Math.max(40, ed.scrollWidth + 2) + 'px';
     // auto-grow height
-    const newH = ls2.length * fsScreen * 1.22 + fsScreen * 0.5;
+    const newH = ls2.length * fsScreen * lh + fsScreen * 0.5;
     ed.style.height = newH + 'px';
     // sync side panel
     const panelInp = document.getElementById('ftTextInput');
     if (panelInp) panelInp.value = ft.text;
   };
   ed.onblur = () => {
+    // Do NOT clear _ftEditorSel here: blur fires before inspector button click.
     S._editingFt = null;
-    ed.style.display='none'; ed.oninput=null; ed.onblur=null;
+    ed.style.display='none';
+    ed.oninput=null; ed.onblur=null; ed.onselect=null; ed.onkeyup=null; ed.onmouseup=null; ed.onpointerup=null;
+    _reflowLayoutForFt(ft);
     render();
   };
-  ed.onkeydown = ev => { if (ev.key==='Escape') { ed.blur(); } };
-  requestAnimationFrame(() => { ed.focus(); ed.select(); });
+  ed.onkeydown = ev => {
+    if (ev.key === 'Escape') { ed.blur(); return; }
+    if (ev.key === 'Tab') {
+      ev.preventDefault();
+      const start = ed.selectionStart ?? 0;
+      const end = ed.selectionEnd ?? start;
+      ed.setRangeText('    ', start, end, 'end');
+      ed.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+  };
+  requestAnimationFrame(() => { ed.focus(); ed.select(); _cacheFtSelection(); });
   syncFtProps();
 }
 
@@ -6371,13 +7035,6 @@ document.querySelectorAll('.fmt-btn[data-ratio]').forEach(b=>{
   });
 });
 
-document.getElementById('fmt1200btn').addEventListener('click',()=>{
-  document.querySelectorAll('.fmt-btn').forEach(x=>x.classList.remove('active'));
-  document.getElementById('fmt1200btn').classList.add('active');
-  document.getElementById('customFmtRow').style.display='none';
-  setCustomFormat(1200, 667);
-});
-
 document.getElementById('customFmtBtn').addEventListener('click',()=>{
   document.querySelectorAll('.fmt-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('customFmtBtn').classList.add('active');
@@ -6385,6 +7042,13 @@ document.getElementById('customFmtBtn').addEventListener('click',()=>{
 });
 
 function setCustomFormat(w,h) {
+  const prevCW = CW, prevCH = CH; // Phase 7A.7
+  // Phase 7X.3B1: capture prevDW/prevDH before DW/DH are updated below
+  const prevDW = DW, prevDH = DH;
+  // Phase 8L.2A compatibility: capture missing manual anchor metadata in OLD geometry.
+  Object.values(S.freeTexts || {}).forEach(ft => {
+    if (ft?._layoutManaged === true && ft._layoutAttached === false && (!ft._manualLayoutAnchor || ft._manualLayoutAnchor.v !== 2)) _captureManualLayoutAnchor(ft);
+  });
   const area=canvas.parentElement;
   const _aCS=getComputedStyle(area);
   const maxW=area.clientWidth -parseFloat(_aCS.paddingLeft)-parseFloat(_aCS.paddingRight);
@@ -6393,11 +7057,67 @@ function setCustomFormat(w,h) {
   CW=Math.round(w*scale); CH=Math.round(h*scale);
   S.format='custom';
   S.customW=w; S.customH=h;
+  // Phase 7X.2: for custom format DW/DH are derived from physical custom dimensions / RETINA_SCALE.
+  DW = w / RETINA_SCALE; DH = h / RETINA_SCALE;
+  syncPreviewGeometry(); // Phase 7X.2: compute PW/PH from updated DW/DH
   setupCanvas();
-  if (S.layoutStyle && window.applyLayoutStyle) {
+  if (S.layoutStyle && window.applyLayoutStyle && !(typeof LAYOUT_MODELS !== 'undefined' && LAYOUT_MODELS[S.layoutStyle])) {
+    // Legacy layouts still use the historic destructive rebuild path. Declarative layouts
+    // continue through the geometry transform below and then reflow non-destructively.
     window.applyLayoutStyle(S.layoutStyle, true);
     return;
   }
+  // Scale all non-frame objects (same as setFormat)
+  const sx = prevCW > 0 ? CW / prevCW : 1;
+  const sy = prevCH > 0 ? CH / prevCH : 1;
+  const prevMin = Math.min(prevCW, prevCH);
+  const newMin  = Math.min(CW, CH);
+  const sm = prevMin > 0 ? newMin / prevMin : 1;
+  // Phase 7A.7 — collect frames before generic transform
+  const _frames7c = [];
+  ['badge','badge2'].forEach(k => { if (S[k] && S[k].kind === 'frame') _frames7c.push(S[k]); });
+  (S.extraBadges || []).forEach(b => { if (b && b.kind === 'frame') _frames7c.push(b); });
+  // Phase 7X.3B1: freeText x/y/maxWidth in DW/DH space — scale by DW/DH ratio
+  const sxDoc = prevDW > 0 ? DW / prevDW : 1;
+  const syDoc = prevDH > 0 ? DH / prevDH : 1;
+  if (S.freeTexts) {
+    Object.values(S.freeTexts).forEach(ft => {
+      ft.x = Math.round(ft.x * sxDoc); ft.y = Math.round(ft.y * syDoc);
+      // Phase 7B.4A: role-driven font size recomputed from canonical; customized uses sm
+      // Phase 7T.2: denominator is DW (= physW / RETINA_SCALE), not CANONICAL_DISPLAY_W
+      if (ft._roleSize === true && ft.stylePreset && FT_STYLES[ft.stylePreset]) {
+        ft.fontSize = Math.round(FT_STYLES[ft.stylePreset].exportPx * CW / DW);
+      } else {
+        ft.fontSize = Math.round(ft.fontSize * sm);
+      }
+      if (ft.maxWidth) ft.maxWidth = Math.round(ft.maxWidth * sxDoc);
+    });
+  }
+  // Phase 7X.3B3 — Model E (same helper as setFormat).
+  ['badge','badge2','aiLabel'].forEach(k => {
+    if (S[k]) _reprojBadgeModelE(S[k], prevCW, prevCH, CW, CH, sm, true);
+  });
+  (S.extraBadges || []).forEach(b => {
+    if (b) _reprojBadgeModelE(b, prevCW, prevCH, CW, CH, sm, false);
+  });
+  if (S.label) { S.label.x = Math.round(S.label.x * sx); S.label.y = Math.round(S.label.y * sy); }
+  // Product: scale center by sx/sy, size by sm — preserves visual center across aspect-ratio changes.
+  ['product','product2'].forEach(k => {
+    const p = S[k]; if (!p) return;
+    const cxOld = p.x + p.w / 2;
+    const cyOld = p.y + p.h / 2;
+    p.w = Math.round(p.w * sm); p.h = Math.round(p.h * sm);
+    p.baseW = Math.round((p.baseW || p.w) * sm); p.baseH = Math.round((p.baseH || p.h) * sm);
+    p.x = Math.round(cxOld * sx - p.w / 2);
+    p.y = Math.round(cyOld * sy - p.h / 2);
+  });
+  // Phase 7A.7 — frame-specific safe-area-aware transform
+  _frames7c.forEach(fr => _transformFrameForFormat(fr, prevCW, prevCH, CW, CH));
+  // Phase 8L.2: custom formats now use the same non-destructive declarative reflow as setFormat.
+  if (S.layoutStyle && typeof reflowDeclarativeLayout === 'function' && LAYOUT_MODELS?.[S.layoutStyle]) {
+    reflowDeclarativeLayout(S.layoutStyle);
+  }
+  _projectDetachedLayoutTexts();
   render();
 }
 
@@ -6645,6 +7365,7 @@ function applyUndo() {
   if (S.product) {
     document.getElementById('shadowSlider').value=S.product.shadow||0;
     document.getElementById('shadowVal').textContent=(S.product.shadow||0)+'%';
+    if (typeof window.syncPhotoShadowUI === 'function') window.syncPhotoShadowUI();
     const f=S.product.filters||{};
     ['Br','Con','Sat'].forEach(k=>{
       document.getElementById('filter'+k).value=f[k]??100;
@@ -6680,12 +7401,79 @@ function updateUndoBtn() {
 // (snapGuides declared near top of script — see below)
 const SNAP_THRESH = 8;
 
+// Phase 7X.3B2A: DW/DH document-space bounds for freeText. Returns null for non-migrated objects.
+// Uses getFtBounds(scX=1) so width/height match actual text layout in DW units.
+function getObjBoundsDoc(key) {
+  if (key?.startsWith('ft_') && S.freeTexts?.[key]) {
+    const ft = S.freeTexts[key];
+    const _c = document.createElement('canvas').getContext('2d');
+    // Option A: fontScale=DW/CW → DW-space text metrics; geomScale=1 → DW-space geometry.
+    const _fsc = CW > 0 ? DW / CW : 1, _fscY = CH > 0 ? DH / CH : 1;
+    const _b = getFtBounds(ft, _c, _fsc, _fscY, 1, 1);
+    return {x: ft.x, y: ft.y, w: _b.containerW, h: _b.h};
+  }
+  return null; // non-migrated objects remain in CW/CH space — use getObjBounds()
+}
+
+// Phase 7X.3B2A: Snap in DW/DH document space for freeText geometry.
+// cx/cy/hw/hh are DW-space coords. Returns {x, y, guides} where x/y are DW-space
+// and guides[].pos is CW-space (compatible with drawSnapGuides and the 7X.2 canvas transform).
+// No cross-object snap to non-migrated objects (they remain in CW/CH space — mixed comparison avoided).
+function computeSnapDoc(cx, cy, hw=0, hh=0, excludeKey=null) {
+  const guides = [];
+  let sx = cx, sy = cy;
+  const safeM = Math.round(Math.min(DW, DH) * 0.06);
+  // Threshold in DW units: SNAP_THRESH screen-px / (screen-px per DW-unit) / zoomLevel
+  const r = canvas.getBoundingClientRect();
+  const scaleX = r.width  > 0 ? r.width  / DW : 1; // screen-px per DW unit
+  const scaleY = r.height > 0 ? r.height / DH : 1;
+  const z = typeof zoomLevel !== 'undefined' ? Math.max(0.25, zoomLevel) : 1;
+  const threshX = SNAP_THRESH / scaleX / z;
+  const threshY = SNAP_THRESH / scaleY / z;
+  // CW/DW ratios for converting guide positions to CW-space for drawSnapGuides
+  const _ftScX = DW > 0 ? CW / DW : 1, _ftScY = DH > 0 ? CH / DH : 1;
+
+  function pickSnap(cands, thresh) {
+    let best = null;
+    for (const c of cands) { if (c.dist < thresh && (!best || c.dist < best.dist)) best = c; }
+    return best;
+  }
+
+  // X candidates: snap center/edges to document boundaries and safe-area margins (DW space)
+  const xCands = [], objL = cx - hw, objR = cx + hw;
+  for (const [px, isMarg] of [[0, false], [safeM, true], [DW/2, false], [DW-safeM, true], [DW, false]]) {
+    xCands.push({dist: Math.abs(cx-px),   result: px,    guideMark: px * _ftScX, margin: isMarg});
+    if (hw > 0) {
+      xCands.push({dist: Math.abs(objL-px), result: px+hw, guideMark: px * _ftScX, margin: isMarg});
+      xCands.push({dist: Math.abs(objR-px), result: px-hw, guideMark: px * _ftScX, margin: isMarg});
+    }
+  }
+  const bx = pickSnap(xCands, threshX);
+  if (bx) { sx = bx.result; guides.push({axis: 'x', pos: bx.guideMark, margin: bx.margin}); }
+
+  // Y candidates: snap center/edges to document boundaries and safe-area margins (DH space)
+  const yCands = [], objT = cy - hh, objB = cy + hh;
+  for (const [py, isMarg] of [[0, false], [safeM, true], [DH/2, false], [DH-safeM, true], [DH, false]]) {
+    yCands.push({dist: Math.abs(cy-py),   result: py,    guideMark: py * _ftScY, margin: isMarg});
+    if (hh > 0) {
+      yCands.push({dist: Math.abs(objT-py), result: py+hh, guideMark: py * _ftScY, margin: isMarg});
+      yCands.push({dist: Math.abs(objB-py), result: py-hh, guideMark: py * _ftScY, margin: isMarg});
+    }
+  }
+  const by = pickSnap(yCands, threshY);
+  if (by) { sy = by.result; guides.push({axis: 'y', pos: by.guideMark, margin: by.margin}); }
+
+  return {x: sx, y: sy, guides};
+}
+
 // Phase 5B.2: collect snap-target bounds for all overlay objects except the one being dragged
 // ── Phase 5C helpers ──────────────────────────────────────────────────────────
 
-/** Returns the key of the topmost hittable object at (x,y), matching mousedown priority. */
-function getHitKey(x, y) {
-  const _fth = hitFreeText(x, y); if (_fth) return _fth;
+/** Returns the key of the topmost hittable object at (x,y), matching mousedown priority.
+ *  Phase 7X.3B1: dox/doy are DW/DH document-space coords for freeText hit test.
+ *  All other objects remain in CW/CH space (x,y). */
+function getHitKey(x, y, dox = x, doy = y) {
+  const _fth = hitFreeText(dox, doy); if (_fth) return _fth;
   if (hitAiLabel(x, y)) return 'aiLabel';
   if (hitBadge2(x, y))  return 'badge2';
   const _xbi = (S.extraBadges || []).findIndex(b => {
@@ -6721,7 +7509,9 @@ function getObjBounds(key) {
   }
   if (key?.startsWith('ft_') && S.freeTexts?.[key]) {
     const ft = S.freeTexts[key];
-    return {x: ft.x, y: ft.y, w: ft.maxWidth || 200, h: ft.fontSize || 32};
+    // Phase 7X.3B1: ft.x/ft.y are in DW/DH space; convert to CW/CH for canvasBoundsToScreen and snap targets
+    const _ftScX = DW > 0 ? CW / DW : 1, _ftScY = DH > 0 ? CH / DH : 1;
+    return {x: ft.x * _ftScX, y: ft.y * _ftScY, w: (ft.maxWidth || 200) * _ftScX, h: (ft.fontSize || 32) * _ftScX};
   }
   return null;
 }
@@ -6735,7 +7525,12 @@ function setObjPosition(key, newX, newY) {
     S.product2.x = newX; S.product2.y = newY; return;
   }
   if (key?.startsWith('ft_') && S.freeTexts?.[key]) {
-    S.freeTexts[key].x = newX; S.freeTexts[key].y = newY; return;
+    // Phase 7X.3B2A: setObjPosition receives CW-space coords (from getObjBounds).
+    // ft.x/ft.y live in DW/DH space — convert before storing.
+    const _ftScX = DW > 0 ? CW / DW : 1, _ftScY = DH > 0 ? CH / DH : 1;
+    S.freeTexts[key].x = Math.round(newX / _ftScX);
+    S.freeTexts[key].y = Math.round(newY / _ftScY);
+    return;
   }
   // Badge-family: internal x,y is CENTER; bounds top-left = center - hw/hh
   const b = getObjBounds(key);
@@ -7048,6 +7843,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Reposition toolbar on window resize and canvas-area scroll
 window.addEventListener('resize', () => {
   if (document.getElementById('ctxToolbar')?.classList.contains('visible')) updateCtxToolbar();
+  // Phase 7X.2: refit preview to new viewport without mutating object geometry
+  if (syncPreviewGeometry()) { setupCanvas(); render(); }
 });
 const _ctxScrollTarget = document.querySelector('.canvas-area');
 if (_ctxScrollTarget) _ctxScrollTarget.addEventListener('scroll', () => {
@@ -7268,11 +8065,14 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
   const scX=W/CW, scY=H/CH;
   if (!forExport) {
     const dpr=DPR();
-    c.setTransform(dpr,0,0,dpr,0,0);
+    // Phase 7X.2: scale CW/CH object space to PW/PH screen space
+    const _scX = CW > 0 ? PW / CW : 1;
+    const _scY = CH > 0 ? PH / CH : 1;
+    c.setTransform(_scX * dpr, 0, 0, _scY * dpr, 0, 0);
   }
   c.clearRect(0,0,W,H);
 
-  drawBg(c,W,H);
+  drawBg(c,W,H,forExport);
 
   // ── Swisscom Stripe (fixed: always above BG, below all elements) ──
   if (S.stripe) {
@@ -7382,18 +8182,33 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
       drawLabel(c,scX,scY,forExport);
     } else if (layerId.startsWith('ft_') && S.freeTexts && S.freeTexts[layerId] && layerId !== S._editingFt) {
       const ft = S.freeTexts[layerId];
+      // Phase 7X.3B1 Hotfix (Option A): separate geometry scale from typography scale.
+      // ftGeomX/Y maps DW/DH document coords → canvas pixels (W/DW).
+      // scX (= W/CW) maps CW-space ft.fontSize → canvas pixels (font scale, unchanged).
+      const ftGeomX = DW > 0 ? W / DW : scX;
+      const ftGeomY = DH > 0 ? H / DH : scY;
       c.save();
       c.globalAlpha = ft.opacity ?? 1;
-      const fs = Math.round((ft.fontSize || 32) * scX);
+      const fs = Math.round((ft.fontSize || 32) * scX);  // scX = W/CW: ft.fontSize is CW-space
       c.textBaseline = 'top';
-      const lines = wrapFtLines(ft, c, scX);
+      const lines = wrapFtLines(ft, c, scX, ftGeomX);  // fontScale=scX, widthScale=ftGeomX
       const lineH = fs * (ft.lineHeightFactor || 1.2);
       const maxLineW = Math.max(...lines.map(l => c.measureText(l).width));
+      // ── Alignment geometry ──
+      const align = ft.alignment || 'left';
+      const containerPx = ft.maxWidth ? ft.maxWidth * ftGeomX : maxLineW;
+      const drawX = align === 'center' ? ft.x * ftGeomX + containerPx / 2
+                  : align === 'right'  ? ft.x * ftGeomX + containerPx
+                  :                      ft.x * ftGeomX;
+      const glyphLeft = align === 'center' ? drawX - maxLineW / 2
+                      : align === 'right'  ? drawX - maxLineW
+                      :                      drawX;
+      c.textAlign = align;
       // ── Glow (Swisscom backlit / outer-glow: halo behind dark text) ──
       if (ft.glow?.enabled) {
         const g = ft.glow;
         const canvasW = c.canvas.width, canvasH = c.canvas.height;
-        const tx = Math.round(ft.x * scX), ty = Math.round(ft.y * scY);
+        const ty = ft.y * ftGeomY;
         const blurBig   = Math.round((g.radius || 0.04) * Math.min(canvasW, canvasH));
         const blurSmall = Math.max(2, Math.round(blurBig * 0.4));
 
@@ -7402,10 +8217,13 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
         ofc.width = canvasW; ofc.height = canvasH;
         const oc = ofc.getContext('2d');
         oc.font = c.font;
+        if ('letterSpacing' in oc && 'letterSpacing' in c) oc.letterSpacing = c.letterSpacing;
         oc.textBaseline = 'top';
 
         // Build gradient
-        const grad = oc.createLinearGradient(tx, ty, tx + maxLineW, ty);
+        oc.textAlign = align;
+        const _glGrX = glyphLeft;
+        const grad = oc.createLinearGradient(_glGrX, ty, _glGrX + maxLineW, ty);
         grad.addColorStop(0.0,  g.colorA || '#F20505');
         grad.addColorStop(0.12, g.colorA || '#F20505');
         grad.addColorStop(0.35, g.colorB || '#0445C8');
@@ -7416,21 +8234,21 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
         oc.filter = `blur(${blurBig}px)`;
         oc.globalAlpha = 1.0;
         oc.fillStyle = grad;
-        lines.forEach((line, i) => oc.fillText(line, tx, ty + i * lineH));
+        lines.forEach((line, i) => oc.fillText(line, drawX, ty + i * lineH));
 
         // Pass 2: tighter, brighter core glow (additive-style)
         oc.filter = `blur(${blurSmall}px)`;
         oc.globalCompositeOperation = 'source-over';
         oc.globalAlpha = 0.7;
         oc.fillStyle = grad;
-        lines.forEach((line, i) => oc.fillText(line, tx, ty + i * lineH));
+        lines.forEach((line, i) => oc.fillText(line, drawX, ty + i * lineH));
 
         // Punch out text shape → background shows through = text looks dark/backlit
         oc.filter = 'none';
         oc.globalAlpha = 1.0;
         oc.globalCompositeOperation = 'destination-out';
         oc.fillStyle = 'rgba(0,0,0,1)';
-        lines.forEach((line, i) => oc.fillText(line, tx, ty + i * lineH));
+        lines.forEach((line, i) => oc.fillText(line, drawX, ty + i * lineH));
 
         // Composite glow layer onto main canvas
         c.save();
@@ -7439,16 +8257,83 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
         c.restore();
       }
       // ── Main text (skip when glow=backlit, draw normally otherwise) ──
-      const cx = ft.x * scX + maxLineW / 2;
-      const cy = ft.y * scY + (lines.length * lineH) / 2;
+      const cx = glyphLeft + maxLineW / 2;
+      const cy = ft.y * ftGeomY + (lines.length * lineH) / 2;
       if (!ft.glow?.enabled) {
+        const _range = ft.fgGradient && ft.gradientRange &&
+          Number.isFinite(ft.gradientRange.start) && Number.isFinite(ft.gradientRange.end) &&
+          ft.gradientRange.end > ft.gradientRange.start
+          ? ft.gradientRange : null;
+        const _indexedLines = _range ? wrapFtLinesWithIndices(ft, c, scX, ftGeomX) : null;
+        // Whole-text gradient is one continuous field across the block, not restarted per line.
+        const _blockTop = ft.y * ftGeomY;
+        const _blockBottom = _blockTop + Math.max(lineH, lines.length * lineH);
+        const _wholeTextGradient = ft.fgGradient && !_range
+          ? makeFreeTextGradient(c, glyphLeft, glyphLeft + maxLineW, _blockTop, _blockBottom, ft.gradientPreset || 'brand', ft.gradientShift)
+          : null;
+
         lines.forEach((line, i) => {
           const lw = c.measureText(line).width;
-          const fill = ft.fgGradient
-            ? makeTextFill(c, {fgGradient:true, fg: ft.color||'#ffffff'}, cx, cy, fs, lw/2)
-            : (ft.color || '#ffffff');
-          c.fillStyle = fill;
-          c.fillText(line, Math.round(ft.x * scX), Math.round(ft.y * scY + i * lineH));
+          const lineY = ft.y * ftGeomY + i * lineH;
+
+          // Whole FreeText: all lines sample the same block-wide gradient field.
+          if (_wholeTextGradient) {
+            c.fillStyle = _wholeTextGradient;
+            c.fillText(line, drawX, lineY);
+            return;
+          }
+
+          // Plain text path stays unchanged when there is no inline gradient range.
+          if (!_range) {
+            c.fillStyle = ft.color || '#ffffff';
+            c.fillText(line, drawX, lineY);
+            return;
+          }
+
+          const info = _indexedLines?.[i];
+          if (!info) {
+            c.fillStyle = ft.color || '#ffffff';
+            c.fillText(line, drawX, lineY);
+            return;
+          }
+          const rS = Math.max(_range.start, info.start);
+          const rE = Math.min(_range.end, info.end);
+          if (rS >= rE) {
+            c.fillStyle = ft.color || '#ffffff';
+            c.fillText(line, drawX, lineY);
+            return;
+          }
+
+          const localStart = Math.max(0, rS - info.start);
+          const localEnd = Math.max(localStart, rE - info.start);
+          const leftRun = info.text.slice(0, localStart);
+          const gradRun = info.text.slice(localStart, localEnd);
+          const rightRun = info.text.slice(localEnd);
+
+          // Absolute left edge of this rendered line, respecting block alignment.
+          // Each visual run is painted exactly once, so antialiased edge pixels from
+          // the normal color and gradient can no longer stack on top of each other.
+          const lineLeft = align === 'center' ? drawX - lw / 2
+                         : align === 'right'  ? drawX - lw
+                         :                      drawX;
+          const x1 = lineLeft + c.measureText(leftRun).width;
+          const x2 = lineLeft + c.measureText(leftRun + gradRun).width;
+
+          c.save();
+          c.textAlign = 'left';
+          if (leftRun) {
+            c.fillStyle = ft.color || '#ffffff';
+            c.fillText(leftRun, lineLeft, lineY);
+          }
+          if (gradRun) {
+            c.fillStyle = makeFreeTextGradient(c, x1, x2, lineY, lineY + lineH, ft.gradientPreset || 'brand', ft.gradientShift);
+            c.fillText(gradRun, x1, lineY);
+          }
+          if (rightRun) {
+            c.fillStyle = ft.color || '#ffffff';
+            c.fillText(rightRun, x2, lineY);
+          }
+          c.restore();
         });
       }
       c.restore();
@@ -7544,8 +8429,11 @@ function drawMarginGuides(c, W, H) {
   c.restore();
 }
 
-function drawBg(c,W,H) {
+function drawBg(c,W,H,forExport=false) {
   if (!S.bg) {
+    // Transparency visualization — preview only. Export canvas stays transparent (PNG)
+    // or relies on the white pre-fill applied before render() for JPG.
+    if (forExport) return;
     c.fillStyle='#f0f0f0'; c.fillRect(0,0,W,H);
     c.fillStyle='#e2e2e2';
     const sz=Math.round(Math.min(W,H)/24);
@@ -7701,6 +8589,62 @@ function drawIconTinted(c, img, x, y, w, h, tint, sx=0, sy=0, sw=null, sh=null) 
     c.drawImage(oc, x, y, w, h);
   }
 }
+
+// Swisscom text-gradient presets observed in official Brand/Figma material.
+// All keep the same color sequence; art direction varies angle + stop positions.
+const FREE_TEXT_GRADIENT_PRESETS = {
+  brand: {
+    angle: 86,
+    // Calibrated against the Brand Center multiline reference (The / Swisscom / Sans).
+    // A small positive field shift keeps the warm accent present slightly longer.
+    shift: 0.13,
+    stops: [[0.0793,'#F20505'], [0.2951,'#0445C8'], [0.6297,'#1FB9FF'], [0.9260,'#033AAA']]
+  },
+  accent: {
+    angle: 95,
+    stops: [[0.4032,'#F20505'], [0.4937,'#0445C8'], [0.7353,'#1FB9FF'], [0.9466,'#033AAA']]
+  },
+  diagonal: {
+    angle: 109.42,
+    stops: [[0.10,'#F20505'], [0.25,'#0445C8'], [0.65,'#1FB9FF'], [1.00,'#033AAA']]
+  }
+};
+
+// CSS linear-gradient angles are measured clockwise from 12 o'clock.
+// Fit the gradient line to the supplied rectangle using the rectangle support
+// length, which matches CSS-style projection for a linear gradient field.
+function makeFreeTextGradient(c, left, right, top = 0, bottom = top + 1, presetKey = 'brand', shift = null) {
+  const l = Number.isFinite(left) ? left : 0;
+  const r = Math.max(l + 1, Number.isFinite(right) ? right : l + 1);
+  const t = Number.isFinite(top) ? top : 0;
+  const b = Math.max(t + 1, Number.isFinite(bottom) ? bottom : t + 1);
+  const spec = FREE_TEXT_GRADIENT_PRESETS[presetKey] || FREE_TEXT_GRADIENT_PRESETS.brand;
+
+  const angle = spec.angle * Math.PI / 180;
+  const dx = Math.sin(angle);
+  const dy = -Math.cos(angle);
+  const cx = (l + r) / 2;
+  const cy = (t + b) / 2;
+  const halfLen = Math.abs(dx) * (r - l) / 2 + Math.abs(dy) * (b - t) / 2;
+  // Optional art-direction shift along the gradient axis. Positive values move
+  // the field forward, so glyphs sample slightly earlier (warmer) parts.
+  // Presets may provide a calibrated default; legacy objects can still override it.
+  const requestedShift = Number.isFinite(Number(shift)) && shift !== null && shift !== ''
+    ? Number(shift)
+    : (Number(spec.shift) || 0);
+  const safeShift = Math.max(-0.30, Math.min(0.30, requestedShift));
+  const shiftPx = safeShift * (halfLen * 2);
+  const gcx = cx + dx * shiftPx;
+  const gcy = cy + dy * shiftPx;
+
+  const g = c.createLinearGradient(
+    gcx - dx * halfLen, gcy - dy * halfLen,
+    gcx + dx * halfLen, gcy + dy * halfLen
+  );
+  spec.stops.forEach(([offset, color]) => g.addColorStop(offset, color));
+  return g;
+}
+
 
 function makeTextFill(c, b, cx, cy, r, halfSpanX) {
   if (b.fgGradient) {
@@ -8511,12 +9455,14 @@ function drawBadge(c,b,scX,scY) {
 function getFtFontName(ft) {
   return '"TheSansB","Helvetica Neue",Arial,sans-serif';
 }
-function wrapFtLines(ft, c, scX) {
-  const fs = Math.round((ft.fontSize||32) * scX);
+function wrapFtLines(ft, c, fontScale, widthScale) {
+  if (widthScale === undefined) widthScale = fontScale;
+  const fs = Math.round((ft.fontSize||32) * fontScale);
   c.font = `${ft.fontWeight||'800'} ${fs}px ${getFtFontName(ft)}`;
+  applyFtCanvasTracking(c, ft, widthScale);
   const rawLines = (ft.text||'').split('\n');
   if (!ft.maxWidth) return rawLines;
-  const maxPx = ft.maxWidth * scX;
+  const maxPx = ft.maxWidth * widthScale;
   const result = [];
   for (const line of rawLines) {
     if (!line) { result.push(''); continue; }
@@ -8532,38 +9478,107 @@ function wrapFtLines(ft, c, scX) {
   }
   return result;
 }
-function getFtBounds(ft, c, scX, scY) {
-  const lines = wrapFtLines(ft, c, scX);
+// Phase 7T.4B: same wrapping rules as wrapFtLines(), plus source character ranges.
+// Ranges are [start,end) offsets into the raw ft.text string. Existing geometry
+// callers continue using wrapFtLines(); this helper is render-only for inline gradient.
+function wrapFtLinesWithIndices(ft, c, fontScale, widthScale) {
+  if (widthScale === undefined) widthScale = fontScale;
+  const fs = Math.round((ft.fontSize||32) * fontScale);
+  c.font = `${ft.fontWeight||'800'} ${fs}px ${getFtFontName(ft)}`;
+  applyFtCanvasTracking(c, ft, widthScale);
+  const source = ft.text || '';
+  const rawLines = source.split('\n');
+  const result = [];
+  let base = 0;
+
+  for (let li = 0; li < rawLines.length; li++) {
+    const line = rawLines[li];
+    if (!ft.maxWidth) {
+      result.push({ text: line, start: base, end: base + line.length });
+      base += line.length + (li < rawLines.length - 1 ? 1 : 0);
+      continue;
+    }
+    if (!line) {
+      result.push({ text:'', start:base, end:base });
+      base += (li < rawLines.length - 1 ? 1 : 0);
+      continue;
+    }
+
+    const maxPx = ft.maxWidth * widthScale;
+    const words = line.split(' ');
+    let cur = '';
+    let curStart = base;
+    let sourcePos = 0;
+    for (let wi = 0; wi < words.length; wi++) {
+      const word = words[wi];
+      const wordStart = base + sourcePos;
+      const test = cur ? cur + ' ' + word : word;
+      if (c.measureText(test).width > maxPx && cur) {
+        result.push({ text: cur, start: curStart, end: curStart + cur.length });
+        cur = word;
+        curStart = wordStart;
+      } else {
+        if (!cur) curStart = wordStart;
+        cur = test;
+      }
+      sourcePos += word.length + (wi < words.length - 1 ? 1 : 0);
+    }
+    result.push({ text: cur, start: curStart, end: curStart + cur.length });
+    base += line.length + (li < rawLines.length - 1 ? 1 : 0);
+  }
+  return result;
+}
+
+function getFtBounds(ft, c, scX, scY, geomScX, geomScY) {
+  // scX/scY = font scale (for ft.fontSize); geomScX/geomScY = geometry scale (for ft.x/y/maxWidth).
+  // Default geom scales to font scales for backward-compatible single-scale callers.
+  if (geomScX === undefined) geomScX = scX;
+  if (geomScY === undefined) geomScY = scY;
+  const lines = wrapFtLines(ft, c, scX, geomScX);
   const fs = Math.round((ft.fontSize||32) * scX);
   const lineH = fs * (ft.lineHeightFactor || 1.2);
   let textW = 0;
   c.font = `${ft.fontWeight||'700'} ${fs}px ${getFtFontName(ft)}`;
+  applyFtCanvasTracking(c, ft, geomScX);
   lines.forEach(l => { textW = Math.max(textW, c.measureText(l).width); });
-  const containerW = ft.maxWidth ? ft.maxWidth * scX : textW;
+  const containerW = ft.maxWidth ? ft.maxWidth * geomScX : textW;
   // textW = actual rendered width; containerW = maxWidth container (for resize handle)
-  return { x: ft.x*scX, y: ft.y*scY, w: Math.max(textW, fs), containerW: Math.max(containerW, fs), h: lines.length*lineH, fs, lineH, lines };
+  const _cW = Math.max(containerW, fs), _tW = Math.max(textW, fs);
+  const _cX = ft.x * geomScX;
+  const _al = ft.alignment || 'left';
+  const glyphX = _al === 'center' ? _cX + (_cW - _tW) / 2
+               : _al === 'right'  ? _cX + _cW - _tW
+               :                    _cX;
+  return { x: _cX, y: ft.y*geomScY, w: _tW, containerW: _cW, h: lines.length*lineH, fs, lineH, lines, glyphX };
 }
 function drawFtSelection(c) {
   const id = S.selected;
   if (!id || !S.freeTexts?.[id]) return;
   const ft = S.freeTexts[id];
   const dpr = DPR();  // Use same rounded DPR as render loop
-  // Reset to clean DPR-only transform — prevents stale transforms from render loop
-  c.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const scX = 1, scY = 1;  // logical units (DPR handled by setTransform)
-  const b = getFtBounds(ft, c, scX, scY);
+  // Phase 7X.2 hotfix: include preview scale so selection aligns with glyphs.
+  // Pre-7X.2 this was DPR-only (correct when PW==CW). Now PW may differ from CW.
+  const _scX = CW > 0 ? PW / CW : 1;
+  const _scY = CH > 0 ? PH / CH : 1;
+  c.setTransform(_scX * dpr, 0, 0, _scY * dpr, 0, 0);
+  // Phase 7X.3B1 Hotfix (Option A): fontScale=1 (ft.fontSize already in CW-space),
+  // geomScale=CW/DW (maps DW-space ft.x/y/maxWidth to CW-space for drawing).
+  const _geomScX = DW > 0 ? CW / DW : 1;
+  const _geomScY = DH > 0 ? CH / DH : 1;
+  const b = getFtBounds(ft, c, 1, 1, _geomScX, _geomScY);
   c.save();
   // Clip selection to canvas bounds so it never bleeds past the edge
   c.beginPath(); c.rect(0, 0, CW, CH); c.clip();
-  // Selection box fits actual text
+  // Selection box follows actual rendered glyph bounds (alignment-aware)
   c.strokeStyle='rgba(56,120,240,.8)'; c.lineWidth=1.5; c.setLineDash([5,4]);
-  c.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8); c.setLineDash([]);
-  // Right-center handle at containerW (controls maxWidth)
-  const hx = b.x + b.containerW + 4, hy = b.y + b.h/2;
+  c.strokeRect(b.glyphX - 4, b.y - 4, b.w + 8, b.h + 8); c.setLineDash([]);
+  // Phase 7X.2 hotfix B: handles at BOUND edges (glyph right), not container right.
+  // b.glyphX + b.w + 4 = bound right edge. Matches bound strokeRect geometry exactly.
+  const hx = b.glyphX + b.w + 4, hy = b.y + b.h / 2;
   c.beginPath(); c.rect(hx-5, hy-5, 10, 10);
   c.fillStyle='#fff'; c.strokeStyle='#3878f0'; c.lineWidth=1.5; c.fill(); c.stroke();
-  // Bottom-right handle at containerW + textH (controls font size)
-  const cx2 = b.x + b.containerW + 4, cy2 = b.y + b.h + 4;
+  // Bottom-right handle at bound bottom-right corner
+  const cx2 = b.glyphX + b.w + 4, cy2 = b.y + b.h + 4;
   c.beginPath(); c.rect(cx2-5, cy2-5, 10, 10);
   c.fill(); c.stroke();
   c.restore();
@@ -8573,10 +9588,13 @@ function hitFtResizeHandle(mx, my) {
   if (!id || !S.freeTexts?.[id] || !id.startsWith('ft_')) return null;
   const ft = S.freeTexts[id];
   const _c = document.createElement('canvas').getContext('2d');
-  const b = getFtBounds(ft, _c, 1, 1);  // scX=scY=1, logical units
-  // Handles in logical canvas units
-  const hx = b.x + b.containerW + 4, hy = b.y + b.h/2;
-  const hbr_x = b.x + b.containerW + 4, hbr_y = b.y + b.h + 4;
+  // Option A: fontScale=DW/CW converts CW-space fontSize to DW-space pixels for consistent hit geometry.
+  // geomScale=1: ft.x/y/maxWidth stay in DW-space (matching mx,my which are dox/doy = DW-space).
+  const _fsc = CW > 0 ? DW / CW : 1, _fscY = CH > 0 ? DH / CH : 1;
+  const b = getFtBounds(ft, _c, _fsc, _fscY, 1, 1);
+  // Phase 7X.2 hotfix B: match drawing — handles at BOUND edges (glyph right)
+  const hx = b.glyphX + b.w + 4, hy = b.y + b.h / 2;
+  const hbr_x = b.glyphX + b.w + 4, hbr_y = b.y + b.h + 4;
   if (Math.abs(mx-hx)<10 && Math.abs(my-hy)<10) return 'right';
   if (Math.abs(mx-hbr_x)<10 && Math.abs(my-hbr_y)<10) return 'bottom-right';
   return null;
@@ -8612,11 +9630,16 @@ function drawHoverRing(c, key) {
   else if (key?.startsWith('ft_')&&S.freeTexts?.[key]) {
     const ft=S.freeTexts[key];
     const _mc=document.createElement('canvas').getContext('2d');
-    const lines=(ft.text||'').split('\n');
-    const fs=ft.fontSize||32;
-    _mc.font=`${ft.bold?'700':'400'} ${fs}px ${ft.fontName||'"TheSansB",Arial,sans-serif'}`;
-    const maxW=Math.max(...lines.map(l=>_mc.measureText(l).width),1);
-    bnd={x:ft.x-4,y:ft.y-4,w:maxW+8,h:lines.length*fs*1.3+8};
+    const _hfs=ft.fontSize||32;
+    _mc.font=`${ft.fontWeight||'800'} ${_hfs}px ${getFtFontName(ft)}`;
+    const _hGeomScX = DW > 0 ? CW / DW : 1;
+    const _hlines=wrapFtLines(ft,_mc,1,_hGeomScX);
+    const _hlh=_hfs*(ft.lineHeightFactor||1.2);
+    const _htW=Math.max(..._hlines.map(l=>_mc.measureText(l).width),1);
+    const _hcW=ft.maxWidth||_htW;
+    const _hal=ft.alignment||'left';
+    const _hbX=_hal==='center'?ft.x+(_hcW-_htW)/2:_hal==='right'?ft.x+_hcW-_htW:ft.x;
+    bnd={x:_hbX-4,y:ft.y-4,w:_htW+8,h:_hlines.length*_hlh+8};
   }
   if (!bnd) return;
   c.save();
@@ -9093,7 +10116,7 @@ const SECTION_MAP = {
   'stripe':   ['Swisscom Stripe'],
 };
 // Always keep these sections expanded
-const ALWAYS_OPEN = ['Bild', 'Label', 'Swisscom Stripe'];
+const ALWAYS_OPEN = ['Bild', 'Label', 'Swisscom Stripe', 'Ebenen'];
 
 let _lastAutoSel = undefined;
 function autoExpandSections(sel) {
@@ -9130,6 +10153,11 @@ document.querySelectorAll('.prop-section').forEach(section => {
   const id = section.querySelector('[id]')?.id || section.querySelector('.prop-title')?.textContent.trim();
   if (!id) return;
   const key = 'swc_collapsed_' + id;
+  const titleText = section.querySelector('.prop-title')?.textContent.replace(/[▾▸◂]/g,'').trim();
+  if (titleText === 'Ebenen') {
+    section.classList.remove('collapsed');
+    return;
+  }
   const saved = safeLS.get(key);
   if (saved === '1') section.classList.add('collapsed');
   else if (saved === '0') section.classList.remove('collapsed');
@@ -9233,6 +10261,598 @@ function loadPlaceholderProduct() {
 const _PLACEHOLDER_STAGE_IMG = new Image();
 _PLACEHOLDER_STAGE_IMG.src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iRWJlbmVfMSIgZGF0YS1uYW1lPSJFYmVuZSAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMTQ0MiIgaGVpZ2h0PSIxMDgwIiB2aWV3Qm94PSI1MjAgNDI1IDQwNSAyMzAiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICMwMGEzYmY7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzAwOTFhYTsKICAgICAgfQoKICAgICAgLmNscy0zIHsKICAgICAgICBmaWxsOiAjZjZmNmY5OwogICAgICB9CgogICAgICAuY2xzLTQgewogICAgICAgIGZpbGw6ICM4YzUzMmQ7CiAgICAgIH0KCiAgICAgIC5jbHMtNSB7CiAgICAgICAgc3Ryb2tlOiAjMDE1OwogICAgICB9CgogICAgICAuY2xzLTUsIC5jbHMtNiB7CiAgICAgICAgc3Ryb2tlLXdpZHRoOiAuNXB4OwogICAgICB9CgogICAgICAuY2xzLTUsIC5jbHMtNiwgLmNscy03IHsKICAgICAgICBmaWxsOiBub25lOwogICAgICAgIHN0cm9rZS1taXRlcmxpbWl0OiAxMDsKICAgICAgfQoKICAgICAgLmNscy04IHsKICAgICAgICBmaWxsOiAjMDE1OwogICAgICB9CgogICAgICAuY2xzLTkgewogICAgICAgIGZpbGw6ICNlOGIxOTI7CiAgICAgIH0KCiAgICAgIC5jbHMtMTAgewogICAgICAgIGZpbGw6ICM4YzUzMmQ7CiAgICAgIH0KCiAgICAgIC5jbHMtMTEgewogICAgICAgIGZpbGw6ICMwMTU7CiAgICAgIH0KCiAgICAgIC5jbHMtMTIgewogICAgICAgIGZpbGw6ICM4M2M5ZmY7CiAgICAgIH0KCiAgICAgIC5jbHMtMTMgewogICAgICAgIGZpbGw6ICNmMjA1MDU7CiAgICAgIH0KCiAgICAgIC5jbHMtMTQgewogICAgICAgIGZpbGw6ICMwNDQ1Yzg7CiAgICAgIH0KCiAgICAgIC5jbHMtMTUgewogICAgICAgIGNsaXAtcGF0aDogdXJsKCNjbGlwcGF0aC0xKTsKICAgICAgfQoKICAgICAgLmNscy0xNiB7CiAgICAgICAgZmlsbDogI2QxMjsKICAgICAgfQoKICAgICAgLmNscy0xNyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLmNscy0xOCB7CiAgICAgICAgZmlsbDogI2I3YjZiYzsKICAgICAgfQoKICAgICAgLmNscy02IHsKICAgICAgICBzdHJva2U6ICNlZWYzZjY7CiAgICAgIH0KCiAgICAgIC5jbHMtMTkgewogICAgICAgIGZpbGw6ICMwMDM2YTc7CiAgICAgIH0KCiAgICAgIC5jbHMtMjAgewogICAgICAgIGZpbGw6ICMwMDliZWE7CiAgICAgIH0KCiAgICAgIC5jbHMtMjEgewogICAgICAgIGZpbGw6ICMxYWY7CiAgICAgIH0KCiAgICAgIC5jbHMtMjIgewogICAgICAgIGZpbGw6ICMxYWY7CiAgICAgIH0KCiAgICAgIC5jbHMtMjMgewogICAgICAgIGZpbGw6ICM4ZjhlOTQ7CiAgICAgIH0KCiAgICAgIC5jbHMtNyB7CiAgICAgICAgc3Ryb2tlOiAjY2VjZGQzOwogICAgICAgIHN0cm9rZS13aWR0aDogNHB4OwogICAgICB9CgogICAgICAuY2xzLTI0IHsKICAgICAgICBmaWxsOiAjY2VjZGQzOwogICAgICB9CgogICAgICAuY2xzLTI1IHsKICAgICAgICBmaWxsOiAjZjRkNmM2OwogICAgICB9CgogICAgICAuY2xzLTI2IHsKICAgICAgICBjbGlwLXBhdGg6IHVybCgjY2xpcHBhdGgpOwogICAgICB9CgogICAgICAuY2xzLTI3IHsKICAgICAgICBmaWxsOiAjZjRkNmM2OwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwcGF0aCI+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU4Ni42OCw1NDguMzhjMS4yOC0yLjE1LDEuOC00Ljc0LDEuNDUtNy4yMS0uMDgtLjU2LS4yMi0xLjE1LS41OC0xLjU5LS4yMS0uMjUtLjUzLS40Ni0uODUtLjM5LS4zLjA2LS41LjMzLS42NS41OS0uMzIuNTYtLjUyLDEuMTctLjY4LDEuNzktLjU4LDIuMTYtLjc4LDQuNDMtLjU3LDYuNjYuMDMuMzIuMTMsMS43OS41NiwxLjg2LjM3LjA2LDEuMTUtMS40MywxLjMyLTEuNzNaIi8+CiAgICA8L2NsaXBQYXRoPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwcGF0aC0xIj4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNODUxLjg5LDU0OC4zOGMxLjI4LTIuMTUsMS44LTQuNzQsMS40NS03LjIxLS4wOC0uNTYtLjIyLTEuMTUtLjU4LTEuNTktLjIxLS4yNS0uNTMtLjQ2LS44NS0uMzktLjMuMDYtLjUuMzMtLjY1LjU5LS4zMi41Ni0uNTIsMS4xNy0uNjgsMS43OS0uNTgsMi4xNi0uNzgsNC40My0uNTcsNi42Ni4wMy4zMi4xMywxLjc5LjU2LDEuODYuMzcuMDYsMS4xNS0xLjQzLDEuMzItMS43M1oiLz4KICAgIDwvY2xpcFBhdGg+CiAgPC9kZWZzPgogIDxyZWN0IHg9IjUyMCIgeT0iNDI1IiB3aWR0aD0iNDA1IiBoZWlnaHQ9IjIzMCIgZmlsbD0iI2Y2ZjZmOSIvPgogIDxnIGlkPSJTdGFnZV9wcmVzZW50YXRpb24iIGRhdGEtbmFtZT0iU3RhZ2UgcHJlc2VudGF0aW9uIj4KICAgIDxnIGlkPSJiYWNrZ3JvdW5kIj4KICAgICAgPHJlY3QgaWQ9ImJnIiBjbGFzcz0iY2xzLTMiIHg9IjU0My4yMiIgeT0iNDQwIiB3aWR0aD0iMzU1LjU2IiBoZWlnaHQ9IjIwMCIvPgogICAgICA8cmVjdCBpZD0iZWxlbWVudCIgY2xhc3M9ImNscy0yNCIgeD0iNTc3LjIiIHk9IjQ0MCIgd2lkdGg9IjI4Ni40OSIgaGVpZ2h0PSIxMy43MyIvPgogICAgICA8cmVjdCBpZD0ic3RhZ2UiIGNsYXNzPSJjbHMtMTciIHg9IjU2Mi42NCIgeT0iNTg5LjIxIiB3aWR0aD0iMzE2LjcxIiBoZWlnaHQ9IjUwLjc5Ii8+CiAgICA8L2c+CiAgICA8ZyBpZD0ic3BlYWtlcnMiPgogICAgICA8Zz4KICAgICAgICA8cmVjdCBjbGFzcz0iY2xzLTI0IiB4PSI4NDUuNDkiIHk9IjQ3Ny45NCIgd2lkdGg9IjIzLjg0IiBoZWlnaHQ9IjM0LjU0IiByeD0iNCIgcnk9IjQiLz4KICAgICAgICA8Zz4KICAgICAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy0xOCIgY3g9Ijg1Ny40MiIgY3k9IjUwMC4wOCIgcj0iOS4xIi8+CiAgICAgICAgICA8Y2lyY2xlIGNsYXNzPSJjbHMtMTgiIGN4PSI4NTcuNDIiIGN5PSI0ODUuMjYiIHI9IjMuNzYiLz4KICAgICAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy0yMyIgY3g9Ijg1Ny40MiIgY3k9IjUwMC4wOCIgcj0iMy4yOSIvPgogICAgICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTYiIGN4PSI4NTcuNDIiIGN5PSI1MDAuMDgiIHI9IjYuNjkiLz4KICAgICAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy0yMyIgY3g9Ijg1Ny40MiIgY3k9IjQ4NS4yNiIgcj0iMS43NCIvPgogICAgICAgIDwvZz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTE4IiBkPSJNODQ5LjMsNDgwLjZjMCwuMzgtLjMxLjY4LS42OC42OHMtLjY4LS4zMS0uNjgtLjY4LjMxLS42OC42OC0uNjguNjguMzEuNjguNjhaTTg2Ni4yMSw0NzkuOTJjLS4zOCwwLS42OC4zMS0uNjguNjhzLjMxLjY4LjY4LjY4LjY4LS4zMS42OC0uNjgtLjMxLS42OC0uNjgtLjY4WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTgiIGQ9Ik04NDkuMyw1MDkuMzFjMCwuMzgtLjMxLjY4LS42OC42OHMtLjY4LS4zMS0uNjgtLjY4LjMxLS42OC42OC0uNjguNjguMzEuNjguNjhaTTg2Ni4yMSw1MDguNjNjLS4zOCwwLS42OC4zMS0uNjguNjhzLjMxLjY4LjY4LjY4LjY4LS4zMS42OC0uNjgtLjMxLS42OC0uNjgtLjY4WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJjbHMtMjQiIHg9IjU3My4yNyIgeT0iNDc3Ljk0IiB3aWR0aD0iMjMuODQiIGhlaWdodD0iMzQuNTQiIHJ4PSI0IiByeT0iNCIvPgogICAgICAgIDxnPgogICAgICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTE4IiBjeD0iNTg1LjE5IiBjeT0iNTAwLjA4IiByPSI5LjEiLz4KICAgICAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy0xOCIgY3g9IjU4NS4xOSIgY3k9IjQ4NS4yNiIgcj0iMy43NiIvPgogICAgICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTIzIiBjeD0iNTg1LjE5IiBjeT0iNTAwLjA4IiByPSIzLjI5Ii8+CiAgICAgICAgICA8Y2lyY2xlIGNsYXNzPSJjbHMtNiIgY3g9IjU4NS4xOSIgY3k9IjUwMC4wOCIgcj0iNi42OSIvPgogICAgICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTIzIiBjeD0iNTg1LjE5IiBjeT0iNDg1LjI2IiByPSIxLjc0Ii8+CiAgICAgICAgPC9nPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTgiIGQ9Ik01NzcuMDgsNDgwLjZjMCwuMzgtLjMxLjY4LS42OC42OHMtLjY4LS4zMS0uNjgtLjY4LjMxLS42OC42OC0uNjguNjguMzEuNjguNjhaTTU5My45OSw0NzkuOTJjLS4zOCwwLS42OC4zMS0uNjguNjhzLjMxLjY4LjY4LjY4LjY4LS4zMS42OC0uNjgtLjMxLS42OC0uNjgtLjY4WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTgiIGQ9Ik01NzcuMDgsNTA5LjMxYzAsLjM4LS4zMS42OC0uNjguNjhzLS42OC0uMzEtLjY4LS42OC4zMS0uNjguNjgtLjY4LjY4LjMxLjY4LjY4Wk01OTMuOTksNTA4LjYzYy0uMzgsMC0uNjguMzEtLjY4LjY4cy4zMS42OC42OC42OC42OC0uMzEuNjgtLjY4LS4zMS0uNjgtLjY4LS42OFoiLz4KICAgICAgPC9nPgogICAgPC9nPgogICAgPGcgaWQ9InNjcmVlbiI+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTciIGQ9Ik03NjIuNTMsNTY3LjU0Yy0yNy41LTExLjM4LTUxLjAzLTI4LjY1LTc0Ljc0LTQ1LjItMjMuNzEtMTYuNTUtNDguNDctMzIuODEtNzcuMjItNDEuNjItLjU3LS4xNy0xLjE0LS4zNC0xLjcyLS41MXYxMDguODloMjI0Ljk3di0xMC41OWMtMjMuOTEsMy4xMy00OS4yNC0xLjg2LTcxLjMtMTAuOThaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xNyIgZD0iTTY4Ny43OSw1MjIuMzRjMjMuNzEsMTYuNTUsNDcuMjQsMzMuODIsNzQuNzQsNDUuMiwyMi4wNiw5LjEzLDQ3LjM5LDE0LjEyLDcxLjMsMTAuOTh2LTEwMC40OGgtMjI0Ljk3djIuMThjLjU4LjE3LDEuMTUuMzQsMS43Mi41MSwyOC43NSw4LjgsNTMuNSwyNS4wNyw3Ny4yMiw0MS42MloiLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTE3IiBkPSJNODMyLjgzLDQ3OC45NHYxMDkuMjdoLTIyMy4wNXYtMTA5LjI3aDIyMy4wNU04MzMuODMsNDc3Ljk0aC0yMjUuMDV2MTExLjI3aDIyNS4wNXYtMTExLjI3aDBaIi8+CiAgICA8L2c+CiAgICA8ZyBpZD0id29tYW5fb25fdGhlX3N0YWdlIiBkYXRhLW5hbWU9IndvbWFuIG9uIHRoZSBzdGFnZSI+CiAgICAgIDxyZWN0IGlkPSJwb2ludGVyIiBjbGFzcz0iY2xzLTgiIHg9Ijc3Ny4wOCIgeT0iNTM5LjQ1IiB3aWR0aD0iMi4wNSIgaGVpZ2h0PSIzLjkiIHJ4PSIxLjAzIiByeT0iMS4wMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTExMy4wOSA4NjQuNCkgcm90YXRlKC01NC43NSkiLz4KICAgICAgPHBhdGggaWQ9InBhcGVyIiBjbGFzcz0iY2xzLTEyIiBkPSJNODEyLjAyLDU2My45NGwuNTguODZzMS4wOCwyLjIsMi42MSwzLjE0bC0xLjg1LDIuNTQtMy4wMywxLjE1LS4zMy02LjI5LjYyLTIuNy0uNS0uMTcsMS4xNS0xLjc2LjkxLS4zLjQ1LDEuMTktLjYxLDIuMzRaIi8+CiAgICAgIDxwYXRoIGlkPSJoYWlyX2JhY2siIGRhdGEtbmFtZT0iaGFpciBiYWNrIiBjbGFzcz0iY2xzLTEzIiBkPSJNNzk3LjQsNTIzLjAzYy0xLDMuNi0xLjI2LDUuNzctMy4xNCw3LjA0LTEuMTguNzktMS4zOCwyLjItLjc0LDMuNDcuNjksMS4zNywyLjIyLDEuODIsNC4xNSwxLjksMy43MS4xNSw1LjItMS4yNSw2LjI2LTIuMjIsMi4wMS0xLjg2LDEuNTEtMTAuMy0uOC0xMS45LTEuOC0xLjI0LTQuMDcuMzQtNC4wNy4zNGwtMS42NiwxLjM3WiIvPgogICAgICA8cGF0aCBpZD0ic2hpcnQiIGNsYXNzPSJjbHMtMjIiIGQ9Ik03OTguNjgsNTMxLjk5Yy0yLjM2LDEuMjctNS44NiwyLjctNi40OSwzLjAzcy0xLjg3LDQuMDEtMy42NSw5Ljg2bC00LjQyLTIuNjctMS43NSwzLjA2czIuMjUsMi44LDIuOTMsMy42OWMuNS42NiwyLjMzLDEuNjMsMy4yNSwyLjA5LjMyLjE2LjcuMDkuOTUtLjE2LjktLjk0LDMuMDItMy4xNywzLjYyLTMuODYuNzYtLjg5LDEuNDYtMi4yMiwxLjQ2LTIuMjJsLS4xMywyLjlzNS4xOSwxLjI3LDcsMS42MmMxLjgxLjM1LDQuMjktMS4yMiw0LjI5LTEuMjJsMS4xMSwzLjkzYy4xMi40My4yOC44NC40OSwxLjIzLjU4LDEuMTIsMS44MywzLjUxLDIuMzEsNC4yMiwwLDAsMS4yOS4yOCwyLjU0LS44NywwLDAtMS40My02LjA3LTEuNjQtNi45LS4xNC0uNTctLjQ0LTEuNjQtLjYyLTIuMjgtLjEtLjM0LS4xNC0uNjktLjEyLTEuMDUuMDUtMS40Mi4xLTUuMTQuMDUtNS45LS4xNS0yLjM3LS4zOC0zLjY2LS43My00LjUyLS4xLS4yNS0uODMtLjgyLTEuMDctLjk1LTIuMjQtMS4yMS0yLjUxLTEuMDEtNC42NC0yLjNsLTQuNzQtLjc0WiIvPgogICAgICA8ZyBpZD0ic2tpbiI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNSIgZD0iTTgxMi40Miw1ODkuODdjLTEuMzksMC0yLjM1LDEuMzgtMS44OCwyLjY4LjcxLDEuOTYsMS4wMSwzLjA0LjgzLDMuNzZsLS42LDEuOTIsMi45MSwxLjEyLDEuNTgsMS4zNmMuNy42MSwxLjY4Ljc3LDIuNTQuNDRoLjU2cy0uNDgtLjM4LS40OC0uMzhjLS41LS4zOC0uOTItLjg2LTEuMjEtMS40Mi0uNzItMS4zNy0uOTMtMy4xLTEuODktNi4xOWwtLjQtMS43NGMtLjIxLS45MS0xLjAyLTEuNTYtMS45NS0xLjU2aDBaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNSIgZD0iTTc5Ny4zOSw1OTcuOGMtLjA5LS41Ni0uNzItMi45OC0uNzItMi45OGwuMTQtMS41aC0zLjA3djIuMzJzLS4wOSwzLjY1LjIsNC4yM2MuMjkuNTksMS4yOS45OSwyLjYzLjk0LDEuMzUtLjA2LDEuNTUtLjgyLDEuNTUtLjgyLDAsMC0uNjQtMS42NC0uNzMtMi4xOVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI1IiBkPSJNNzgzLjk3LDU0Mi40OHMtMS42Ny0xLjEtMi4wOC0xLjM2Yy0uMzUtLjIzLTIuNjYtMS4zNi0zLjU3LTEuODYtLjE1LS4wOC0uMzQuMDEtLjM2LjE4aDBjLS4wNS40MS4wOS44MS4zOSwxLjFsMS4yMSwxLjE1Yy4xNC4xMy4xNy4zMy4wOS41bC0uMDUuMWMtLjEyLjIzLS4zNS4zOC0uNjEuMzhoMGMtLjIyLDAtLjQyLS4xLS41NS0uMjhsLS4zOS0uNTNjLS4xMS0uMTQtLjI2LS4yNC0uNDQtLjI2bC0uMTYtLjAyYy0uMTMtLjAyLS4yMy4xMi0uMTguMjRsLjE1LjM1LTEuNDQtLjk5Yy0uMTMtLjExLS4yOC0uMTktLjQzLS4yNmwtLjI2LS4xMWMtLjMtLjEzLS42My0uMTctLjk1LS4xM2gwYy0uMTYuMDItLjIyLjIxLS4xMS4zMi43LjcsMi41NSwyLjU0LDMuMDIsMy4wNS41OS42My40Ni42NCwxLjkuNzFzMy40Ni4xNCwzLjQ2LjE0bDEuMzctMi40MVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI1IiBkPSJNODEyLjE4LDU1Ni42MXMxLjMyLDQuMDEsMS40OCw0LjY5LS43OCwyLTEuMDYsMy41bC0uNTgtLjg2Yy0uMDgtLjEyLS4xMi0uMjYtLjExLS40bC4wNS0xLjc3YzAtLjE3LS4wNC0uMzQtLjEzLS40OWwtLjExLS4xOC0uNTEuNTZjLS4xMy4xNC0uMjMuMjktLjMyLjQ2bC0uMjcuNTFjLS4xMi4yMy0uMzEuNDEtLjU1LjUybC0uMjMuMTEtLjExLS44My4zLS44MWMuMDQtLjExLjA3LS4yMi4wOC0uMzNsLjI2LTIuNTEtLjA4LTEuMjgsMS44OS0uODhaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNSIgZD0iTTgwMy45NCw1MjUuODljLjA2LS4xLjEyLS4yMS4yMS0uMjhzLjI0LS4wOC4zMywwYy4wOC4wOC4wNy4yMS4wNS4zMi0uMDIuMTctLjA1LjM0LS4wNy41MS0uMDMuMTktLjA1LjM3LS4xMy41NHMtLjIyLjMyLS40LjM3bC4wMi0xLjQ4Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNSIgZD0iTTc5Ny44LDUyNS42MWMwLS4wOC0uMDItLjE3LS4wNy0uMjNzLS4xNC0uMS0uMjItLjA2Yy0uMDcuMDQtLjA5LjEzLS4wOS4yMS0uMDMuNDIuMDcuODQuMTcsMS4yNC4wNS4yMS4xMy40NS4zMi41M2wtLjEyLTEuNjhaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNyIgZD0iTTgwMy40MSw1MzIuNzNjLS4yLTEuMTctLjI3LTIuMzYtLjIyLTMuNTQtMS4zMiwwLTIuNy4xOS0zLjkxLjcxLS4xOCwxLjUtLjg5LDIuNjUtLjg5LDIuNjUtLjU5LDEuNjksNS40LDIuNDMsNS4wMi4xOVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI3IiBkPSJNNzk4LjA2LDUyOC40M2MuMywxLjI0LDEuMzUsMi4zNSwyLjYyLDIuNTIuNjkuMDksMS40LS4xMiwxLjkzLS41NiwxLjA5LS45MSwxLjQzLTIuNTIsMS40NS0zLjk0LjAyLS44Ny4xNC0xLjc3LDAtMi42My0uMDgtLjUxLS41NS0xLS44NC0xLjQ0LS42OS0xLjA2LTIuMjMtMS40OC0zLjM3LS45My0yLjU2LDEuMjQtMi4zLDQuOTMtMS44LDYuOTlaIi8+CiAgICAgIDwvZz4KICAgICAgPGcgaWQ9InNob2VzIj4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIxIiBkPSJNODExLjM2LDU5Ni4zMWMyLjM0LjU3LDEuNzIsMy41OCw2LjM0LDQuNjEsMy4yNiwxLjA5LDIuNjksMS45MSwyLjY5LDEuOTFoLTQuNjVjLS42MSwwLTEuMTctLjM0LTEuNDItLjg5LS4zNy0uOC0uOTgtMS43NC0xLjY2LTIuMTktLjI1LS4xNi0uNTgsMC0uNTguM3YyLjc4aC0uNTZzLS4yLTIuMzUtLjUzLTMuMTEtLjUzLTEuMzYuMzYtMy40MVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIxIiBkPSJNNzk4LjEyLDU5OS45OXMuNSwxLjIzLjEyLDIuMDJjLS4zOC43OS0xLjM1LjgyLTEuNjEuODItLjU4LDAtMi4wMy0uMjMtMi41Mi0xLjAyLS40My0uNzEtLjM4LTMuNzItLjM4LTMuNzJsLjA4LjczYy4wOS44MS42MywxLjUyLDEuNCwxLjc5LjUyLjE4LDEuMTYuMjcsMS44Mi4wNi40OS0uMTYuODQtLjQ0LDEuMDgtLjY3WiIvPgogICAgICA8L2c+CiAgICAgIDxnIGlkPSJzb2xlcyI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy04IiBkPSJNODIwLjQzLDYwMi43MmwtMy4xNC0uMjRjLS4xOS0uMDEtLjM4LS4wNC0uNTYtLjA4bC0xLjAzLS4yMmMtLjM5LS4wOC0uNzQtLjMtLjk5LS42MWwtMS4wNy0xLjMxYy0uMjEtLjI0LS40NC0uNDYtLjcxLS42NGwtLjM3LS4yNmMtLjMyLS4yMi0uNjktLjM2LTEuMDgtLjRsLS43NC0uMDhjLjA0LjMxLjE0LjU3LjI2Ljg0LjMzLjc2LjUzLDMuMTEuNTMsMy4xMWguNTZ2LTIuNzhjMC0uMy4zMy0uNDcuNTgtLjMuNjguNDUsMS4yOSwxLjM5LDEuNjYsMi4xOS4yNi41NS44Mi44OSwxLjQyLjg5aDQuNjVzLjAzLS4wNC4wNC0uMTFaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy04IiBkPSJNNzk4LjI0LDYwMi4wMWMuMDctLjE0LjEtLjI4LjEyLS40NC0uMDkuMTQtLjIzLjMxLS40Mi40Ni0uMjYuMi0uNjMuMzItLjg2LjM3LS4xMy4wMy0uMjYuMDQtLjM5LjA0LS4zNS0uMDItMS4xNS0uMDctMS42NC0uMjItLjc1LS4yNC0xLjEtLjkxLTEuMS0uOTEuMDUuMjEuMS4zOC4xNy40OS40OC44LDEuOTQsMS4wMiwyLjUyLDEuMDIuMjYsMCwxLjIzLS4wMywxLjYxLS44MloiLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBpZD0ic3BvZG5pZSIgY2xhc3M9ImNscy0xMSIgZD0iTTc5NC40NCw1NDcuNzFsLS4xOSwxLjJzLTIuNzgsNS4wOS0zLjI3LDYuMzFjLS40OSwxLjIyLS4xLDYuOTQsMCw5LjguMSwyLjg2LDEuNjcsMjMuMDgsMS42NywyMy4wOGwtLjA2LDUuMjZzMy4yNy44NCw0Ljk0LDBjMCwwLC40OS0xMy4zMi40OS0xNC4wOHMxLjg4LTE4LjIsMS44OC0xOC4yYzAsMCwzLjQ5LDkuNDgsNC41MywxMi4yLDEuMDUsMi43Miw1LjUxLDE5LjU5LDYuMTQsMjAuODUsMCwwLDMuMjEuNyw0Ljg4LDAsMCwwLTIuOTMtMTUuNzYtMy4yOC0xOC4wNi0uMzUtMi4zLTIuMy0xMS44NS0yLjM3LTEzLjExcy0yLjQ4LTkuNjktMi40OC05LjY5bC0xLjI1LTQuMDUtLjM1LTEuMTItLjk1LS4wM2MtLjYtLjAyLTEuMTkuMTYtMS42OC41M2wtLjk0LjcxLTEuMTgtLjg1Yy0uNDktLjM1LTEuMDctLjU1LTEuNjctLjU3bC00Ljg2LS4xN1oiLz4KICAgICAgPHBhdGggaWQ9ImhhaXJfZnJvbnQiIGRhdGEtbmFtZT0iaGFpciBmcm9udCIgY2xhc3M9ImNscy0xMyIgZD0iTTc5Ny43Niw1MjUuNjVjLjE1LTEuMjYuOTEtMi40NCwyLTMuMDkuNjQtLjM5LDEuMzgtLjYsMi4wMS0uOTkuODksMS4zNiwxLjgxLDIuODksMi4xNCw0LjQ4LjctMS4yOC42MS0yLjk5LS4yNi00LjE2LS4xNS0uMjEtLjMzLS40LS41My0uNTYtLjg0LS42Ny0yLjAxLS43NC0zLjA3LS41OS0uMjkuMDQtLjU4LjEtLjg1LjItLjkuMzQtMS41NSwxLjE3LTEuOCwyLjFzMCwxLjcyLjM2LDIuNjFaIi8+CiAgICAgIDxnIGlkPSJzaGFkb3dzIj4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTkiIGQ9Ik03OTkuMDYsNTMwLjk2czEuNzMuMzksMi4xNywwYy0uMjQuMDEtLjY0LDAtMS4xLS4xNi0uNDMtLjE1LS43My0uMzctLjkxLS41My0uMDUuMjMtLjExLjQ2LS4xNi42OFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIwIiBkPSJNODA2LjUxLDUzOC40NXMuNjEsMi45OC42MSwzLjU5LS4xNywxLjU1LS43NywzLjIyYy0uMjcuNzYtLjYzLDIuODQtLjYzLDIuODRsLjU2LDEuOTcsMS4yNi02LjhjLjEzLS43MS4wOC0xLjQ1LS4xNC0yLjE0bC0uODktMi43WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjAiIGQ9Ik03OTQuNTcsNTQ0Ljgxcy4xMy0yLjE2LS4yNC0zLjE0YzAsMC0uMzcsMy45Mi0uNDIsNC4yNmwuNjYtMS4xMloiLz4KICAgICAgPC9nPgogICAgPC9nPgogICAgPGcgaWQ9InBlcnNvbl80IiBkYXRhLW5hbWU9InBlcnNvbiA0Ij4KICAgICAgPHBhdGggaWQ9InNoaXJ0LTIiIGRhdGEtbmFtZT0ic2hpcnQiIGNsYXNzPSJjbHMtMjIiIGQ9Ik04MjAuNjcsNjE1LjAxYzMuNDIsMCw2LjMtMi4xNyw2LjMtMi4xNywwLDAtLjE2LTEuODkuNTYtNS4yLjUyLTIuNDIuODEtNy41Ny45My0xMC4xNy4wNi0xLjI0LS4yMi0yLjQ3LS44MS0zLjU2LDAtLjAyLS4wMi0uMDQtLjAzLS4wNS0uNjUtMS4yMi0xLjc5LTIuMTEtMy4xMy0yLjQ0bC0zLjgyLS45NGMtMS4yNC0uMjgtMi41Mi0uMjgtMy43NiwwLDAsMC0yLjE0LjQ2LTMuODkuODgtMS40LjM0LTIuNTcsMS4yOS0zLjE5LDIuNTgtLjAyLjA1LS4wNS4wOS0uMDcuMTQtLjQ4LDEuMDEtLjcsMi4xMy0uNjUsMy4yNS4xMSwyLjU2LjQsNy44NS45MywxMC4zMS43MiwzLjMyLjU2LDUuMi41Niw1LjIsMCwwLDIuODgsMi4xNyw2LjMsMi4xN2gzLjc3WiIvPgogICAgICA8cGF0aCBpZD0iaGFpciIgY2xhc3M9ImNscy0xMyIgZD0iTTgyNS4yOSw1OTIuNzRjLS41OC0xLjY3LTIuMjItMi44Ni0xLjc3LTQuNzkuNDYtMS45My43Mi01LjM0LS42MS02LjUyLS44My0uNzktMi4xNy0xLjc4LTMuNzktMS45NC0xLjk5LS4xOS0zLjcsMS4yNC00LjYzLDMuMTItMS4xOSwyLjY2LTEuMjgsMy45OC0uNTgsNi4yMi4xOS42LjYsMi42MywwLDQuNTUtLjk2LDMuMDgsMi40MSw0LjU3LDYuMTgsNC4yOSw1LjI5LS4zOSw1Ljc3LTMuMjUsNS4xOS00LjkyWiIvPgogICAgPC9nPgogICAgPGcgaWQ9InBlcnNvbl8zIiBkYXRhLW5hbWU9InBlcnNvbiAzIj4KICAgICAgPHBhdGggaWQ9InNoaXJ0LTMiIGRhdGEtbmFtZT0ic2hpcnQiIGNsYXNzPSJjbHMtMTQiIGQ9Ik03NTQuNDcsNjE2LjMzYzMuMzUsMCw2LjE2LTIuMTMsNi4xNi0yLjEzLDAsMC0uMTYtMS44NS41NS01LjA5czEuMTctMTAuMTMuOTctMTEuNWMtLjEzLS44NS0uMzItMS45My0uNDUtMi42Mi0uMDgtLjQ1LS4zNi0uODMtLjc0LTEuMDJoMGMtLjYxLS4zLTIuNC0uOTItMy4zNi0xLjI1LS40LS4xNC0uODQtLjEzLTEuMjQsMGgwcy0zLjczLS44My0zLjczLS44M2gwcy0zLjczLjgzLTMuNzMuODNoMGMtLjQtLjE0LS44NC0uMTUtMS4yNCwwLS45Ni4zMy0yLjc1Ljk1LTMuMzYsMS4yNWgwYy0uMzguMTktLjY2LjU3LS43NCwxLjAyLS4xMy43LS4zMiwxLjc3LS40NSwyLjYyLS4yMSwxLjM3LjI2LDguMjYuOTcsMTEuNS43LDMuMjUuNTUsNS4wOS41NSw1LjA5LDAsMCwyLjgyLDIuMTMsNi4xNiwyLjEzLjU4LDAsMy4xMSwwLDMuNjksMFoiLz4KICAgICAgPHBhdGggaWQ9InNraW4tMiIgZGF0YS1uYW1lPSJza2luIiBjbGFzcz0iY2xzLTI1IiBkPSJNNzQ4LjY2LDU4Ni4zN2MtLjQ5LjA1LS4zNS44OC4wMSwxLjYxcy44OCwxLjY4LDEuMjEsMS41OWwuMjktLjA4LjIsMS4xMy0uNDksMS44OXMxLjUsMS4xMywyLjk4LDEuMTMsMi43NS0xLjA4LDIuNzUtMS4wOGwtLjAyLTIuNDMuMy0xLjMzcy41LjE0LDEuMDUtMS4wMWMuNTUtMS4xNC42Mi0yLjE0LS4wNy0xLjg4cy04LjIxLjQ2LTguMjEuNDZaIi8+CiAgICAgIDxwYXRoIGlkPSJoYWlyLTIiIGRhdGEtbmFtZT0iaGFpciIgY2xhc3M9ImNscy0yNCIgZD0iTTc1Mi40OCw1ODAuNmMtMS41Mi4xNS0yLjc4LDEuMDgtMy41NiwxLjgycy0uNiwzLjQyLjE2LDUuMjhjLjc2LDEuODUsMS4yOSwyLjkyLDEuMjksMi45MmwyLjExLDEuMjFjLjMzLjE5LjczLjE2LDEuMDMtLjA3bDIuMDgtMS42MiwxLjA2LTMuMDNzLjc1LTIuODktLjA0LTQuMDZjLS44LTEuMTctMi4yNS0yLjYyLTQuMTItMi40NFoiLz4KICAgICAgPGVsbGlwc2UgaWQ9ImhhaXJiYW5kIiBjbGFzcz0iY2xzLTE0IiBjeD0iNzUyLjUzIiBjeT0iNTgyLjY3IiByeD0iMi40NyIgcnk9IjIuNCIvPgogICAgICA8cGF0aCBpZD0iaGFpcl9mcm9udC0yIiBkYXRhLW5hbWU9ImhhaXIgZnJvbnQiIGNsYXNzPSJjbHMtMjQiIGQ9Ik03NTUuMjksNTc5LjQ1Yy0uMzUtLjMtLjc1LS41MS0xLjE1LS42My0uMjUtLjYzLS44OC0xLjA4LTEuNjItMS4wOC0uODIsMC0xLjUuNTUtMS42OCwxLjI5LS4zOS4xMy0uNzguMzYtMS4xMS42Ny0xLjA3LDEtMS4yOCwyLjUyLS40NiwzLjQuMzUuMzguODMuNTcsMS4zNS42LjQ1LjUzLDEuMTMuODcsMS45Ljg3Ljg2LDAsMS42Mi0uNDMsMi4wNi0xLjA5LjUtLjA1Ljk2LS4yNywxLjI5LS42NC43OC0uOTEuNTItMi40Mi0uNTktMy4zOFoiLz4KICAgIDwvZz4KICAgIDxnIGlkPSJwZXJzb24yIj4KICAgICAgPHBhdGggaWQ9InNraW4tMyIgZGF0YS1uYW1lPSJza2luIiBjbGFzcz0iY2xzLTI3IiBkPSJNNjg2LjExLDU4Mi43OWMuOTguNDMsMS43MywxLjI2LDIuMDQsMi4yOS43NiwyLjU1LDEuNTMsNi4yLjM1LDcuMTgtLjM2LjMtMS40My4zLTEuNDMuM2wtMi4wNCwzLjQ3LTUuMzUtMi4zNC43OS0xLjUyLS43Ni0xLjgzYy0uNjgtMS42NS0uNjgtMy41LDAtNS4xNWgwYy41OS0xLjQyLDEuODItMi40OCwzLjMxLTIuODVoMGMuODUtLjIxLDEuNzQtLjEzLDIuNTQuMjFsLjU1LjI0WiIvPgogICAgICA8cGF0aCBpZD0ic2hpcnQtNCIgZGF0YS1uYW1lPSJzaGlydCIgY2xhc3M9ImNscy0xMSIgZD0iTTY3OS4wMiw1OTMuOTNsLjYzLS45NXMuMjktLjUsMS44Ny0uNWMyLjMxLDAsMy43OC4yMyw1LjI0LDIuMDNsNC42LDIuNjRjMS4xLjYzLDEuOSwxLjY3LDIuMjMsMi45bDEuMzYsOS43Mi0yLjQxLDkuNTktMjIuMTguNzQtLjY5LTEwLjYyLjg5LTYuOTcsMS4wNC0zLjExYy4yMi0uNjcuNjUtMS4yNSwxLjIzLTEuNjZsMS4zMy0uOTVjLjYtLjQzLDEuMjItLjgzLDEuODYtMS4xOWwzLTEuNjdaIi8+CiAgICAgIDxwYXRoIGlkPSJoYWlyLTMiIGRhdGEtbmFtZT0iaGFpciIgY2xhc3M9ImNscy0xMSIgZD0iTTY4OS4xMSw1ODkuNTljLS44Ny0uMTEtMS40OS0uNzctMS44NC0xLjI1LS4yMS0uMy0uMzItLjY2LS4zMi0xLjAzdi0uNzhjLjAyLS44Ny4zNS0xLjcxLjk3LTIuMzIsMCwwLC4xLTEuMjctLjY2LTEuODUtLjE5LS41MS0uNTQtLjk1LTEuMDItMS4yMy0uOS0uNTItMi4wMS0uMzYtMi44Ni4zMS0uNzEuMDUtMS40OC4yMS0yLjI5LjU0LTIuNDcsMS4wMS0yLjgzLDMuMzgtMi44NCw0LjUtLjAyLDEuNjYuNzIsMy4wNSwyLjIxLDUuNzFsLjI4LS40NWMuMjMtLjM3LjY5LS41NCwxLjEtLjM5LjQ5LjE3LDEuMDUuMzgsMS4zOS4xMSwxLjMxLTEsMi4wOS0yLjMxLDIuMDktMi4zMSwwLDAtLjk3LTEuNTItLjI3LTIuMTkuMjgtLjI3LjYzLS4xOC45Ni4wMS4xNi42NC44MywyLjI3LjgxLDIuODUtLjA0LDEuMDguMjQsMi43Ny4yNCwyLjc3bC4wOS4wNWMuNC4yMS44NS4zMSwxLjMuMjkuNDUtLjAxLjgtLjQuNzgtLjg1bC0uMTMtMi40OFoiLz4KICAgIDwvZz4KICAgIDxnIGlkPSJwZXJzb24xIj4KICAgICAgPHBhdGggaWQ9InNraW4tNCIgZGF0YS1uYW1lPSJza2luIiBjbGFzcz0iY2xzLTI3IiBkPSJNNjI1LjM1LDU4Mi40NGMuNzkuNjcsMS4yNSwxLjY1LDEuMjUsMi42OSwwLDIuNTctLjMsNi4xNy0xLjY3LDYuNzUtLjQyLjE4LTEuNDEtLjEyLTEuNDEtLjEybC0uOTUsMy4wOC01LjI4LTEuNjYsMS0yLjk3Yy4xNC0uNDIuMDktLjg4LS4xNS0xLjI2bC0uODEtMS4zYy0uMTctMS43Mi4zNC0zLjQzLDEuNDMtNC43N2gwYy45NC0xLjE1LDIuMzctMS43OSwzLjg2LTEuNzJoMGMuODQuMDQsMS42NS4zNiwyLjI5LjlsLjQ0LjM3WiIvPgogICAgICA8cGF0aCBpZD0iaGFpci00IiBkYXRhLW5hbWU9ImhhaXIiIGNsYXNzPSJjbHMtMTEiIGQ9Ik02MjYuNCw1ODEuMzZjLS41Mi0uMy0xLjA4LS40LTEuNTctLjMyLTEtLjU0LTIuMy0uOTEtMy45LS43Ni0yLjU3LjI1LTMuNTYsMi4zNS0zLjg4LDMuMzgtLjQxLDEuMzItLjI1LDIuNjIuMjIsNC44Mi4xNy43OS44NiwxLjM5LDEuNjcsMS40MS40LDAsLjg2LS4wNSwxLjM0LS4yMywxLjQ5LS41NywyLjY4LTEuMDcsMi42OC0xLjA3LDAsMC0uNTgtMi4xOC4yNi0yLjYuODMtLjQyLDEuNTEsMS4zMiwxLjUxLDEuMzJsLjM3LTEuMThjLjI0LS43Ni42Ni0xLjE5LDEuMzMtMS41Ny40MS0uMS43Ni0uMzMuOTctLjY5LjQ3LS44MS4wMi0xLjkzLS45OS0yLjUyWiIvPgogICAgICA8cGF0aCBpZD0ic2hpcnQtNSIgZGF0YS1uYW1lPSJzaGlydCIgY2xhc3M9ImNscy0xNCIgZD0iTTYxOC4zOCw2MTUuMzNjLTMuMjYsMC02LTIuMDctNi0yLjA3LDAsMCwuMTUtMS44LS41My00Ljk2LS41LTIuMzEtLjc3LTcuMjEtLjg4LTkuNy0uMDUtMS4xOC4yMS0yLjM1Ljc3LTMuNCwwLS4wMi4wMi0uMDMuMDMtLjA1LjYyLTEuMTYsMS43LTIuMDEsMi45OC0yLjMybDMuNjQtLjljMS4xOC0uMjYsMi40MS0uMjYsMy41OSwwLDAsMCwyLjA0LjQ0LDMuNy44NCwxLjMzLjMyLDIuNDUsMS4yMywzLjA0LDIuNDYuMDIuMDQuMDQuMDkuMDYuMTQuNDYuOTcuNjcsMi4wMy42MiwzLjEtLjExLDIuNDQtLjM4LDcuNDgtLjg5LDkuODMtLjY5LDMuMTYtLjUzLDQuOTYtLjUzLDQuOTYsMCwwLTIuNzUsMi4wNy02LDIuMDctLjk5LDAtMi42LDAtMy41OSwwWiIvPgogICAgPC9nPgogICAgPHBhdGggaWQ9InNlYXRzX2luX2Zyb250IiBkYXRhLW5hbWU9InNlYXRzIGluIGZyb250IiBjbGFzcz0iY2xzLTIwIiBkPSJNODQyLjcsNjE1LjgzaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNnMtLjA0LDAtLjA2LDBjLS4wMiwwLS4wNCwwLS4wNiwwaC0yLjM2bC0uMjgtNi4xMmMtLjM2LTcuOC02Ljc5LTEzLjk0LTE0LjYxLTEzLjk0aDBjLTcuODEsMC0xNC4yNCw2LjE0LTE0LjYxLDEzLjk0bC0uMjgsNi4xMmgtMi4zNmMtLjk0LDAtMS43MS43Ni0xLjcxLDEuNzF2MTUuMDVoMjQ1LjYydi0xNS4wNWMwLS45NC0uNzYtMS43MS0xLjcxLTEuNzFaIi8+CiAgICA8ZyBpZD0icGVyc29uX2Zyb250XzUiIGRhdGEtbmFtZT0icGVyc29uIGZyb250IDUiPgogICAgICA8ZyBpZD0ic2tpbi01IiBkYXRhLW5hbWU9InNraW4iPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOSIgZD0iTTgzMS40LDU4OS4wM2MtLjg1LjcyLTEuMzQsMS43Ny0xLjM0LDIuODgsMCwyLjc1LjMyLDYuNiwxLjc5LDcuMjIuNDUuMTksMS41MS0uMTIsMS41MS0uMTJsMS4wMSwzLjMsNS42NS0xLjc4LTEuMDctMy4xOGMtLjE1LS40NS0uMDktLjk1LjE2LTEuMzVsLjg3LTEuMzljLjE5LTEuODQtLjM3LTMuNjctMS41My01LjFoMGMtMS4wMS0xLjIzLTIuNTQtMS45Mi00LjEzLTEuODRoMGMtLjkuMDQtMS43Ni4zOC0yLjQ1Ljk3bC0uNDcuNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTkiIGQ9Ik04MjUuOTYsNjIxLjc1bC0zLjIxLS45NWMtLjcxLS4yMS0xLjQ4LS4wMy0yLjA0LjQ4bC0uNDQuNGMtLjQuMzYtLjc2Ljc2LTEuMDksMS4xOWwtLjI4LjM3aDYuNzRzLjMyLTEuNDkuMzItMS40OVoiLz4KICAgICAgPC9nPgogICAgICA8ZyBpZD0ic2hpcnQtNiIgZGF0YS1uYW1lPSJzaGlydCI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xNCIgZD0iTTgzOC44NSw2MjQuMjJjMy40OSwwLDYuNDMtMi4yMiw2LjQzLTIuMjIsMCwwLS4xNi0xLjkyLjU3LTUuMzEuNTQtMi40Ny44My03LjcyLjk1LTEwLjM4LjA2LTEuMjYtLjIzLTIuNTItLjgyLTMuNjQsMC0uMDItLjAyLS4wNC0uMDMtLjA2LS42Ni0xLjI0LTEuODItMi4xNS0zLjE5LTIuNDlsLTMuOS0uOTZjLTEuMjYtLjI4LTIuNTgtLjI4LTMuODQsMCwwLDAtMi4xOC40Ny0zLjk2LjktMS40My4zNC0yLjYyLDEuMzEtMy4yNSwyLjYzLS4wMi4wNS0uMDUuMS0uMDcuMTQtLjQ5LDEuMDQtLjcxLDIuMTctLjY2LDMuMzIuMTEsMi42MS40MSw4LjAxLjk1LDEwLjUyLjczLDMuMzkuNTcsNS4zMS41Nyw1LjMxLDAsMCwyLjk0LDIuMjIsNi40MywyLjIyaDMuODRaIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0xNCIgcG9pbnRzPSI4MjQuMDMgNjIzLjI0IDgyNy4xMiA2MDQuOTIgODMxLjEyIDYwOS4yNyA4MzEuNjMgNjIzLjI0IDgyNC4wMyA2MjMuMjQiLz4KICAgICAgPC9nPgogICAgICA8ZyBpZD0iaGFpci01IiBkYXRhLW5hbWU9ImhhaXIiPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTgzMC42MSw1ODguNDRjMS4xNS0uOTksMi45Ny0xLjk4LDUuNTEtMS43MywyLjc1LjI3LDMuODEsMi41MSw0LjE1LDMuNjIuNDQsMS40Mi4yNiwyLjgtLjI0LDUuMTUtLjE4Ljg1LS45MiwxLjQ5LTEuNzksMS41MS0uNDMsMC0uOTItLjA1LTEuNDMtLjI0LTEuNTktLjYxLTIuODctMS4xNC0yLjg3LTEuMTQsMCwwLC42Mi0yLjMzLS4yOC0yLjc4cy0xLjYxLDEuNDEtMS42MSwxLjQxbC0uMzktMS4yNmMtLjI3LS44Ni0uNzUtMS4zMy0xLjU1LTEuNzUtLjMxLS4xNi0uNTUtMS44OS40OS0yLjc4WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTgzOS44OCw1ODguMzRzMS41OS4yNiwxLjg1LDEuODRjLjI2LDEuNTguODUsMTIuNzEsMS4xMSwxMy45Ni4yNiwxLjI1LTMuODEtLjQtNC41LTIuMjVzMS41MS0xMC45MywxLjA0LTExLjgzLjUtMS43Mi41LTEuNzJaIi8+CiAgICAgIDwvZz4KICAgICAgPHBhdGggaWQ9ImhhaXJiYW5kLTIiIGRhdGEtbmFtZT0iaGFpcmJhbmQiIGNsYXNzPSJjbHMtMTMiIGQ9Ik04MzguNjYsNTg4LjAyYy4wNC0uMjIuMjYtLjM2LjQ4LS4zMi40OC4xLjg3LjM3Ljc0LjY0LS4xNy4zNC0uMjQsMi4wMy0uOCwxLjgyLS4xOS0uMDctLjMzLS4xNC0uNDQtLjIxLS4xOS0uMTEtLjI4LS4zMy0uMjQtLjU0bC4yNi0xLjM5WiIvPgogICAgPC9nPgogICAgPGcgaWQ9InBlcnNvbl9mcm9udF80IiBkYXRhLW5hbWU9InBlcnNvbiBmcm9udCA0Ij4KICAgICAgPHBhdGggaWQ9InNoaXJ0LTciIGRhdGEtbmFtZT0ic2hpcnQiIGNsYXNzPSJjbHMtMTEiIGQ9Ik03NzAuMzgsNjI5Ljk5Yy00LjA1LDAtNy40Ny0yLjU4LTcuNDctMi41OCwwLDAsLjE5LTIuMjQtLjY2LTYuMTdzLTEuNDItMTIuMjgtMS4xNy0xMy45NGMuMTUtMS4wMy4zOS0yLjMzLjU0LTMuMTguMS0uNTQuNDMtMSwuOS0xLjIzaDBjLjc0LS4zNywyLjkxLTEuMTIsNC4wNy0xLjUxLjQ5LS4xNywxLjAyLS4xNiwxLjUuMDFoMHM0LjUyLTEuMDEsNC41Mi0xLjAxaDBzNC41MiwxLjAxLDQuNTIsMS4wMWgwYy40OS0uMTcsMS4wMS0uMTgsMS41LS4wMSwxLjE2LjQsMy4zMywxLjE1LDQuMDcsMS41MWgwYy40Ni4yMy44LjY5LjksMS4yMy4xNS44NS4zOCwyLjE1LjU0LDMuMTguMjUsMS42Ni0uMzIsMTAtMS4xNywxMy45NC0uODUsMy45NC0uNjYsNi4xNy0uNjYsNi4xNywwLDAtMy40MiwyLjU4LTcuNDcsMi41OC0uNywwLTMuNzYsMC00LjQ3LDBaIi8+CiAgICAgIDxnIGlkPSJza2luLTYiIGRhdGEtbmFtZT0ic2tpbiI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy05IiBkPSJNNzc3Ljg5LDU5My42OGMuNjUuMDYuNDcsMS4wNy0uMDEsMS45NnMtMS4xNywyLjAzLTEuNiwxLjkzbC0uMzgtLjEtLjI3LDEuMzcuNjUsMi4yOXMtMS45OSwxLjM3LTMuOTUsMS4zNy0zLjY1LTEuMzEtMy42NS0xLjMxbC4wMy0yLjk0LS40LTEuNjJzLS42Ny4xNi0xLjQtMS4yMi0uODMtMi41OS4wOS0yLjI4LDEwLjkuNTYsMTAuOS41NloiLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBpZD0iaGFpci02IiBkYXRhLW5hbWU9ImhhaXIiIGNsYXNzPSJjbHMtMTAiIGQ9Ik03NzIuMzMsNTg2LjY4Yy0yLjk0LDAtNi42OSwyLjI1LTUuMzMsNi40NSwxLjM2LDQuMiwyLjM0LDYuOTgsMi4zNCw2Ljk4bDEuNDctLjkxYy45Mi0uNTYsMi4xMi0uNTYsMy4wMywwbDEuNDcuOTFzLjk5LTIuNzgsMi4zNC02Ljk4YzEuMzYtNC4yLTIuMzktNi40NS01LjMzLTYuNDVaIi8+CiAgICA8L2c+CiAgICA8ZyBpZD0icGVyc29uX2Zyb250XzMiIGRhdGEtbmFtZT0icGVyc29uIGZyb250IDMiPgogICAgICA8ZyBpZD0ic2hpcnQtOCIgZGF0YS1uYW1lPSJzaGlydCI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy04IiBkPSJNNzAyLjgsNjI5Ljc2Yy00LjA1LDAtNy40Ny0yLjU4LTcuNDctMi41OCwwLDAsLjE5LTIuMjQtLjY2LTYuMTctLjg1LTMuOTQtMS40Mi0xMi4yOC0xLjE3LTEzLjk0LjE1LTEuMDMuMzktMi4zMy41NC0zLjE4LjEtLjU0LjQzLTEsLjktMS4yM2gwYy43NC0uMzcsMi45MS0xLjEyLDQuMDctMS41MS40OS0uMTcsMS4wMi0uMTYsMS41LjAxaDBzNC41Mi0xLjAxLDQuNTItMS4wMWgwczQuNTIsMS4wMSw0LjUyLDEuMDFoMGMuNDktLjE3LDEuMDEtLjE4LDEuNS0uMDEsMS4xNi40LDMuMzMsMS4xNSw0LjA3LDEuNTFoMGMuNDYuMjMuOC42OS45LDEuMjMuMTUuODUuMzgsMi4xNS41NCwzLjE4LjI1LDEuNjYtLjMyLDEwLTEuMTcsMTMuOTQtLjg1LDMuOTQtLjY2LDYuMTctLjY2LDYuMTcsMCwwLTMuNDIsMi41OC03LjQ3LDIuNTgtLjcsMC0zLjc2LDAtNC40NywwWiIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtOCIgcG9pbnRzPSI3MTYuNTcgNjA3LjA3IDcxOC4zIDYyMy40MiA3MTMuNDkgNjIzLjQyIDcxMy40OSA2MTMuMDggNzE2LjU3IDYwNy4wNyIvPgogICAgICA8L2c+CiAgICAgIDxnIGlkPSJza2luLTciIGRhdGEtbmFtZT0ic2tpbiI+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy00IiBkPSJNNzA5LjgzLDU5My40NWMuNTkuMDYuNDMsMS4wNy0uMDEsMS45NnMtMS4wNywyLjAzLTEuNDYsMS45M2wtLjM1LS4xLS4yNSwxLjM3LjU5LDIuMjlzLTEuODIsMS4zNy0zLjYsMS4zNy0zLjMzLTEuMzEtMy4zMy0xLjMxbC4wMy0yLjk0LS4zNi0xLjYycy0uNjEuMTYtMS4yOC0xLjIyLS43NS0yLjU5LjA4LTIuMjgsOS45NS41Niw5Ljk1LjU2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTcxNi42MSw2MjEuOTNsMy4yMS0uOTVjLjcxLS4yMSwxLjQ4LS4wMywyLjA0LjQ4bC40NC40Yy40LjM2Ljc2Ljc2LDEuMDksMS4xOWwuMjguMzdoLTYuNzRsLS4zMi0xLjQ5WiIvPgogICAgICA8L2c+CiAgICAgIDxwYXRoIGlkPSJoYWlyLTciIGRhdGEtbmFtZT0iaGFpciIgY2xhc3M9ImNscy0xMSIgZD0iTTcwOS45LDU4OS4zMmMtLjA4LS41OC0uMzgtMS4xOC0uODgtMS42OC0uNTgtLjU4LTEuMy0uODktMS45NS0uOS0uNDItLjU1LTEuMjItLjktMi4xMy0uODYtLjguMDQtMS40OS4zOC0xLjkuODctLjcxLS4wNi0xLjUzLjI1LTIuMTguODktLjY2LjY2LS45NywxLjUxLS44OSwyLjIzLS41OCwxLjU5LjE3LDQuNDcuMTcsNC40N2wxLjI4LDMuNjgsMi41MiwxLjk3Yy4zNi4yOC44NS4zMiwxLjI1LjA5bDIuNTUtMS40N3MuNjUtMS4zLDEuNTctMy41NGMuNzYtMS44NiwxLjA0LTQuNDEuNTctNS43NFoiLz4KICAgIDwvZz4KICAgIDxnIGlkPSJwZXJzb25fZnJvbnRfMiIgZGF0YS1uYW1lPSJwZXJzb24gZnJvbnQgMiI+CiAgICAgIDxnIGlkPSJzaGlydC05IiBkYXRhLW5hbWU9InNoaXJ0Ij4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTE0IiBkPSJNNjM3LjU5LDYyOC4zNWMtLjk4LDAtMS45My0uMTctMi43OC0uNDEtMi4yMS0uNjQtMy44Mi0yLjU0LTQuMS00LjgyLS4wOS0uNzUtLjI0LTEuNjQtLjQ1LTIuNjYtLjc3LTMuNTUtMS4yOC0xMS4wOC0xLjA2LTEyLjU3LjE0LS45My4zNS0yLjEuNDktMi44Ny4wOS0uNDkuMzktLjkuODEtMS4xMWgwYy42Ny0uMzMsMi42Mi0xLjAxLDMuNjctMS4zNy40NC0uMTUuOTItLjE1LDEuMzYsMGgwczQuMDgtLjkxLDQuMDgtLjkxaDBzNC4wOC45MSw0LjA4LjkxaDBjLjQ0LS4xNi45Mi0uMTYsMS4zNiwwLDEuMDUuMzYsMy4wMSwxLjA0LDMuNjcsMS4zN2gwYy40Mi4yMS43Mi42Mi44MSwxLjExLjE0Ljc2LjM1LDEuOTQuNDksMi44Ny4yMywxLjUtLjI5LDkuMDItMS4wNiwxMi41Ny0uMjIsMS4wMS0uMzYsMS45LS40NSwyLjY2LS4yOCwyLjI4LTEuOSw0LjE4LTQuMSw0LjgyLS44NS4yNS0xLjc5LjQxLTIuNzguNDFoLTQuMDNaIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0xNCIgcG9pbnRzPSI2NTEuNDkgNjIzLjI0IDY1MC4wMiA2MDcuODggNjQ0LjI4IDYwOS4wMyA2NDcuNDUgNjIzLjI0IDY1MS40OSA2MjMuMjQiLz4KICAgICAgPC9nPgogICAgICA8ZyBpZD0ic2tpbi04IiBkYXRhLW5hbWU9InNraW4iPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjUiIGQ9Ik02NDMuMzgsNTkxLjE5Yy44NC43MSwxLjMzLDEuNzUsMS4zMywyLjg1LDAsMi43My0uMzIsNi41NC0xLjc4LDcuMTYtLjQ1LjE5LTEuNDktLjEyLTEuNDktLjEyLDAsMC01LjQ2LTIuNTktNS43MS0yLjk5bC0uODYtMS4zOGMtLjE4LTEuODIuMzYtMy42NCwxLjUyLTUuMDZoMGMxLTEuMjIsMi41Mi0xLjksNC4xLTEuODJoMGMuODkuMDQsMS43NS4zOCwyLjQzLjk2bC40Ny40WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjUiIGQ9Ik02NDMuOTQsNTk1LjU5Yy41NC4wNS4zOC45Ni0uMDEsMS43Ni0uNC44LS45NiwxLjgzLTEuMzIsMS43NGwtLjMxLS4wOS0uMjIsMS4yNC41MywyLjA2cy0xLjY0LDEuMjQtMy4yNSwxLjI0LTMuMDEtMS4xOC0zLjAxLTEuMThsLjAzLTIuNjYtLjMzLTEuNDZzLS41NS4xNS0xLjE1LTEuMS0uNjgtMi4zNC4wNy0yLjA2LDguOTguNSw4Ljk4LjVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yNSIgZD0iTTY1MS4zMyw2MjEuNTlsMi4zNi0uNzljLjcxLS4yMSwxLjQ4LS4wMywyLjA0LjQ4bC40NC40Yy40LjM2Ljc2Ljc2LDEuMDksMS4xOWwuMjguMzdoLTYuMDVsLS4xNi0xLjY1WiIvPgogICAgICA8L2c+CiAgICAgIDxwYXRoIGlkPSJoYWlyLTgiIGRhdGEtbmFtZT0iaGFpciIgY2xhc3M9ImNscy0xMSIgZD0iTTY0My42NSw1OTEuMjhjLS44NS0uODEtMi4yMy0xLjgzLTMuODktMS45OS0yLjA0LS4yLTMuNjQsMS4zOS00LjUxLDIuNjctLjA1LjA4LS4xLjE3LS4xNC4yNi0xLjI0LDIuMjYtMS4zMyw1LjA0LTEuMTYsNy4wOS4xNCwxLjY2LDEuNDIsMi45MywyLjk2LDIuOTNoMS44YzEuNTMsMCwzLjE0LS41OSwzLjk0LTEuODUsMS4wNy0xLjY3LDEuNDktNS45LDEuNDktNS45LjE3LTEuNC4wNC0yLjctLjQ4LTMuMloiLz4KICAgICAgPHBhdGggaWQ9ImhhaXJiYW5kLTMiIGRhdGEtbmFtZT0iaGFpcmJhbmQiIGNsYXNzPSJjbHMtMTYiIGQ9Ik02NDMuMzEsNTk0Ljc4cy0uNjUtNS4zNi0zLjU0LTUuNDljMCwwLDIuOTctLjU1LDMuNTQsMi44OS4yMSwxLjI0LDAsMi42LDAsMi42WiIvPgogICAgPC9nPgogICAgPGcgaWQ9InBlcnNvbl9mcm9udF8xIiBkYXRhLW5hbWU9InBlcnNvbiBmcm9udCAxIj4KICAgICAgPGcgaWQ9InNoaXJ0LTEwIiBkYXRhLW5hbWU9InNoaXJ0Ij4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEzIiBkPSJNNjAzLjg3LDYyNS41Yy0zLjQ2LDAtNi4zNy0yLjItNi4zNy0yLjIsMCwwLC4xNi0xLjkxLS41Ni01LjI2LS41My0yLjQ1LS44Mi03LjY1LS45NC0xMC4yOS0uMDYtMS4yNS4yMy0yLjUuODItMy42MSwwLS4wMi4wMi0uMDQuMDMtLjA1LjY2LTEuMjMsMS44MS0yLjEzLDMuMTctMi40N2wzLjg2LS45NWMxLjI1LS4yOCwyLjU1LS4yOCwzLjgxLDAsMCwwLDIuMTYuNDcsMy45My44OSwxLjQxLjM0LDIuNiwxLjMsMy4yMiwyLjYxLjAyLjA1LjA1LjEuMDcuMTQuNDksMS4wMy43MSwyLjE2LjY2LDMuMjktLjExLDIuNTktLjQsNy45NC0uOTQsMTAuNDMtLjczLDMuMzYtLjU2LDUuMjYtLjU2LDUuMjYsMCwwLTIuOTEsMi4yLTYuMzcsMi4yaC0zLjgxWiIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMTMiIHBvaW50cz0iNjE1LjQ4IDYwNi4xOCA2MTkuNiA2MjMuNjQgNjEyLjc5IDYyMy42NCA2MTAuNzEgNjE0LjI0IDYxNS40OCA2MDYuMTgiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTE2IiBkPSJNNTk2LjIsNjA1Ljc0bC03LjgzLDE3LjkxaDQuNjRjMS4zMywwLDIuNTYtLjc0LDMuMTgtMS45MmwyLjYtNC45My0yLjYtMTEuMDZaIi8+CiAgICAgIDwvZz4KICAgICAgPGcgaWQ9InNraW4tOSIgZGF0YS1uYW1lPSJza2luIj4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI1IiBkPSJNNjE5LjE4LDYyMS44NWwyLjItLjY1Yy43MS0uMjEsMS40OC0uMDMsMi4wNC40OGwuNDQuNGMuNC4zNi43Ni43NiwxLjA5LDEuMTlsLjI4LjM3aC01LjYzbC0uNDItMS43OVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI1IiBkPSJNNTg5LjEyLDYyMS45NWwtMi41Mi0uNzRjLS43MS0uMjEtMS40OC0uMDMtMi4wNC40OGwtLjQ0LjRjLS40LjM2LS43Ni43Ni0xLjA5LDEuMTlsLS4yOC4zN2g1LjYzcy43NC0xLjcuNzQtMS43WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjciIGQ9Ik02MTEuMjYsNTkwLjZjLjg0LjcxLDEuMzMsMS43NSwxLjMzLDIuODUsMCwyLjczLS4zMiw2LjU0LTEuNzgsNy4xNi0uNDUuMTktMS40OS0uMTItMS40OS0uMTJsLTEsMy4yNy01LjYxLTEuNzcsMS4wNi0zLjE2Yy4xNS0uNDUuMDktLjk0LS4xNi0xLjM0bC0uODYtMS4zOGMtLjE4LTEuODIuMzYtMy42NCwxLjUyLTUuMDZoMGMxLTEuMjIsMi41Mi0xLjksNC4xLTEuODJoMGMuODkuMDQsMS43NS4zOCwyLjQzLjk2bC40Ny40WiIvPgogICAgICA8L2c+CiAgICAgIDxwYXRoIGlkPSJoYWlyLTkiIGRhdGEtbmFtZT0iaGFpciIgY2xhc3M9ImNscy0xMSIgZD0iTTYxMi4zOCw1ODkuNDVjLS41NS0uMzItMS4xNC0uNDItMS42Ni0uMzQtMS4wNy0uNTctMi40NC0uOTctNC4xNC0uOC0yLjczLjI3LTMuNzcsMi40OS00LjEyLDMuNTktLjE1LjQ5LS4yMy45Ny0uMjUsMS40OWgwczAsLjA1LDAsLjA4YzAsLjAyLDAsLjA1LDAsLjA3LS4wNywzLjQzLTIuNjEsMy43Ny0zLjc0LDYuMzgtMS4xNCwyLjY1LjYzLDYuNTQsNC4yMyw2Ljk2LDQuNzkuNTUsNi42My0yLjI0LDcuMjctNC4yOS42NC0yLjA1LS44NS00LjEtMS4yNS01LjQ2LDAsMC0uNjEtMi4zMS4yNy0yLjc2Ljg4LS40NSwxLjYsMS40LDEuNiwxLjRsLjM5LTEuMjVjLjI1LS44MS43LTEuMjcsMS40MS0xLjY2LjQ0LS4xMS44MS0uMzUsMS4wMy0uNzMuNDktLjg2LjAyLTIuMDUtMS4wNS0yLjY3WiIvPgogICAgPC9nPgogICAgPGcgaWQ9InNlYXRzX2luX3RoZV9iYWNrIiBkYXRhLW5hbWU9InNlYXRzIGluIHRoZSBiYWNrIj4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xMSIgZD0iTTU4NC43OSw2NDBoLTMuM3YtMTUuMDVjMC0uOTQuNzYtMS43MSwxLjcxLTEuNzFoMi4zN3MtLjc4LDE2Ljc2LS43OCwxNi43NlpNNjE2LjA5LDY0MGgzLjN2LTE1LjA1YzAtLjk0LS43Ni0xLjcxLTEuNzEtMS43MWgtMi4zN2wuNzgsMTYuNzZaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yMiIgZD0iTTYxNi4xMSw2NDBoLTMxLjMzbDEuMDYtMjIuODhjLjM2LTcuOCw2Ljc5LTEzLjk0LDE0LjYxLTEzLjk0aDBjNy44MSwwLDE0LjI0LDYuMTQsMTQuNjEsMTMuOTRsMS4wNiwyMi44OFoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTExIiBkPSJNNjE5LjQsNjQwaC0zLjN2LTE1LjA1YzAtLjk0Ljc2LTEuNzEsMS43MS0xLjcxaDIuMzdzLS43OCwxNi43Ni0uNzgsMTYuNzZaTTY1MC43MSw2NDBoMy4zdi0xNS4wNWMwLS45NC0uNzYtMS43MS0xLjcxLTEuNzFoLTIuMzdsLjc4LDE2Ljc2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjIiIGQ9Ik02NTAuNzIsNjQwaC0zMS4zM2wxLjA2LTIyLjg4Yy4zNi03LjgsNi43OS0xMy45NCwxNC42MS0xMy45NGgwYzcuODEsMCwxNC4yNCw2LjE0LDE0LjYxLDEzLjk0bDEuMDYsMjIuODhaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xMSIgZD0iTTY1NC4wMiw2NDBoLTMuM3YtMTUuMDVjMC0uOTQuNzYtMS43MSwxLjcxLTEuNzFoMi4zN3MtLjc4LDE2Ljc2LS43OCwxNi43NlpNNjg1LjMzLDY0MGgzLjN2LTE1LjA1YzAtLjk0LS43Ni0xLjcxLTEuNzEtMS43MWgtMi4zN2wuNzgsMTYuNzZaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yMiIgZD0iTTY4NS4zNCw2NDBoLTMxLjMzbDEuMDYtMjIuODhjLjM2LTcuOCw2Ljc5LTEzLjk0LDE0LjYxLTEzLjk0aDBjNy44MSwwLDE0LjI0LDYuMTQsMTQuNjEsMTMuOTRsMS4wNiwyMi44OFoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTExIiBkPSJNNjg4LjY0LDY0MGgtMy4zdi0xNS4wNWMwLS45NC43Ni0xLjcxLDEuNzEtMS43MWgyLjM3cy0uNzgsMTYuNzYtLjc4LDE2Ljc2Wk03MTkuOTUsNjQwaDMuM3YtMTUuMDVjMC0uOTQtLjc2LTEuNzEtMS43MS0xLjcxaC0yLjM3bC43OCwxNi43NloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIyIiBkPSJNNzE5Ljk2LDY0MGgtMzEuMzNsMS4wNi0yMi44OGMuMzYtNy44LDYuNzktMTMuOTQsMTQuNjEtMTMuOTRoMGM3LjgxLDAsMTQuMjQsNi4xNCwxNC42MSwxMy45NGwxLjA2LDIyLjg4WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTEiIGQ9Ik03MjMuMjYsNjQwaC0zLjN2LTE1LjA1YzAtLjk0Ljc2LTEuNzEsMS43MS0xLjcxaDIuMzdzLS43OCwxNi43Ni0uNzgsMTYuNzZaTTc1NC41Nyw2NDBoMy4zdi0xNS4wNWMwLS45NC0uNzYtMS43MS0xLjcxLTEuNzFoLTIuMzdsLjc4LDE2Ljc2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjIiIGQ9Ik03NTQuNTgsNjQwaC0zMS4zM2wxLjA2LTIyLjg4Yy4zNi03LjgsNi43OS0xMy45NCwxNC42MS0xMy45NGgwYzcuODEsMCwxNC4yNCw2LjE0LDE0LjYxLDEzLjk0bDEuMDYsMjIuODhaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xMSIgZD0iTTc1Ny44OCw2NDBoLTMuM3YtMTUuMDVjMC0uOTQuNzYtMS43MSwxLjcxLTEuNzFoMi4zN3MtLjc4LDE2Ljc2LS43OCwxNi43NlpNNzg5LjE5LDY0MGgzLjN2LTE1LjA1YzAtLjk0LS43Ni0xLjcxLTEuNzEtMS43MWgtMi4zN2wuNzgsMTYuNzZaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yMiIgZD0iTTc4OS4yLDY0MGgtMzEuMzNsMS4wNi0yMi44OGMuMzYtNy44LDYuNzktMTMuOTQsMTQuNjEtMTMuOTRoMGM3LjgxLDAsMTQuMjQsNi4xNCwxNC42MSwxMy45NGwxLjA2LDIyLjg4WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTEiIGQ9Ik03OTIuNSw2NDBoLTMuM3YtMTUuMDVjMC0uOTQuNzYtMS43MSwxLjcxLTEuNzFoMi4zN3MtLjc4LDE2Ljc2LS43OCwxNi43NlpNODIzLjgsNjQwaDMuM3YtMTUuMDVjMC0uOTQtLjc2LTEuNzEtMS43MS0xLjcxaC0yLjM3bC43OCwxNi43NloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIyIiBkPSJNODIzLjgyLDY0MGgtMzEuMzNsMS4wNi0yMi44OGMuMzYtNy44LDYuNzktMTMuOTQsMTQuNjEtMTMuOTRoMGM3LjgxLDAsMTQuMjQsNi4xNCwxNC42MSwxMy45NGwxLjA2LDIyLjg4WiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMTEiIGQ9Ik04MjcuMTIsNjQwaC0zLjN2LTE1LjA1YzAtLjk0Ljc2LTEuNzEsMS43MS0xLjcxaDIuMzdzLS43OCwxNi43Ni0uNzgsMTYuNzZaTTg1OC40Miw2NDBoMy4zdi0xNS4wNWMwLS45NC0uNzYtMS43MS0xLjcxLTEuNzFoLTIuMzdsLjc4LDE2Ljc2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjIiIGQ9Ik04NTguNDQsNjQwaC0zMS4zM2wxLjA2LTIyLjg4Yy4zNi03LjgsNi43OS0xMy45NCwxNC42MS0xMy45NGgwYzcuODEsMCwxNC4yNCw2LjE0LDE0LjYxLDEzLjk0bDEuMDYsMjIuODhaIi8+CiAgICAgIDwvZz4KICAgIDwvZz4KICAgIDxnIGlkPSJsaWdodHMiPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNNjY2LjkxLDQ2NC43MmMtLjg0LS40My0uNzMtMi4zMS4yNC00LjIuOTctMS44OSwyLjQ0LTMuMDgsMy4yNy0yLjY1bDguMjksNC4yNS0zLjUxLDYuODUtOC4yOS00LjI1WiIvPgogICAgICAgIDxlbGxpcHNlIGNsYXNzPSJjbHMtMjMiIGN4PSI2NzYuOTUiIGN5PSI0NjUuNTUiIHJ4PSIzLjg1IiByeT0iMS43IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtNDYuMjYgODU1LjM3KSByb3RhdGUoLTYyLjg0KSIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik02NjUuMTYsNDYxLjUzYy0uMzktLjItLjM0LTEuMDguMTEtMS45Ny40Ni0uODksMS4xNC0xLjQ0LDEuNTQtMS4yNGwzLjg5LDItMS42NSwzLjIyLTMuODktMloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNNjcxLjY3LDQ2My42aC0uODl2LTUuNTVjMC0uODUuNjktMS41MywxLjUzLTEuNTNoLjg3Yy44NSwwLDEuNTMuNjksMS41MywxLjUzdjIuNzVoLS44OXYtMi43NWMwLS4zNi0uMjktLjY1LS42NS0uNjVoLS44N2MtLjM2LDAtLjY1LjI5LS42NS42NXY1LjU1WiIvPgogICAgICAgIDxsaW5lIGNsYXNzPSJjbHMtNyIgeDE9IjY3Mi43NSIgeTE9IjQ1Ni45MiIgeDI9IjY3Mi43NSIgeTI9IjQ1My43MyIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik01OTguOCw0NjQuNzVjLS44NC0uNDMtLjczLTIuMzEuMjQtNC4yLjk3LTEuODksMi40NC0zLjA4LDMuMjctMi42NWw4LjI5LDQuMjUtMy41MSw2Ljg1LTguMjktNC4yNVoiLz4KICAgICAgICA8ZWxsaXBzZSBjbGFzcz0iY2xzLTIzIiBjeD0iNjA4Ljg1IiBjeT0iNDY1LjU4IiByeD0iMy44NSIgcnk9IjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzLjMxIDc5NC44KSByb3RhdGUoLTYyLjg0KSIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik01OTcuMDYsNDYxLjU2Yy0uMzktLjItLjM0LTEuMDguMTEtMS45Ny40Ni0uODksMS4xNC0xLjQ0LDEuNTQtMS4yNGwzLjg5LDItMS42NSwzLjIyLTMuODktMloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNNjAzLjU3LDQ2My42M2gtLjg5di01LjU1YzAtLjg1LjY5LTEuNTMsMS41My0xLjUzaC44N2MuODUsMCwxLjUzLjY5LDEuNTMsMS41M3YyLjc1aC0uODl2LTIuNzVjMC0uMzYtLjI5LS42NS0uNjUtLjY1aC0uODdjLS4zNiwwLS42NS4yOS0uNjUuNjV2NS41NVoiLz4KICAgICAgICA8bGluZSBjbGFzcz0iY2xzLTciIHgxPSI2MDQuNjUiIHkxPSI0NTYuOTUiIHgyPSI2MDQuNjUiIHkyPSI0NTMuNzMiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNNzczLjk4LDQ2NC43MmMuODQtLjQzLjczLTIuMzEtLjI0LTQuMnMtMi40NC0zLjA4LTMuMjctMi42NWwtOC4yOSw0LjI1LDMuNTEsNi44NSw4LjI5LTQuMjVaIi8+CiAgICAgICAgPGVsbGlwc2UgY2xhc3M9ImNscy0yMyIgY3g9Ijc2My45MyIgY3k9IjQ2NS41NSIgcng9IjEuNyIgcnk9IjMuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xMjguMjggNDAwLjAyKSByb3RhdGUoLTI3LjE2KSIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik03NzUuNzIsNDYxLjUzYy4zOS0uMi4zNC0xLjA4LS4xMS0xLjk3cy0xLjE0LTEuNDQtMS41NC0xLjI0bC0zLjg5LDIsMS42NSwzLjIyLDMuODktMloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNNzY5LjIxLDQ2My42aC44OXMwLTUuNTUsMC01LjU1YzAtLjg1LS42OS0xLjUzLTEuNTMtMS41M2gtLjg3Yy0uODUsMC0xLjUzLjY5LTEuNTMsMS41M3YyLjc1cy44OSwwLC44OSwwdi0yLjc1YzAtLjM2LjI5LS42NS42NS0uNjVoLjg3Yy4zNiwwLC42NS4yOS42NS42NXY1LjU1WiIvPgogICAgICAgIDxsaW5lIGNsYXNzPSJjbHMtNyIgeDE9Ijc2OC4xMyIgeTE9IjQ1Ni45MiIgeDI9Ijc2OC4xMyIgeTI9IjQ1My43MyIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik04NDIuMDgsNDY0Ljc1Yy44NC0uNDMuNzMtMi4zMS0uMjQtNC4yLS45Ny0xLjg5LTIuNDQtMy4wOC0zLjI3LTIuNjVsLTguMjksNC4yNSwzLjUxLDYuODUsOC4yOS00LjI1WiIvPgogICAgICAgIDxlbGxpcHNlIGNsYXNzPSJjbHMtMjMiIGN4PSI4MzIuMDMiIGN5PSI0NjUuNTgiIHJ4PSIxLjciIHJ5PSIzLjg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTIwLjc4IDQzMS4xMSkgcm90YXRlKC0yNy4xNikiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTI0IiBkPSJNODQzLjgzLDQ2MS41NmMuMzktLjIuMzQtMS4wOC0uMTEtMS45Ny0uNDYtLjg5LTEuMTQtMS40NC0xLjU0LTEuMjRsLTMuODksMiwxLjY1LDMuMjIsMy44OS0yWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMjQiIGQ9Ik04MzcuMzEsNDYzLjYzaC44OXMwLTUuNTUsMC01LjU1YzAtLjg1LS42OS0xLjUzLTEuNTMtMS41M2gtLjg3Yy0uODUsMC0xLjUzLjY5LTEuNTMsMS41M3YyLjc1cy44OSwwLC44OSwwdi0yLjc1YzAtLjM2LjI5LS42NS42NS0uNjVoLjg3Yy4zNiwwLC42NS4yOS42NS42NXY1LjU1WiIvPgogICAgICAgIDxsaW5lIGNsYXNzPSJjbHMtNyIgeDE9IjgzNi4yMyIgeTE9IjQ1Ni45NSIgeDI9IjgzNi4yMyIgeTI9IjQ1My43MyIvPgogICAgICA8L2c+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTk2LjYsNTM0LjI5Yy4xNy0yLjY5LDEuMjgtNS4zMSwzLjEtNy4zLjQyLS40NS44OS0uODksMS40OC0xLjA2LjM0LS4xLjc1LS4wOS45OS4xNy4yMy4yNC4yNC42LjIyLjkzLS4wNi42OS0uMjYsMS4zNi0uNDgsMi4wMS0uOCwyLjI4LTIuMDEsNC40Mi0zLjU1LDYuMjgtLjIyLjI3LTEuMjEsMS41Mi0xLjYzLDEuMzItLjM3LS4xNy0uMTUtMS45Ny0uMTMtMi4zNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik01OTQuNTEsNTQ3LjQxYzEuMDYtMi4yNiwyLjkxLTQuMTUsNS4xNS01LjI1LjUxLS4yNSwxLjA3LS40NywxLjY0LS40MS4zMy4wMy42OC4xOC44LjQ4LjEyLjI4LDAsLjYtLjEzLjg3LS4yOC41Ny0uNjgsMS4wOS0xLjEsMS41Ny0xLjQ2LDEuNy0zLjIzLDMuMTMtNS4xOSw0LjIxLS4yOC4xNS0xLjU2LjktMS44Ni41OS0uMjYtLjI3LjU0LTEuNzUuNjgtMi4wNloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik01OTIuNzMsNTU4LjY4Yy45Ny0yLjA5LDIuNjMtMy44NSw0LjYzLTQuODkuNDYtLjI0Ljk1LS40NCwxLjQ1LS40MS4yOS4wMi41OS4xNS43LjQzLjEuMjUsMCwuNTUtLjEzLjgtLjI2LjUzLS42MiwxLjAxLTEsMS40Ni0xLjMyLDEuNTgtMi45LDIuOTItNC42NSwzLjk1LS4yNS4xNS0xLjM5Ljg1LTEuNjUuNTctLjIzLS4yNS41LTEuNjEuNjQtMS45WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU5MS42LDU2Ny42MmMuMzUtMS41NCwxLjIxLTIuOTUsMi4zOS0zLjkzLjI3LS4yMi41Ny0uNDMuOTEtLjQ4LjE5LS4wMy40Mi4wMi41My4xOS4xLjE2LjA4LjM3LjAzLjU1LS4xLjM5LS4yNy43Ni0uNDYsMS4xMi0uNjYsMS4yNC0xLjUyLDIuMzYtMi41NCwzLjMtLjE1LjEzLS44MS43Ni0xLjAyLjYxLS4xOS0uMTMuMTEtMS4xNS4xNS0xLjM2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU5Mi4yOCw1NDIuMDFjLTEuNzItMS44MS0yLjc5LTQuMjMtMi45OS02LjcyLS4wNC0uNTctLjA0LTEuMTcuMjItMS42Ny4xNS0uMjkuNDEtLjU2Ljc0LS41Ny4zLDAsLjU2LjIxLjc2LjQ0LjQzLjQ4Ljc2LDEuMDMsMS4wNiwxLjYsMS4wNCwxLjk4LDEuNzIsNC4xNiwyLjAxLDYuMzguMDQuMzIuMjYsMS43OC0uMTQsMS45NC0uMzUuMTQtMS40My0xLjE0LTEuNjctMS40WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU4OS4xOCw1NTYuMjJjMS41MS0yLjMyLDIuMjUtNS4xMiwyLjA3LTcuNzgtLjA0LS42MS0uMTQtMS4yMy0uNDktMS43MS0uMi0uMjctLjUyLS40OS0uODYtLjQyLS4zMi4wNy0uNTUuMzYtLjczLjY1LS4zNy42LS42MywxLjI3LS44NSwxLjk0LS43NywyLjM0LTEuMTUsNC43OC0xLjEsNy4xOSwwLC4zNCwwLDEuOTMuNDQsMi4wMS4zOS4wNywxLjMxLTEuNTUsMS41Mi0xLjg3WiIvPgogICAgICAgIDxnPgogICAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTg2LjY4LDU0OC4zOGMxLjI4LTIuMTUsMS44LTQuNzQsMS40NS03LjIxLS4wOC0uNTYtLjIyLTEuMTUtLjU4LTEuNTktLjIxLS4yNS0uNTMtLjQ2LS44NS0uMzktLjMuMDYtLjUuMzMtLjY1LjU5LS4zMi41Ni0uNTIsMS4xNy0uNjgsMS43OS0uNTgsMi4xNi0uNzgsNC40My0uNTcsNi42Ni4wMy4zMi4xMywxLjc5LjU2LDEuODYuMzcuMDYsMS4xNS0xLjQzLDEuMzItMS43M1oiLz4KICAgICAgICAgIDxnIGNsYXNzPSJjbHMtMjYiPgogICAgICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik01ODcuMDQsNTQ0LjYzYy0uMjguMzItLjQuNzQtLjQ5LDEuMTYtLjE4LjgxLS4yNSwxLjY0LS4yMiwyLjQ2LDAsLjI0LjA0LjUyLjI0LjY2LjQ3LS4zMi43OS0uODIsMS4wNy0xLjMyLjQxLS43NC43NS0xLjU3Ljc0LTIuNDMsMC0uMzQsMC0uNzgtLjM0LS45MnMtLjc4LjE1LS45OS4zOFoiLz4KICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTg5LjcyLDU1My4zM2MtMS42Ny0xLjg2LTIuNjgtNC4zLTIuODEtNi44LS4wMy0uNTcsMC0xLjE3LjI2LTEuNjcuMTUtLjI5LjQzLS41NS43Ni0uNTUuMywwLC41Ni4yMy43NS40Ni40Mi40OS43MywxLjA1LDEuMDIsMS42My45OSwyLjAxLDEuNjIsNC4yLDEuODUsNi40My4wMy4zMi4yMSwxLjc5LS4xOSwxLjk0LS4zNS4xMy0xLjQtMS4xOC0xLjYzLTEuNDRaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTgyLjY3LDU0OS41N2MtMS40LTIuMDctMy41Mi0zLjY1LTUuOTEtNC4zOC0uNTQtLjE3LTEuMTMtLjI5LTEuNjgtLjE1LS4zMi4wOC0uNjQuMjgtLjcyLjYtLjA3LjI5LjA5LjU5LjI2Ljg0LjM3LjUyLjg0Ljk3LDEuMzMsMS4zOCwxLjcxLDEuNDUsMy42OCwyLjU5LDUuNzksMy4zNS4zLjExLDEuNjguNjQsMS45Mi4yOS4yMi0uMzEtLjgtMS42NS0xLTEuOTNaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTg1LjI4LDU1OC4xOGMtMS4yNS0xLjg2LTMuMTYtMy4yNy01LjMtMy45My0uNDktLjE1LTEuMDEtLjI2LTEuNTEtLjE0LS4yOC4wNy0uNTcuMjUtLjY0LjU0LS4wNi4yNi4wOC41My4yMy43NS4zMy40Ny43Ni44NywxLjIsMS4yNCwxLjUzLDEuMywzLjMsMi4zMiw1LjE5LDMuMDEuMjcuMSwxLjUxLjU4LDEuNzMuMjYuMTktLjI4LS43Mi0xLjQ4LS45LTEuNzNaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTg3LjEsNTY0LjM2Yy0xLjA5LTEuNjQtMi43Mi0yLjktNC41My0zLjUyLS40MS0uMTQtLjg2LS4yNS0xLjI3LS4xNS0uMjQuMDYtLjQ4LjItLjUzLjQ1LS4wNS4yMy4wOC40Ni4yMS42Ni4yOS40MS42NS43NywxLjAzLDEuMSwxLjMyLDEuMTYsMi44MiwyLjA4LDQuNDIsMi43Mi4yMy4wOSwxLjI4LjUzLDEuNDUuMjYuMTYtLjI0LS42NC0xLjI5LS43OS0xLjUyWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU4MS4xMyw1NjMuMTJjLTEuMDUtMS44OC0yLjcxLTMuNC00LjYzLTQuMjQtLjQ0LS4xOS0uOTEtLjM1LTEuMzctLjI4LS4yNi4wNC0uNTQuMTgtLjYxLjQ0LS4wNy4yNC4wNC41MS4xNy43NC4yOC40OC42NC44OSwxLjAzLDEuMjksMS4zMywxLjM4LDIuODksMi41Miw0LjU4LDMuMzYuMjQuMTIsMS4zNC43LDEuNTYuNDIuMTktLjI0LS41OC0xLjQ3LS43My0xLjczWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU4My42NCw1NjguMTFjLTEuMDMtMS4wNi0yLjQxLTEuNzYtMy44NC0xLjk3LS4zMi0uMDUtLjY3LS4wNy0uOTYuMDYtLjE3LjA3LS4zMi4yMi0uMzMuNDEsMCwuMTcuMTIuMzMuMjUuNDYuMjcuMjcuNTkuNDguOTEuNjcsMS4xMy42NywyLjM3LDEuMTUsMy42NCwxLjQuMTguMDQsMS4wMi4yMiwxLjExLDAsLjA4LS4yLS42NS0uODctLjc5LTEuMDFaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTg1LjYzLDU2Ni42NWMuNDgtMS40LjUtMi45NS4wNS00LjMxLS4xLS4zMS0uMjQtLjYzLS40OC0uODMtLjE0LS4xMi0uMzQtLjE5LS41MS0uMTEtLjE2LjA3LS4yNC4yNi0uMy40My0uMTIuMzYtLjE2Ljc0LS4xOSwxLjEyLS4wOSwxLjMxLjAzLDIuNjMuMzgsMy44OC4wNS4xOC4yNiwxLjAxLjUuOTkuMjEtLjAxLjQ4LS45Ny41NS0xLjE2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU3Ni40MSw1MzcuNThjLS44Ni0xLjYxLTIuMzctNS44OS0xLjE2LTYuNjEsMS41OS0uOTQsNC4xMywxLjg5LDUuMDcsMy45LDEuMzgsMi45NSwyLjY0LDcuNzEsMS40NCw4LjI0LTEuNS42Ny00LjQ4LTMuOTItNS4zNS01LjUzWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTU4Ny4yNyw1NjAuN3MuMzMtNC4zMiwxLjEtNi44NyIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTU4OS4xOCw1NjIuNTJjLTEuMzQtMS42MS0yLjEzLTMuNjctMi4xOC01Ljc0LS4wMS0uNDcuMDItLjk3LjI1LTEuMzcuMTMtLjIzLjM3LS40NC42NC0uNDIuMjUuMDEuNDUuMjEuNjEuNDEuMzQuNDIuNTguOS44MSwxLjM5Ljc4LDEuNzEsMS4yNSwzLjU0LDEuMzksNS40LjAyLjI3LjE0LDEuNDktLjE5LDEuNi0uMy4xLTEuMTMtMS4wNC0xLjMyLTEuMjZaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNNTk4LjQ0LDUzMi4wM3MtNy44OSwxNy4xOS03Ljg5LDQyLjY4Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNNTc5Ljk1LDUzOC44MnM5LjAzLDE5LjU0LDkuMDMsMzUuODkiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01NzkuMDIsNTYxLjk5czcuMzMsNi45OCw4LjQsMTIuNzEiLz4KICAgICAgICA8bGluZSBjbGFzcz0iY2xzLTUiIHgxPSI1OTIuMDUiIHkxPSI1MzguODIiIHgyPSI1OTQuMzUiIHkyPSI1NDQuMzYiLz4KICAgICAgICA8bGluZSBjbGFzcz0iY2xzLTUiIHgxPSI1OTcuOTYiIHkxPSI1NDUuNDQiIHgyPSI1OTIuOTciIHkyPSI1NTAuMzQiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODkuNTEsNTUwLjM0Yy4yMi42OS40OCwxLjQyLjgxLDIuMTkuNTUsMS4yNywxLjE1LDIuMzYsMS43MywzLjI3Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNNTk1LjIyLDU1Ny40M2MtLjc4LjY0LTEuNjQsMS40My0yLjQ5LDIuNC0uNTguNjYtMS4wOCwxLjMtMS41LDEuOTEiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODkuMTQsNTU5Ljc5cy44LDIuOTYsMS44Miw0LjgiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01OTIuOTIsNTY2LjM3cy0xLjgxLDMuMjMtMi4zMSw0LjM4Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNNTc5LjgxLDU0OC41czQuNTcsMy4yNiw1LjUxLDQuODciLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODUsNTUyLjNzLjMzLTQuMzIsMS4xLTYuODciLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODIuMzQsNTU3LjA0czQuMzUsMi44Myw1LjA4LDQuNDEiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODYsNTY0LjQyczIuMjMsMS4xOSwyLjQxLDIuNTgiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik01ODEuNzMsNTY3LjgyczIuOTkuODcsMy44MiwyLjMyIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNNTg0LjksNTY5cy4zMi0yLjM4LjMyLTMuNDUiLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTE0IiBwb2ludHM9IjU5NC4xOCA1ODkuNCA1ODQuODQgNTg5LjQgNTgzLjc5IDU3NC43MSA1OTUuMjIgNTc0LjcxIDU5NC4xOCA1ODkuNCIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJjbHMtMTQiIHg9IjU4My4wNyIgeT0iNTc0LjcxIiB3aWR0aD0iMTIuNjciIGhlaWdodD0iMS42NiIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMTkiIHBvaW50cz0iNTk1LjEgNTc2LjM3IDU4My45NyA1NzcuMjMgNTgzLjk3IDU3Ni4zNyA1OTUuMSA1NzYuMzciLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik01ODQsNTY0LjM3cy0uMjEtMS42LjI4LTIuNzJsLjE0LjA5cy0uNDQsMS4xOS0uMjIsMi43NmwtLjItLjEyWiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik01ODcuNzgsNTUwLjgxcy42NSwyLjE5LDIuNDMsMy40OGwuMTItLjI4cy0xLjE0LTEuMTItMi40Ni0zLjU1bC0uMDguMzVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTU4OS4yMyw1NTYuMTRzLS42Mi0xLjAzLTEuMTQtMS4wOWMwLDAsLjQuMTgsMSwxLjMxbC4xNC0uMjJaIi8+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNODYxLjgxLDUzNC4yOWMuMTctMi42OSwxLjI4LTUuMzEsMy4xLTcuMy40Mi0uNDUuODktLjg5LDEuNDgtMS4wNi4zNC0uMS43NS0uMDkuOTkuMTcuMjMuMjQuMjQuNi4yMi45My0uMDYuNjktLjI2LDEuMzYtLjQ4LDIuMDEtLjgsMi4yOC0yLjAxLDQuNDItMy41NSw2LjI4LS4yMi4yNy0xLjIxLDEuNTItMS42MywxLjMyLS4zNy0uMTctLjE1LTEuOTctLjEzLTIuMzRaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNODU5LjcxLDU0Ny40MWMxLjA2LTIuMjYsMi45MS00LjE1LDUuMTUtNS4yNS41MS0uMjUsMS4wNy0uNDcsMS42NC0uNDEuMzMuMDMuNjguMTguOC40OC4xMi4yOCwwLC42LS4xMy44Ny0uMjguNTctLjY4LDEuMDktMS4xLDEuNTctMS40NiwxLjctMy4yMywzLjEzLTUuMTksNC4yMS0uMjguMTUtMS41Ni45LTEuODYuNTktLjI2LS4yNy41NC0xLjc1LjY4LTIuMDZaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNODU3Ljk0LDU1OC42OGMuOTctMi4wOSwyLjYzLTMuODUsNC42My00Ljg5LjQ2LS4yNC45NS0uNDQsMS40NS0uNDEuMjkuMDIuNTkuMTUuNy40My4xLjI1LDAsLjU1LS4xMy44LS4yNi41My0uNjIsMS4wMS0xLDEuNDYtMS4zMiwxLjU4LTIuOSwyLjkyLTQuNjUsMy45NS0uMjUuMTUtMS4zOS44NS0xLjY1LjU3LS4yMy0uMjUuNS0xLjYxLjY0LTEuOVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NTYuOCw1NjcuNjJjLjM1LTEuNTQsMS4yMS0yLjk1LDIuMzktMy45My4yNy0uMjIuNTctLjQzLjkxLS40OC4xOS0uMDMuNDIuMDIuNTMuMTkuMS4xNi4wOC4zNy4wMy41NS0uMS4zOS0uMjcuNzYtLjQ2LDEuMTItLjY2LDEuMjQtMS41MiwyLjM2LTIuNTQsMy4zLS4xNS4xMy0uODEuNzYtMS4wMi42MS0uMTktLjEzLjExLTEuMTUuMTUtMS4zNloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NTcuNDgsNTQyLjAxYy0xLjcyLTEuODEtMi43OS00LjIzLTIuOTktNi43Mi0uMDQtLjU3LS4wNC0xLjE3LjIyLTEuNjcuMTUtLjI5LjQxLS41Ni43NC0uNTcuMywwLC41Ni4yMS43Ni40NC40My40OC43NiwxLjAzLDEuMDYsMS42LDEuMDQsMS45OCwxLjcyLDQuMTYsMi4wMSw2LjM4LjA0LjMyLjI2LDEuNzgtLjE0LDEuOTQtLjM1LjE0LTEuNDMtMS4xNC0xLjY3LTEuNFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NTQuMzksNTU2LjIyYzEuNTEtMi4zMiwyLjI1LTUuMTIsMi4wNy03Ljc4LS4wNC0uNjEtLjE0LTEuMjMtLjQ5LTEuNzEtLjItLjI3LS41Mi0uNDktLjg2LS40Mi0uMzIuMDctLjU1LjM2LS43My42NS0uMzcuNi0uNjMsMS4yNy0uODUsMS45NC0uNzcsMi4zNC0xLjE1LDQuNzgtMS4xLDcuMTksMCwuMzQsMCwxLjkzLjQ0LDIuMDEuMzkuMDcsMS4zMS0xLjU1LDEuNTItMS44N1oiLz4KICAgICAgICA8Zz4KICAgICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1MS44OSw1NDguMzhjMS4yOC0yLjE1LDEuOC00Ljc0LDEuNDUtNy4yMS0uMDgtLjU2LS4yMi0xLjE1LS41OC0xLjU5LS4yMS0uMjUtLjUzLS40Ni0uODUtLjM5LS4zLjA2LS41LjMzLS42NS41OS0uMzIuNTYtLjUyLDEuMTctLjY4LDEuNzktLjU4LDIuMTYtLjc4LDQuNDMtLjU3LDYuNjYuMDMuMzIuMTMsMS43OS41NiwxLjg2LjM3LjA2LDEuMTUtMS40MywxLjMyLTEuNzNaIi8+CiAgICAgICAgICA8ZyBjbGFzcz0iY2xzLTE1Ij4KICAgICAgICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNODUyLjI0LDU0NC42M2MtLjI4LjMyLS40Ljc0LS40OSwxLjE2LS4xOC44MS0uMjUsMS42NC0uMjIsMi40NiwwLC4yNC4wNC41Mi4yNC42Ni40Ny0uMzIuNzktLjgyLDEuMDctMS4zMi40MS0uNzQuNzUtMS41Ny43NC0yLjQzLDAtLjM0LDAtLjc4LS4zNC0uOTJzLS43OC4xNS0uOTkuMzhaIi8+CiAgICAgICAgICA8L2c+CiAgICAgICAgPC9nPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1NC45Myw1NTMuMzNjLTEuNjctMS44Ni0yLjY4LTQuMy0yLjgxLTYuOC0uMDMtLjU3LDAtMS4xNy4yNi0xLjY3LjE1LS4yOS40My0uNTUuNzYtLjU1LjMsMCwuNTYuMjMuNzUuNDYuNDIuNDkuNzMsMS4wNSwxLjAyLDEuNjMuOTksMi4wMSwxLjYyLDQuMiwxLjg1LDYuNDMuMDMuMzIuMjEsMS43OS0uMTksMS45NC0uMzUuMTMtMS40LTEuMTgtMS42My0xLjQ0WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg0Ny44Nyw1NDkuNTdjLTEuNC0yLjA3LTMuNTItMy42NS01LjkxLTQuMzgtLjU0LS4xNy0xLjEzLS4yOS0xLjY4LS4xNS0uMzIuMDgtLjY0LjI4LS43Mi42LS4wNy4yOS4wOS41OS4yNi44NC4zNy41Mi44NC45NywxLjMzLDEuMzgsMS43MSwxLjQ1LDMuNjgsMi41OSw1Ljc5LDMuMzUuMy4xMSwxLjY4LjY0LDEuOTIuMjkuMjItLjMxLS44LTEuNjUtMS0xLjkzWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1MC40OCw1NTguMThjLTEuMjUtMS44Ni0zLjE2LTMuMjctNS4zLTMuOTMtLjQ5LS4xNS0xLjAxLS4yNi0xLjUxLS4xNC0uMjguMDctLjU3LjI1LS42NC41NC0uMDYuMjYuMDguNTMuMjMuNzUuMzMuNDcuNzYuODcsMS4yLDEuMjQsMS41MywxLjMsMy4zLDIuMzIsNS4xOSwzLjAxLjI3LjEsMS41MS41OCwxLjczLjI2LjE5LS4yOC0uNzItMS40OC0uOS0xLjczWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1Mi4zLDU2NC4zNmMtMS4wOS0xLjY0LTIuNzItMi45LTQuNTMtMy41Mi0uNDEtLjE0LS44Ni0uMjUtMS4yNy0uMTUtLjI0LjA2LS40OC4yLS41My40NS0uMDUuMjMuMDguNDYuMjEuNjYuMjkuNDEuNjUuNzcsMS4wMywxLjEsMS4zMiwxLjE2LDIuODIsMi4wOCw0LjQyLDIuNzIuMjMuMDksMS4yOC41MywxLjQ1LjI2LjE2LS4yNC0uNjQtMS4yOS0uNzktMS41MloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NDYuMzQsNTYzLjEyYy0xLjA1LTEuODgtMi43MS0zLjQtNC42My00LjI0LS40NC0uMTktLjkxLS4zNS0xLjM3LS4yOC0uMjYuMDQtLjU0LjE4LS42MS40NC0uMDcuMjQuMDQuNTEuMTcuNzQuMjguNDguNjQuODksMS4wMywxLjI5LDEuMzMsMS4zOCwyLjg5LDIuNTIsNC41OCwzLjM2LjI0LjEyLDEuMzQuNywxLjU2LjQyLjE5LS4yNC0uNTgtMS40Ny0uNzMtMS43M1oiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NDguODUsNTY4LjExYy0xLjAzLTEuMDYtMi40MS0xLjc2LTMuODQtMS45Ny0uMzItLjA1LS42Ny0uMDctLjk2LjA2LS4xNy4wNy0uMzIuMjItLjMzLjQxLDAsLjE3LjEyLjMzLjI1LjQ2LjI3LjI3LjU5LjQ4LjkxLjY3LDEuMTMuNjcsMi4zNywxLjE1LDMuNjQsMS40LjE4LjA0LDEuMDIuMjIsMS4xMSwwLC4wOC0uMi0uNjUtLjg3LS43OS0xLjAxWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTg1MC44NCw1NjYuNjVjLjQ4LTEuNC41LTIuOTUuMDUtNC4zMS0uMS0uMzEtLjI0LS42My0uNDgtLjgzLS4xNC0uMTItLjM0LS4xOS0uNTEtLjExLS4xNi4wNy0uMjQuMjYtLjMuNDMtLjEyLjM2LS4xNi43NC0uMTksMS4xMi0uMDksMS4zMS4wMywyLjYzLjM4LDMuODguMDUuMTguMjYsMS4wMS41Ljk5LjIxLS4wMS40OC0uOTcuNTUtMS4xNloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NDEuNjIsNTM3LjU4Yy0uODYtMS42MS0yLjM3LTUuODktMS4xNi02LjYxLDEuNTktLjk0LDQuMTMsMS44OSw1LjA3LDMuOSwxLjM4LDIuOTUsMi42NCw3LjcxLDEuNDQsOC4yNC0xLjUuNjctNC40OC0zLjkyLTUuMzUtNS41M1oiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Ik04NTIuNDcsNTYwLjdzLjMzLTQuMzIsMS4xLTYuODciLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik04NTQuMzgsNTYyLjUyYy0xLjM0LTEuNjEtMi4xMy0zLjY3LTIuMTgtNS43NC0uMDEtLjQ3LjAyLS45Ny4yNS0xLjM3LjEzLS4yMy4zNy0uNDQuNjQtLjQyLjI1LjAxLjQ1LjIxLjYxLjQxLjM0LjQyLjU4LjkuODEsMS4zOS43OCwxLjcxLDEuMjUsMy41NCwxLjM5LDUuNC4wMi4yNy4xNCwxLjQ5LS4xOSwxLjYtLjMuMS0xLjEzLTEuMDQtMS4zMi0xLjI2WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTg2My42NCw1MzIuMDNzLTcuODksMTcuMTktNy44OSw0Mi42OCIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTg0NS4xNiw1MzguODJzOS4wMywxOS41NCw5LjAzLDM1Ljg5Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODQ0LjIyLDU2MS45OXM3LjMzLDYuOTgsOC40LDEyLjcxIi8+CiAgICAgICAgPGxpbmUgY2xhc3M9ImNscy01IiB4MT0iODU3LjI2IiB5MT0iNTM4LjgyIiB4Mj0iODU5LjU1IiB5Mj0iNTQ0LjM2Ii8+CiAgICAgICAgPGxpbmUgY2xhc3M9ImNscy01IiB4MT0iODYzLjE2IiB5MT0iNTQ1LjQ0IiB4Mj0iODU4LjE4IiB5Mj0iNTUwLjM0Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODU0LjcxLDU1MC4zNGMuMjIuNjkuNDgsMS40Mi44MSwyLjE5LjU1LDEuMjcsMS4xNSwyLjM2LDEuNzMsMy4yNyIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTg2MC40Miw1NTcuNDNjLS43OC42NC0xLjY0LDEuNDMtMi40OSwyLjQtLjU4LjY2LTEuMDgsMS4zLTEuNSwxLjkxIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODU0LjM0LDU1OS43OXMuOCwyLjk2LDEuODIsNC44Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODU4LjEzLDU2Ni4zN3MtMS44MSwzLjIzLTIuMzEsNC4zOCIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTg0NS4wMiw1NDguNXM0LjU3LDMuMjYsNS41MSw0Ljg3Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODUwLjIxLDU1Mi4zcy4zMy00LjMyLDEuMS02Ljg3Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODQ3LjU1LDU1Ny4wNHM0LjM1LDIuODMsNS4wOCw0LjQxIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODUxLjIxLDU2NC40MnMyLjIzLDEuMTksMi40MSwyLjU4Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy01IiBkPSJNODQ2Ljk0LDU2Ny44MnMyLjk5Ljg3LDMuODIsMi4zMiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTg1MC4xLDU2OXMuMzItMi4zOC4zMi0zLjQ1Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0xNCIgcG9pbnRzPSI4NTkuMzggNTg5LjQgODUwLjA0IDU4OS40IDg0OSA1NzQuNzEgODYwLjQyIDU3NC43MSA4NTkuMzggNTg5LjQiLz4KICAgICAgICA8cmVjdCBjbGFzcz0iY2xzLTE0IiB4PSI4NDguMjciIHk9IjU3NC43MSIgd2lkdGg9IjEyLjY3IiBoZWlnaHQ9IjEuNjYiLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTE5IiBwb2ludHM9Ijg2MC4zMSA1NzYuMzcgODQ5LjE4IDU3Ny4yMyA4NDkuMTggNTc2LjM3IDg2MC4zMSA1NzYuMzciLz4KICAgICAgPC9nPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik04NDkuMiw1NjQuMzdzLS4yMS0xLjYuMjgtMi43MmwuMTQuMDlzLS40NCwxLjE5LS4yMiwyLjc2bC0uMi0uMTJaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTg1Mi45OSw1NTAuODFzLjY1LDIuMTksMi40MywzLjQ4bC4xMi0uMjhzLTEuMTQtMS4xMi0yLjQ2LTMuNTVsLS4wOC4zNVoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNODU0LjQ0LDU1Ni4xNHMtLjYyLTEuMDMtMS4xNC0xLjA5YzAsMCwuNC4xOCwxLDEuMzFsLjE0LS4yMloiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPg==';
 
+
+// ── Phase 8L.1: Declarative Layout Model (non-destructive architecture layer) ──
+// Design-space rhythm tokens. These describe relationships between semantic text roles;
+// they are intentionally independent from CW/CH preview size.
+const LAYOUT_RHYTHM = Object.freeze({
+  headline_subheadline: 24,
+  subheadline_lead: 16,
+  subheadline_body: 14,
+  lead_body: 12,
+  body_cta: 16,
+  expressiveHeadline_next: 20,
+});
+
+// Semantic starter copy for declarative layouts. Roles stay readable in the editor;
+// Body intentionally uses realistic paragraph copy so wrapping/rhythm are visible immediately.
+const LAYOUT_PLACEHOLDERS = Object.freeze({
+  expressiveHeadline: 'Headline',
+  headline: 'Headline',
+  subheadline: 'Subheadline',
+  lead: 'Lead',
+  body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  cta: 'CTA',
+});
+
+// v1 model: only Type Only is migrated as a proving layout. Legacy layouts remain untouched.
+const LAYOUT_MODELS = Object.freeze({
+  typeonly: {
+    version: 1,
+    anchor: 'safe-top-left',
+    region: { width: 0.82 },
+    background: 'typeonlyGradient',
+    textStack: [
+      { role:'expressiveHeadline', text:LAYOUT_PLACEHOLDERS.expressiveHeadline, color:'#ffffff' },
+      { role:'lead', text:LAYOUT_PLACEHOLDERS.lead, color:'#ffffff', gap:20 },
+    ],
+  },
+  // Phase 8L.3: first production migration. Uses the existing bgSplit renderer;
+  // the layout model only owns regions/relationships around that treatment.
+  split: {
+    version: 2,
+    kind: 'media-content-split',
+    background: 'splitGradient',
+    split: { angle:73, pos:38, color:'#E8EDF0' },
+    // Reference geometry: a large centered product overlaps the diagonal and leaves
+    // a calm content field below. Values are format-relative; the media object's
+    // own aspect ratio is preserved by _layoutReflowSplit().
+    media: { top:0.14, bottom:0.66, width:0.58 },
+    badge: { anchor:'media-top-right', xOverlap:0.90, yOverlap:0.35, r:0.14, text1:'CHF 29.–', text2:'/Mt.', color:'#E4003A' },
+    textRegion: { top:0.72, width:0.84 },
+    textStack: [
+      { role:'subheadline', text:LAYOUT_PLACEHOLDERS.subheadline, color:'#040D33' },
+      { role:'body', text:LAYOUT_PLACEHOLDERS.body, color:'#040D33', gap:14 },
+    ],
+  },
+  // Phase 8L.3 — Layout #2. Offer/product hero without logo.
+  // Light canvas, semantic copy at top-left, product grounded in the lower half,
+  // blue price ribbon related to the product, and the existing Swisscom Stripe near the bottom.
+  fullbleed: {
+    version: 1,
+    kind: 'offer-product-hero',
+    background: 'horizon',
+    textRegion: { top:0.14, width:0.68 },
+    textStack: [
+      { role:'subheadline', text:LAYOUT_PLACEHOLDERS.subheadline, color:'#001155' },
+      { role:'body', text:LAYOUT_PLACEHOLDERS.body, color:'#001155', gap:10 },
+    ],
+    media: { top:0.50, bottom:0.89, width:0.78 },
+    // Layout #2 reference: blue price ribbon sits independently in the right-middle field.
+    // Keep it canvas-relative so product aspect/crop does not pull the badge around.
+    badge: { anchor:'safe-relative', x:1.00, y:0.48, r:0.14, priceMode:true, priceKind:'mt', text1:'0.–', text2:'', color:'#0445C8' },
+    // Reference Stripe controls: Position 80%, Winkel -14°, Dicke 28%.
+    stripe: { y:80, angle:-14, width:28 },
+  },
+});
+
+function _layoutSafeDoc() {
+  // Safe area is 6% of the short document axis, matching guides/snap semantics.
+  return Math.round(Math.min(DW, DH) * 0.06);
+}
+
+function _layoutRoleGap(prevRole, nextRole) {
+  if (prevRole === 'expressiveHeadline') return LAYOUT_RHYTHM.expressiveHeadline_next;
+  if (prevRole === 'headline' && nextRole === 'subheadline') return LAYOUT_RHYTHM.headline_subheadline;
+  if (prevRole === 'subheadline' && nextRole === 'lead') return LAYOUT_RHYTHM.subheadline_lead;
+  if (prevRole === 'subheadline' && nextRole === 'body') return LAYOUT_RHYTHM.subheadline_body;
+  if (prevRole === 'lead' && nextRole === 'body') return LAYOUT_RHYTHM.lead_body;
+  if (prevRole === 'body' && nextRole === 'cta') return LAYOUT_RHYTHM.body_cta;
+  return 16;
+}
+
+function _layoutAddText(item, x, y, maxWidth) {
+  const role = FT_STYLES[item.role] || FT_STYLES.body;
+  const id = 'ft_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const ft = {
+    id, text:item.text || '', x:Math.round(x), y:Math.round(y),
+    // ft.fontSize remains CW-space by typography semantics; geometry remains DW/DH-space.
+    fontSize:Math.round(role.exportPx * CW / DW),
+    color:item.color || '#ffffff',
+    fontWeight:item.weight || role.defaultWeight,
+    opacity:1, stylePreset:item.role,
+    maxWidth:Math.round(maxWidth),
+    lineHeightFactor:role.lineHeightPx / role.exportPx,
+    trackingPx:role.trackingPx ?? 0,
+    _roleSize:true,
+    _layoutManaged:true,
+    _layoutAttached:true,
+    _layoutStyle:S.layoutStyle || null,
+    _layoutIndex:Number.isFinite(item._layoutIndex) ? item._layoutIndex : null,
+    glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}
+  };
+  S.freeTexts[id] = ft;
+  S.layerOrder.push(id);
+  return ft;
+}
+
+function _layoutTextHeightDoc(ft) {
+  // Phase 8L.2: use the actual wrapped FreeText bounds in document space.
+  // This makes stack rhythm respond to real line wrapping, not only explicit newlines.
+  try {
+    const ctx = document.createElement('canvas').getContext('2d');
+    const fontScaleX = CW > 0 ? DW / CW : 1;
+    const fontScaleY = CH > 0 ? DH / CH : 1;
+    const b = getFtBounds(ft, ctx, fontScaleX, fontScaleY, 1, 1);
+    if (b && Number.isFinite(b.h) && b.h > 0) return b.h;
+  } catch (_) {}
+  const role = FT_STYLES[ft.stylePreset];
+  const lh = role ? role.lineHeightPx : ((ft.fontSize || 16) * (ft.lineHeightFactor || 1.2) * DW / CW);
+  return Math.max(lh, (ft.text || '').split('\n').length * lh);
+}
+
+
+// Phase 8L.2A — manual-anchor preservation for detached layout-managed FreeText.
+// A detached object keeps the user's VISUAL relationship to the canvas across formats:
+// near an edge => preserve that edge gap; near center => preserve center; otherwise
+// preserve normalized glyph-center position. Geometry is based on rendered glyph bounds,
+// never on the invisible maxWidth container.
+function _layoutFtBoundsDoc(ft) {
+  try {
+    const ctx = document.createElement('canvas').getContext('2d');
+    const fscX = CW > 0 ? DW / CW : 1;
+    const fscY = CH > 0 ? DH / CH : 1;
+    return getFtBounds(ft, ctx, fscX, fscY, 1, 1);
+  } catch (_) { return null; }
+}
+
+
+// Phase 8L.3A — TextStack primitive.
+// Layouts align the visible ink edge, not the FreeText container origin. This keeps
+// Headline/Lead/Body on one optical axis even when font size/sidebearings differ.
+function _layoutOpticalBoundsDoc(ft) {
+  const base = _layoutFtBoundsDoc(ft);
+  if (!base) return null;
+  try {
+    // The current production layouts use left-aligned text. For center/right, the
+    // alignment-aware glyphX from getFtBounds remains the safest reference.
+    if ((ft.alignment || 'left') !== 'left') {
+      return {...base, opticalGlyphX:base.glyphX, opticalW:base.w};
+    }
+    const ctx = document.createElement('canvas').getContext('2d');
+    const fsc = CW > 0 ? DW / CW : 1;
+    const lines = wrapFtLines(ft, ctx, fsc, 1);
+    const fs = Math.round((ft.fontSize || 32) * fsc);
+    ctx.font = `${ft.fontWeight || '700'} ${fs}px ${getFtFontName(ft)}`;
+    applyFtCanvasTracking(ctx, ft, 1);
+    let minLeft = Infinity, maxRight = -Infinity;
+    for (const line of lines) {
+      if (!line) continue;
+      const m = ctx.measureText(line);
+      const left = Number.isFinite(m.actualBoundingBoxLeft) ? -m.actualBoundingBoxLeft : 0;
+      const right = Number.isFinite(m.actualBoundingBoxRight) ? m.actualBoundingBoxRight : m.width;
+      minLeft = Math.min(minLeft, left);
+      maxRight = Math.max(maxRight, right);
+    }
+    if (!Number.isFinite(minLeft) || !Number.isFinite(maxRight)) {
+      return {...base, opticalGlyphX:base.glyphX, opticalW:base.w};
+    }
+    return {
+      ...base,
+      opticalGlyphX: ft.x + minLeft,
+      opticalW: Math.max(0, maxRight - minLeft),
+      opticalOffsetX: minLeft,
+    };
+  } catch (_) {
+    return {...base, opticalGlyphX:base.glyphX, opticalW:base.w};
+  }
+}
+
+function _layoutAlignOpticalLeft(ft, targetX) {
+  const b = _layoutOpticalBoundsDoc(ft);
+  if (!b || !Number.isFinite(b.opticalGlyphX)) return;
+  ft.x += targetX - b.opticalGlyphX;
+}
+
+function _layoutApplyRoleMetrics(ft, roleKey) {
+  const role = FT_STYLES[roleKey];
+  if (!ft || !role || ft._roleSize !== true) return;
+  ft.fontSize = Math.round(role.exportPx * CW / DW);
+  ft.lineHeightFactor = role.lineHeightPx / role.exportPx;
+  ft.trackingPx = role.trackingPx ?? 0;
+}
+
+// True vertical flow for semantic text stacks. The next item is placed from the
+// previous line-box bottom + semantic gap, so wrapping/content edits cannot overlap it.
+// Horizontal placement is optical: all attached items share the same visible ink axis.
+function _layoutFlowTextStack(style, items, targetX, startY, regionW) {
+  let cursorY = startY;
+  let prevRole = null;
+  (items || []).forEach((item, idx) => {
+    const ft = _layoutManagedText(style, idx);
+    if (!ft) return;
+    const roleKey = ft.stylePreset || item.role;
+    if (idx > 0) cursorY += Number.isFinite(item.gap) ? item.gap : _layoutRoleGap(prevRole, roleKey);
+
+    if (ft._layoutAttached !== false) {
+      ft.maxWidth = regionW;
+      _layoutApplyRoleMetrics(ft, roleKey);
+      ft.x = targetX;
+      ft.y = cursorY;
+      _layoutAlignOpticalLeft(ft, targetX);
+      cursorY = ft.y + _layoutTextHeightDoc(ft);
+    } else {
+      // Detached text keeps its manual position, but its semantic slot still has a
+      // measured height so downstream attached items remain in a stable stack.
+      cursorY += _layoutTextHeightDoc(ft);
+    }
+    prevRole = roleKey;
+  });
+  return cursorY;
+}
+
+function _reflowLayoutForFt(ft) {
+  if (!ft || ft._layoutManaged !== true || ft._layoutAttached === false || !ft._layoutStyle) return false;
+  if (typeof LAYOUT_MODELS === 'undefined' || !LAYOUT_MODELS[ft._layoutStyle]) return false;
+  if (typeof reflowDeclarativeLayout !== 'function') return false;
+  return !!reflowDeclarativeLayout(ft._layoutStyle);
+}
+
+function _captureManualLayoutAnchor(ft) {
+  if (!ft || DW <= 0 || DH <= 0) return null;
+  const b = _layoutFtBoundsDoc(ft);
+  if (!b) return null;
+  const safe = _layoutSafeDoc();
+  const safeL = safe, safeR = DW - safe, safeT = safe, safeB = DH - safe;
+  const safeThresh = Math.max(14, safe * 0.9);
+  const edgeThresh = Math.max(18, safe * 1.6);
+  const centerThreshX = Math.max(18, DW * 0.07);
+  const centerThreshY = Math.max(18, DH * 0.07);
+  const gx = b.glyphX, gy = b.y, gw = b.w, gh = b.h;
+  const cx = gx + gw / 2, cy = gy + gh / 2;
+  const leftGap = gx, rightGap = DW - (gx + gw);
+  const topGap = gy, bottomGap = DH - (gy + gh);
+  const safeLeftGap = gx - safeL, safeRightGap = safeR - (gx + gw);
+  const safeTopGap = gy - safeT, safeBottomGap = safeB - (gy + gh);
+
+  let xMode, xValue;
+  // Layout-managed text prefers the Safe Area when the visible glyph is near a safe edge.
+  // This prevents a top-right composition from drifting into the outer 6% margin after
+  // an aspect-ratio change. Canvas-edge anchors remain available for deliberate bleed.
+  if (Math.abs(safeRightGap) <= safeThresh) { xMode='safe-right'; xValue=safeRightGap; }
+  else if (Math.abs(safeLeftGap) <= safeThresh) { xMode='safe-left'; xValue=safeLeftGap; }
+  else if (Math.abs(rightGap) <= edgeThresh && Math.abs(rightGap) <= Math.abs(leftGap)) { xMode='right'; xValue=rightGap; }
+  else if (Math.abs(leftGap) <= edgeThresh) { xMode='left'; xValue=leftGap; }
+  else if (Math.abs(cx - DW/2) <= centerThreshX) { xMode='center'; xValue=0.5; }
+  else { xMode='normalized'; xValue=DW > 0 ? cx / DW : 0.5; }
+
+  let yMode, yValue;
+  if (Math.abs(safeTopGap) <= safeThresh) { yMode='safe-top'; yValue=safeTopGap; }
+  else if (Math.abs(safeBottomGap) <= safeThresh) { yMode='safe-bottom'; yValue=safeBottomGap; }
+  else if (Math.abs(topGap) <= edgeThresh && Math.abs(topGap) <= Math.abs(bottomGap)) { yMode='top'; yValue=topGap; }
+  else if (Math.abs(bottomGap) <= edgeThresh) { yMode='bottom'; yValue=bottomGap; }
+  else if (Math.abs(cy - DH/2) <= centerThreshY) { yMode='center'; yValue=0.5; }
+  else { yMode='normalized'; yValue=DH > 0 ? cy / DH : 0.5; }
+
+  ft._manualLayoutAnchor = { v:2, xMode, xValue, yMode, yValue };
+  return ft._manualLayoutAnchor;
+}
+
+function _projectManualLayoutAnchor(ft) {
+  const a = ft?._manualLayoutAnchor;
+  if (!ft || !a || DW <= 0 || DH <= 0) return false;
+  const b = _layoutFtBoundsDoc(ft);
+  if (!b) return false;
+  const glyphOffsetX = b.glyphX - ft.x;
+
+  const safe = _layoutSafeDoc();
+  let targetGlyphX;
+  if (a.xMode === 'safe-right') targetGlyphX = (DW - safe) - Number(a.xValue || 0) - b.w;
+  else if (a.xMode === 'safe-left') targetGlyphX = safe + Number(a.xValue || 0);
+  else if (a.xMode === 'right') targetGlyphX = DW - Number(a.xValue || 0) - b.w;
+  else if (a.xMode === 'left') targetGlyphX = Number(a.xValue || 0);
+  else if (a.xMode === 'center') targetGlyphX = DW/2 - b.w/2;
+  else targetGlyphX = (Number.isFinite(+a.xValue) ? +a.xValue : 0.5) * DW - b.w/2;
+
+  let targetY;
+  if (a.yMode === 'safe-bottom') targetY = (DH - safe) - Number(a.yValue || 0) - b.h;
+  else if (a.yMode === 'safe-top') targetY = safe + Number(a.yValue || 0);
+  else if (a.yMode === 'bottom') targetY = DH - Number(a.yValue || 0) - b.h;
+  else if (a.yMode === 'top') targetY = Number(a.yValue || 0);
+  else if (a.yMode === 'center') targetY = DH/2 - b.h/2;
+  else targetY = (Number.isFinite(+a.yValue) ? +a.yValue : 0.5) * DH - b.h/2;
+
+  // Phase 8L.2B: preserve edge anchors at sub-pixel precision.
+  // Rounding ft.x/ft.y here introduced a visible 1–2 px hop at safe/canvas edges
+  // when formats changed. Canvas text rendering supports fractional coordinates, so
+  // keep the solved anchor position exact and let the renderer rasterize it.
+  ft.x = targetGlyphX - glyphOffsetX;
+  ft.y = targetY;
+  return true;
+}
+
+function _projectDetachedLayoutTexts() {
+  Object.values(S.freeTexts || {}).forEach(ft => {
+    if (ft && ft._layoutManaged === true && ft._layoutAttached === false && ft._manualLayoutAnchor) {
+      _projectManualLayoutAnchor(ft);
+    }
+  });
+}
+
+function _layoutBaseGeometry(model) {
+  const safe = _layoutSafeDoc();
+  const innerW = Math.max(1, DW - 2 * safe);
+  const regionW = innerW * (model.region?.width ?? 1);
+  let x = safe;
+  if (model.anchor === 'safe-top-center') x = (DW - regionW) / 2;
+  else if (model.anchor === 'safe-top-right') x = DW - safe - regionW;
+  return {safe, innerW, regionW, x, y:safe};
+}
+
+function _layoutManagedText(style, idx) {
+  return Object.values(S.freeTexts || {}).find(ft =>
+    ft && ft._layoutManaged === true && ft._layoutStyle === style && ft._layoutIndex === idx
+  ) || null;
+}
+
+function _layoutReflowSplit(model) {
+  if (!model || model.kind !== 'media-content-split') return false;
+  const safeDoc = _layoutSafeDoc();
+  const safeX = safeDoc * CW / DW;
+  const safeY = safeDoc * CH / DH;
+
+  // Existing built-in diagonal background split — no duplicate renderer.
+  S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
+  S.bgSplit.enabled = true;
+  S.bgSplit.angle = model.split?.angle ?? 73;
+  S.bgSplit.pos = model.split?.pos ?? 38;
+  S.bgSplit.color = model.split?.color || '#E8EDF0';
+
+  // Media object belongs to the upper region. Layout sizing is based on the
+  // VISIBLE cropped content, not the full source frame. Transparent-padding
+  // auto-crop can leave only a small fraction of p.w/p.h visible; fitting the
+  // full frame to 58% made such products look tiny.
+  const p = S.product;
+  if (p) {
+    const cL = (p.cropL || 0) / 100, cR = (p.cropR || 0) / 100;
+    const cT = (p.cropT || 0) / 100, cB = (p.cropB || 0) / 100;
+    const vW = Math.max(0.01, 1 - cL - cR);
+    const vH = Math.max(0.01, 1 - cT - cB);
+
+    const hasImg = p.img instanceof HTMLImageElement && p.img.naturalWidth && p.img.naturalHeight;
+    const fullAspect = hasImg
+      ? p.img.naturalHeight / p.img.naturalWidth
+      : (p._aspect || (p.h && p.w ? p.h / p.w : 0.75));
+    // Aspect ratio of the visible (post-crop) product content.
+    const visibleAspect = fullAspect * (vH / vW);
+
+    const maxVisibleW = Math.max(1, CW * (model.media?.width ?? 0.78));
+    const top = CH * (model.media?.top ?? 0.08);
+    const bottom = CH * (model.media?.bottom ?? 0.48);
+    const maxVisibleH = Math.max(1, bottom - top);
+
+    let visW = maxVisibleW, visH = visW * visibleAspect;
+    if (visH > maxVisibleH) { visH = maxVisibleH; visW = visH / visibleAspect; }
+
+    // Back-calculate the full image frame that produces those visible dimensions.
+    const fullW = visW / vW, fullH = visH / vH;
+    const visLeft = (CW - visW) / 2;
+    const visTop = top + (maxVisibleH - visH) / 2;
+
+    p.w = Math.round(fullW); p.h = Math.round(fullH);
+    p.baseW = p.w; p.baseH = p.h;
+    p.x = Math.round(visLeft - fullW * cL);
+    p.y = Math.round(visTop - fullH * cT);
+    p._layoutManaged = true; p._layoutStyle = 'split';
+  }
+
+  const b = S.badge;
+  if (b && b._layoutManaged === true) {
+    const r = Math.min(CW,CH) * (model.badge?.r ?? 0.14);
+    b.r = Math.round(r);
+
+    // Layout #1: the ribbon belongs visually to the product, not to the canvas corner.
+    // Anchor it to the VISIBLE crop-aware media bounds and keep it above the product.
+    // This preserves the intended overlap across portrait and landscape formats.
+    if (p && model.badge?.anchor === 'media-top-right') {
+      const cL = (p.cropL || 0) / 100, cR = (p.cropR || 0) / 100;
+      const cT = (p.cropT || 0) / 100, cB = (p.cropB || 0) / 100;
+      const visLeft = p.x + p.w * cL;
+      const visTop = p.y + p.h * cT;
+      const visW = p.w * Math.max(0.01, 1 - cL - cR);
+      const overlapX = model.badge?.xOverlap ?? 0.90;
+      const overlapY = model.badge?.yOverlap ?? 0.35;
+      b.x = Math.round(visLeft + visW - r * overlapX);
+      b.y = Math.round(visTop + r * overlapY);
+      // Keep the whole ribbon inside the canvas while retaining media overlap.
+      b.x = Math.max(r, Math.min(CW - r, b.x));
+      b.y = Math.max(r, Math.min(CH - r, b.y));
+    } else {
+      b.x=Math.round(CW-safeX-r);
+      b.y=Math.round(r + CH*0.06);
+    }
+
+    // Dynamic layer order draws later entries on top. For Layout #1 the ribbon
+    // is intentionally the topmost NON-TEXT object, so it always overlays the product.
+    // Keep ft_* layers above it because text has its own semantic stack.
+    S.layerOrder = S.layerOrder.filter(id => id !== 'badge');
+    const firstFt = S.layerOrder.findIndex(id => id.startsWith('ft_'));
+    if (firstFt >= 0) S.layerOrder.splice(firstFt, 0, 'badge');
+    else S.layerOrder.push('badge');
+  }
+
+  // Text region is independent from the diagonal's paint geometry: it starts in the
+  // content field and flows by semantic role + rhythm.
+  const xDoc=safeDoc;
+  const regionW=Math.max(1,(DW-2*safeDoc)*(model.textRegion?.width ?? 0.86));
+  _layoutFlowTextStack('split', model.textStack || [], xDoc, DH*(model.textRegion?.top ?? 0.57), regionW);
+  return true;
+}
+
+
+function _layoutReflowOfferHero(model) {
+  if (!model || model.kind !== 'offer-product-hero') return false;
+  const safeDoc = _layoutSafeDoc();
+
+  // Existing background system — no new paint path.
+  const findPreset = id => BG_PRESETS.find(p => p.id === id);
+  S.bg = findPreset('p-hz') || findPreset('p-wh') || S.bg;
+  S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
+  S.bgSplit.enabled = false;
+
+  // Reuse the existing Swisscom Stripe primitive for the thin diagonal accent.
+  S.stripe = true;
+  S.stripeY = model.stripe?.y ?? 95;
+  S.stripeAngle = model.stripe?.angle ?? -14;
+  S.stripeWidth = model.stripe?.width ?? 28;
+
+  const p = S.product;
+  if (p) {
+    const cL=(p.cropL||0)/100, cR=(p.cropR||0)/100, cT=(p.cropT||0)/100, cB=(p.cropB||0)/100;
+    const vW=Math.max(0.01,1-cL-cR), vH=Math.max(0.01,1-cT-cB);
+    const hasImg=p.img instanceof HTMLImageElement && p.img.naturalWidth && p.img.naturalHeight;
+    const fullAspect=hasImg ? p.img.naturalHeight/p.img.naturalWidth : (p._aspect || (p.h&&p.w?p.h/p.w:0.42));
+    const visibleAspect=fullAspect*(vH/vW);
+
+    const top=CH*(model.media?.top ?? 0.50), bottom=CH*(model.media?.bottom ?? 0.89);
+    const maxVisibleH=Math.max(1,bottom-top);
+    // Portrait gets a generous product; landscape is constrained by canvas height.
+    const maxVisibleW=Math.max(1,Math.min(CW*(model.media?.width ?? 0.78), CH*1.10));
+    let visW=maxVisibleW, visH=visW*visibleAspect;
+    if(visH>maxVisibleH){visH=maxVisibleH;visW=visH/visibleAspect;}
+
+    const fullW=visW/vW, fullH=visH/vH;
+    const visLeft=(CW-visW)/2;
+    const visTop=top+(maxVisibleH-visH)/2;
+    p.w=Math.round(fullW); p.h=Math.round(fullH); p.baseW=p.w; p.baseH=p.h;
+    p.x=Math.round(visLeft-fullW*cL); p.y=Math.round(visTop-fullH*cT);
+    p._layoutManaged=true; p._layoutStyle='fullbleed';
+  }
+
+  const b=S.badge;
+  if(b && b._layoutManaged===true){
+    const r=Math.min(CW,CH)*(model.badge?.r ?? 0.13); b.r=Math.round(r);
+    if(model.badge?.anchor==='canvas-relative'){
+      b.x=Math.round(CW*(model.badge?.x ?? 0.86));
+      b.y=Math.round(CH*(model.badge?.y ?? 0.60));
+      b.x=Math.max(r,Math.min(CW-r,b.x)); b.y=Math.max(r,Math.min(CH-r,b.y));
+    } else if(model.badge?.anchor==='safe-relative'){
+      // Layout-managed badge stays fully inside the visible 6% Safe Area.
+      // x/y are normalized within the center range that keeps the full circle inside safe bounds.
+      const safeC=Math.round(Math.min(CW,CH)*0.06);
+      const minX=safeC+r, maxX=CW-safeC-r;
+      const minY=safeC+r, maxY=CH-safeC-r;
+      const nx=Math.max(0,Math.min(1,model.badge?.x ?? 1));
+      const ny=Math.max(0,Math.min(1,model.badge?.y ?? 0.48));
+      b.x=minX+(maxX-minX)*nx;
+      b.y=minY+(maxY-minY)*ny;
+    } else if(p && model.badge?.anchor==='media-top-right'){
+      const cL=(p.cropL||0)/100,cR=(p.cropR||0)/100,cT=(p.cropT||0)/100,cB=(p.cropB||0)/100;
+      const visLeft=p.x+p.w*cL, visTop=p.y+p.h*cT;
+      const visW=p.w*Math.max(0.01,1-cL-cR);
+      b.x=Math.round(visLeft+visW-r*(model.badge?.xOverlap ?? 0.55));
+      b.y=Math.round(visTop+r*(model.badge?.yOverlap ?? 0.20));
+      b.x=Math.max(r,Math.min(CW-r,b.x)); b.y=Math.max(r,Math.min(CH-r,b.y));
+    }
+    S.layerOrder=S.layerOrder.filter(id=>id!=='badge');
+    const firstFt=S.layerOrder.findIndex(id=>id.startsWith('ft_'));
+    if(firstFt>=0) S.layerOrder.splice(firstFt,0,'badge'); else S.layerOrder.push('badge');
+  }
+
+  const regionW=Math.max(1,(DW-2*safeDoc)*(model.textRegion?.width ?? 0.68));
+  _layoutFlowTextStack('fullbleed',model.textStack||[],safeDoc,DH*(model.textRegion?.top ?? 0.14),regionW);
+  return true;
+}
+
+function reflowDeclarativeLayout(style) {
+  // Phase 8L.2: re-project attached layout objects from semantic anchors + rhythm.
+  // User-moved/resized objects detach from the layout and are deliberately left alone.
+  const model = LAYOUT_MODELS[style];
+  if (!model) return false;
+  if (model.kind === 'media-content-split') return _layoutReflowSplit(model);
+  if (model.kind === 'offer-product-hero') return _layoutReflowOfferHero(model);
+  const g = _layoutBaseGeometry(model);
+  _layoutFlowTextStack(style, model.textStack || [], g.x, g.y, g.regionW);
+  return true;
+}
+
+function applyDeclarativeLayout(style) {
+  const model = LAYOUT_MODELS[style];
+  if (!model) return false;
+
+  if (model.kind === 'offer-product-hero') {
+    const findPreset = id => BG_PRESETS.find(p => p.id === id);
+    S.bg = findPreset('p-hz') || findPreset('p-wh');
+    S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
+    S.bgSplit.enabled=false;
+    S.stripe=true; S.stripeY=model.stripe?.y??95; S.stripeAngle=model.stripe?.angle??-14; S.stripeWidth=model.stripe?.width??28;
+
+    if(!S.product || S.product.isPlaceholder){
+      const aspect=0.42, bw=Math.round(CW*0.72);
+      S.product={img:null,opacity:1,shadow:0,x:0,y:0,w:bw,h:Math.round(bw*aspect),baseW:bw,baseH:Math.round(bw*aspect),cropT:0,cropB:0,cropL:0,cropR:0,isPlaceholder:true,_aspect:aspect,_layoutManaged:true,_layoutStyle:'fullbleed',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+      if(!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
+    }
+    const br=model.badge;
+    S.badge={x:0,y:0,r:1,text1:br.text1,text2:br.text2||'',priceMode:br.priceMode===true,priceKind:br.priceKind||'mt',fill:{type:'solid',color:br.color},fg:'#ffffff',kind:'circle',shape:'circle',opacity:1,_fromLayout:true,_layoutManaged:true,_layoutStyle:'fullbleed',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+
+    const safe=_layoutSafeDoc(), regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width??0.68));
+    let y=DH*(model.textRegion?.top??0.14), prevRole=null;
+    (model.textStack||[]).forEach((rawItem,idx)=>{
+      const item={...rawItem,_layoutIndex:idx};
+      if(idx>0) y += Number.isFinite(item.gap)?item.gap:_layoutRoleGap(prevRole,item.role);
+      const ft=_layoutAddText(item,safe,y,regionW); ft._layoutStyle='fullbleed';
+      y += _layoutTextHeightDoc(ft); prevRole=item.role;
+    });
+    _layoutReflowOfferHero(model);
+    return true;
+  }
+
+  if (model.kind === 'media-content-split') {
+    const findPreset = id => BG_PRESETS.find(p => p.id === id);
+    S.bg = findPreset('bg-gr1') || findPreset('p-ng') || findPreset('p-dn');
+    S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
+    S.bgSplit.enabled=true; S.bgSplit.angle=model.split.angle; S.bgSplit.pos=model.split.pos; S.bgSplit.color=model.split.color;
+
+    // Reuse existing placeholder/product machinery semantics without creating a second media type.
+    if (!S.product || S.product.isPlaceholder) {
+      const aspect=0.75, maxW=Math.round(CW*(model.media?.width??0.78));
+      S.product={img:null,opacity:1,shadow:0,x:0,y:0,w:maxW,h:Math.round(maxW*aspect),baseW:maxW,baseH:Math.round(maxW*aspect),cropT:0,cropB:0,cropL:0,cropR:0,isPlaceholder:true,_aspect:aspect,_layoutManaged:true,_layoutStyle:'split',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+      if(!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
+    }
+    const br=model.badge;
+    S.badge={x:0,y:0,r:1,text1:br.text1,text2:br.text2,fill:{type:'solid',color:br.color},fg:'#ffffff',kind:'circle',shape:'circle',opacity:1,_fromLayout:true,_layoutManaged:true,_layoutStyle:'split',glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+
+    const safe=_layoutSafeDoc(), regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width??0.86));
+    let y=DH*(model.textRegion?.top??0.57), prevRole=null;
+    (model.textStack||[]).forEach((rawItem,idx)=>{
+      const item={...rawItem,_layoutIndex:idx};
+      if(idx>0) y += Number.isFinite(item.gap)?item.gap:_layoutRoleGap(prevRole,item.role);
+      const ft=_layoutAddText(item,safe,y,regionW); ft._layoutStyle='split';
+      y += _layoutTextHeightDoc(ft); prevRole=item.role;
+    });
+    _layoutReflowSplit(model);
+    return true;
+  }
+
+  const g = _layoutBaseGeometry(model);
+
+  if (model.background === 'typeonlyGradient') {
+    S.bg = {id:'_typeonly', label:'Type Only', layers:[{type:'linear', angle:135,
+      stops:[{c:'#E4003A',p:0},{c:'#0028A5',p:50},{c:'#1FBFFF',p:100}]}]};
+  }
+
+  let y = g.y, prevRole = null;
+  (model.textStack || []).forEach((rawItem, idx) => {
+    const item = {...rawItem, _layoutIndex:idx};
+    if (idx > 0) y += Number.isFinite(item.gap) ? item.gap : _layoutRoleGap(prevRole, item.role);
+    const ft = _layoutAddText(item, g.x, y, g.regionW);
+    y += _layoutTextHeightDoc(ft);
+    prevRole = item.role;
+  });
+  _layoutFlowTextStack(style, model.textStack || [], g.x, g.y, g.regionW);
+  return true;
+}
+
 window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
   document.querySelectorAll('.layout-style-card').forEach(el => el.classList.remove('active'));
   const activeCard = document.querySelector('.layout-style-card[onclick*="' + style + '"]');
@@ -9257,7 +10877,9 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
       fontWeight:weight||'700', opacity:1,
       stylePreset: stylePreset || 'custom',
       maxWidth: maxWidth ? Math.round(maxWidth) : Math.round(CW * 0.82),
-      lineHeightFactor: stylePreset === 'headline' ? 82/70 : stylePreset === 'subheadline' ? 52/44 : stylePreset === 'lead' ? 40/32 : stylePreset === 'body' || stylePreset === 'cta' ? 24/18 : 1.2,
+      lineHeightFactor: FT_STYLES[stylePreset] ? FT_STYLES[stylePreset].lineHeightPx / FT_STYLES[stylePreset].exportPx : 1.2, // Phase 7T.3B: derived from FT_STYLES
+      trackingPx: FT_STYLES[stylePreset]?.trackingPx ?? 0, // Typography v2: design-pixel tracking
+      _roleSize: true, // Phase 7B.4A: font size tracks semantic role on format change
       glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}
     };
     S.layerOrder.push(id);
@@ -9290,7 +10912,13 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
   S.layoutStyle = style; // remember for re-apply on resize
   clearCanvas();
 
-  if (style === 'split') {
+  // Phase 8L.1: proving migration. Declarative layouts use semantic roles + rhythm;
+  // all other layouts continue through the legacy branches below.
+  const _usedDeclarativeLayout = applyDeclarativeLayout(style);
+
+  if (_usedDeclarativeLayout) {
+    // scene is already built; common UI sync below still runs
+  } else if (style === 'split') {
     S.bg = findPreset('bg-gr1') || findPreset('p-ng') || findPreset('p-dn');
     S.bgSplit.enabled = true; S.bgSplit.angle = 73; S.bgSplit.pos = 38;
     S.bgSplit.color = '#E8EDF0';
@@ -9310,7 +10938,7 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
       S.product.x = Math.round((CW - bw) / 2);
       S.product.y = Math.round(CH * 0.10);
     }
-    addFT('Produktname\nkurze Beschreibung\ndes Angebots', CW*0.07, CH*0.60, Math.round(70*CW/1200), '#040D33', '700', Math.round(CW*0.58), 'headline');
+    addFT('Produktname\nkurze Beschreibung\ndes Angebots', CW*0.07, CH*0.60, Math.round(70*CW/DW), '#040D33', '700', Math.round(CW*0.58), 'headline'); // Phase 7B.10A
     addBadge(CW*0.78, CH*0.22, Math.round(Math.min(CW,CH)*0.14), 'CHF 29.–', '/Mt.', '#E4003A');
   } else if (style === 'fullbleed') {
     // Full Bleed: lifestyle/product photo fills entire canvas
@@ -9333,12 +10961,12 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
     // Headline W7
     addFT('Entdecke,\nwas du kannst',
       CW*0.06, CH*0.56,
-      Math.round(70*CW/1200), '#ffffff', '700',
+      Math.round(70*CW/DW), '#ffffff', '700', // Phase 7B.10A
       Math.round(CW*0.72), 'headline');
     // Sub-headline W5
     addFT('Im besten Netz der Schweiz',
       CW*0.06, CH*0.81,
-      Math.round(32*CW/1200), '#ffffff', '500',
+      Math.round(32*CW/DW), '#ffffff', '500', // Phase 7B.10A
       Math.round(CW*0.72), 'lead');
   } else if (style === 'typeimage') {
     // Layout 3: Frame als Bild — Gradient-BG, Foto eingerahmt, volle Breite, Text oben, CTA-Pill auf Frame
@@ -9369,7 +10997,7 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
     }
     // Headline W7 oben
     addFT('Power up\nyour world',
-      CW*0.06, CH*0.06, Math.round(90*CW/1200), '#ffffff', '700', Math.round(CW*0.85), 'headline');
+      CW*0.06, CH*0.06, Math.round(90*CW/DW), '#ffffff', '700', Math.round(CW*0.85), 'headline'); // Phase 7B.10A
     // CTA-Button — innerhalb des Frames, unten rechts
     const ctaR = Math.round(Math.min(CW,CH)*0.048);
     const ctaPad = Math.round(CW * 0.04);
@@ -9401,9 +11029,9 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
       S.product.y = Math.round(CH * 0.18);
     }
     addFT('Produktname',
-      CW*0.05, CH*0.08, Math.round(70*CW/1200), '#040D33', '700', Math.round(CW*0.42), 'headline');
+      CW*0.05, CH*0.08, Math.round(70*CW/DW), '#040D33', '700', Math.round(CW*0.42), 'headline'); // Phase 7B.10A
     addFT('Kurze Beschreibung',
-      CW*0.05, CH*0.32, Math.round(32*CW/1200), '#040D33', '500', Math.round(CW*0.42), 'lead');
+      CW*0.05, CH*0.32, Math.round(32*CW/DW), '#040D33', '500', Math.round(CW*0.42), 'lead'); // Phase 7B.10A
     addBadge(CW*0.18, CH*0.75, Math.round(Math.min(CW,CH)*0.14), 'CHF 29.–', '/Mt.', '#E4003A');
   } else if (style === 'lifeform') {
     S.bg = findPreset('p-dn');
