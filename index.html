@@ -2736,6 +2736,28 @@ function _reprojBadgeModelE(b, prevCW, prevCH, CW, CH, sm, scaleBaseR) {
   }
 }
 
+// Physical export dimensions represented by the format-bar presets.
+// Keep this separate from DOCUMENT_FORMATS because the 1:1 UI preset is the 360×360 Mini format.
+const CANVAS_EXPORT_DIMS = {
+  '1:1':  { w: 360,  h: 360  },
+  '4:3':  { w: 1200, h: 900  },
+  '16:9': { w: 1200, h: 675  },
+  '2:1':  { w: 1800, h: 900  },
+  '3:4':  { w: 900,  h: 1200 },
+};
+function getCanvasExportDimensions() {
+  if (S.format === 'custom') return { w: S.customW || CW, h: S.customH || CH };
+  return CANVAS_EXPORT_DIMS[S.format] || null;
+}
+function syncExportResolutionToCanvas() {
+  const sel = document.getElementById('exportRes');
+  if (!sel) return;
+  const d = getCanvasExportDimensions();
+  const opt = sel.querySelector('option[value="canvas"]');
+  if (opt && d) opt.textContent = `Canvas — ${d.w} × ${d.h} px`;
+  sel.value = 'canvas';
+}
+
 function setFormat(ratio) {
   const prevCW = CW, prevCH = CH; // capture before resize
   // Phase 7X.3B1: capture prevDW/prevDH before syncDocumentDimensions updates them
@@ -2748,24 +2770,9 @@ function setFormat(ratio) {
   S.format=ratio;
   syncDocumentDimensionsFromLegacyFormat(ratio); // Phase 7X.1: update DW/DH
   safeLS.set('swc_format', ratio);
-  // Auto-adjust default export resolution per format
-  const resSel = document.getElementById('exportRes');
-  if (resSel) {
-    const cur = +resSel.value;
-    if (ratio === '1:1') {
-      // Square: default to 360 px. Returning from the dedicated 2:1 minimum
-      // should also restore the square default.
-      if (cur === 1200 || cur === 1800 || cur === 360) resSel.value = '360';
-    } else if (ratio === '2:1') {
-      // 2:1 is a production format with a requested minimum of 1800 × 900.
-      // Keep larger user choices, but never silently export below the minimum.
-      if (cur < 1800) resSel.value = '1800';
-    } else {
-      // Other standard formats: bump up from Mini; when leaving the dedicated
-      // 2:1 default, return to the normal 1200 px default.
-      if (cur === 360 || cur === 1800) resSel.value = '1200';
-    }
-  }
+  // Export defaults follow the selected canvas format exactly.
+  // Users can still choose a scaled width manually in the export dialog.
+  syncExportResolutionToCanvas();
   const {w,h}=FORMATS[ratio];
   const area=canvas.parentElement;
   const _aCS=getComputedStyle(area);
@@ -4663,6 +4670,7 @@ document.getElementById('filterToggleRow').addEventListener('click', (e) => {
 document.getElementById('headerExportBtn').addEventListener('click', () => {
   S.exportFmt = S.exportFmt || 'png';
   updateExportFormatUI();
+  syncExportResolutionToCanvas();
   document.getElementById('exportModal').style.display = 'flex';
 });
 // Close modal on backdrop click
@@ -9747,10 +9755,14 @@ S.exportFmt = S.exportFmt || 'png';
 
 (document.getElementById('exportBtn')||{addEventListener:()=>{}}).addEventListener('click',()=>{
   let EW, EH;
-  if (S.format==='custom') {
+  const resValue = document.getElementById('exportRes').value;
+  const canvasDims = getCanvasExportDimensions();
+  if (resValue === 'canvas' && canvasDims) {
+    EW = canvasDims.w; EH = canvasDims.h;
+  } else if (S.format==='custom') {
     EW=S.customW||CW; EH=S.customH||CH;
   } else {
-    const res=+document.getElementById('exportRes').value;
+    const res=+resValue;
     const {w:rw,h:rh}=FORMATS[S.format];
     EW=res; EH=Math.round(res*rh/rw);
   }
@@ -10887,6 +10899,12 @@ window.applyLayoutStyle = function applyLayoutStyle(style, _silent) {
     S.badge = null; S.badge2 = null; S.aiLabel = null; S.label = null;
     S.freeTexts = {};
     S.layerOrder = ['product','product2','badge','badge2','aiLabel','label'];
+    // Layout-owned decorative primitives must not leak between presets.
+    // Offer Hero enables the Swisscom Stripe explicitly; Split does not use it.
+    S.stripe = false;
+    S.stripeY = 100;
+    S.stripeAngle = 0;
+    S.stripeWidth = 100;
     S.bgSplit = S.bgSplit || {enabled:false, angle:135, pos:50, color:'#ffffff'};
     S.bgSplit.enabled = false;
     S.bgFlipped = false;
@@ -11175,9 +11193,10 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
     <!-- Resolution -->
     <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">AUFLÖSUNG</div>
     <select id="exportRes" style="width:100%;padding:7px 10px;border-radius:7px;border:1px solid #333;background:#111;color:#fff;font-size:12px;margin-bottom:20px;cursor:pointer;">
+      <option value="canvas" selected>Canvas</option>
       <option value="360">360 px (Mini)</option>
       <option value="800">800 px (Klein)</option>
-      <option value="1200" selected>1200 px (Standard)</option>
+      <option value="1200">1200 px (Standard)</option>
       <option value="1800">1800 px (2:1 Minimum)</option>
       <option value="2000">2000 px (Gross)</option>
       <option value="3000">3000 px (Druck)</option>
