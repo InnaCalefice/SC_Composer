@@ -611,6 +611,94 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
 .ctx-btn-del { color: var(--danger-action); opacity: .75; }
 .ctx-btn-del:hover { background: var(--danger-bg); color: var(--danger); opacity: 1; }
 
+
+
+/* ── Premium glass interaction pass ────────────────────────────────────────
+   Deliberately limited to transient/floating UI and hover states.
+   Main sidebars/inspector remain solid for clarity and performance. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Floating format selector: subtle resting glass, not a glossy panel. */
+  .format-bar {
+    background: rgba(25, 25, 28, .78);
+    border-color: rgba(255,255,255,.10);
+    -webkit-backdrop-filter: blur(12px) saturate(118%);
+    backdrop-filter: blur(12px) saturate(118%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.055),
+      0 8px 24px rgba(0,0,0,.28);
+  }
+
+  /* Contextual / alignment toolbars are the strongest glass surfaces. */
+  #ctxToolbar,
+  #alignToolbar {
+    background: rgba(22, 22, 25, .72);
+    border-color: rgba(255,255,255,.11);
+    -webkit-backdrop-filter: blur(16px) saturate(125%);
+    backdrop-filter: blur(16px) saturate(125%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.075),
+      0 10px 28px rgba(0,0,0,.34),
+      0 2px 8px rgba(0,0,0,.22);
+  }
+
+  /* Export / dialog surfaces: glass only while transient. */
+  .modal {
+    background: rgba(28, 28, 31, .84);
+    border-color: rgba(255,255,255,.11);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    backdrop-filter: blur(18px) saturate(120%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.055),
+      0 28px 70px rgba(0,0,0,.52);
+  }
+}
+
+/* Hover glass: interaction state only. */
+.lib-nav-btn {
+  transition: color .16s ease, background .16s ease, transform .16s cubic-bezier(.2,.8,.2,1), box-shadow .16s ease;
+}
+.lib-nav-btn:hover:not(.active) {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,.055);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 5px 16px rgba(0,0,0,.18);
+}
+.lib-nav-btn:active:not(.active) { transform: translateY(0); }
+
+.fmt-btn,
+.ctx-btn,
+#alignToolbar button {
+  transition: color .15s ease, background .15s ease, transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .15s ease;
+}
+.fmt-btn:hover:not(.active),
+.ctx-btn:hover:not([disabled]),
+#alignToolbar button:hover:not(:disabled) {
+  background: rgba(255,255,255,.075);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.065);
+}
+.ctx-btn:active:not([disabled]),
+#alignToolbar button:active:not(:disabled) { transform: translateY(0); }
+
+/* Active format stays grounded but gets a restrained glass highlight. */
+.fmt-btn.active {
+  background: rgba(255,255,255,.085);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 2px 6px rgba(0,0,0,.28);
+}
+
+/* Inputs/selects: only focus gets the premium lift; resting inspector stays calm. */
+.props select:focus,
+.props input:focus,
+.props textarea:focus {
+  box-shadow:
+    0 0 0 1px rgba(74,137,255,.30),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
 </style>
 </head>
 <body>
@@ -791,15 +879,25 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           </svg>
           <div class="layout-style-label">Offer Hero</div>
         </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('typeimage')" title="Type and Image">
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedstory')" title="Full Bleed Image & Type">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <rect width="60" height="42" fill="#333"/>
-            <rect y="42" width="60" height="38" fill="#ffffff"/>
-            <rect x="6" y="48" width="30" height="5" rx="2.5" fill="#040D33" opacity="0.8"/>
-            <rect x="6" y="56" width="22" height="3" rx="1.5" fill="#040D33" opacity="0.4"/>
-            <rect x="6" y="62" width="14" height="2.5" rx="1" fill="#E4003A" opacity="0.7"/>
+            <defs>
+              <linearGradient id="fbStoryPreview" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#18295f"/><stop offset=".48" stop-color="#6f8fa8"/><stop offset="1" stop-color="#d9b39b"/>
+              </linearGradient>
+              <linearGradient id="fbStoryScrim" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0" stop-color="#000" stop-opacity=".58"/><stop offset=".7" stop-color="#000" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="60" height="80" fill="url(#fbStoryPreview)"/>
+            <circle cx="43" cy="27" r="13" fill="#e5c7b2" opacity=".72"/>
+            <path d="M0 55 C14 45 25 50 36 39 C46 29 53 34 60 28 V80 H0Z" fill="#263d50" opacity=".48"/>
+            <rect y="42" width="60" height="38" fill="url(#fbStoryScrim)"/>
+            <rect x="5" y="59" width="37" height="5" rx="1" fill="#fff"/>
+            <rect x="5" y="66" width="29" height="5" rx="1" fill="#fff"/>
+            <rect x="5" y="73" width="22" height="2.5" rx="1" fill="#fff" opacity=".78"/>
           </svg>
-          <div class="layout-style-label">Type &amp; Image</div>
+          <div class="layout-style-label">Full Bleed</div>
         </div>
         <div class="layout-style-card" onclick="applyLayoutStyle('typeproduct')" title="Type and Product">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
@@ -1453,6 +1551,42 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           <div id="ftColorPalette" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
           <div id="ftGradBtn" title="Swisscom Verlauf" style="width:22px;height:16px;border-radius:3px;cursor:pointer;border:2px solid transparent;background:linear-gradient(180deg,#F20505 12.89%,#0445C8 33.5%,#1FB9FF 73.77%);flex-shrink:0;transition:border-color .15s;"></div>
         </div>
+      </div>
+      <div class="prop-row" id="ftPhotoToneRow" style="margin-top:4px;display:none;">
+        <span class="prop-label">Foto-Text</span>
+        <select id="ftPhotoToneMode" class="pi" style="flex:1;font-size:12px;">
+          <option value="auto">Auto · Schutz</option>
+          <option value="white">Weiß</option>
+          <option value="navy">Navy</option>
+          <option value="custom">Manuell</option>
+        </select>
+      </div>
+      <div id="ftPhotoScrimPanel" style="display:none;margin-top:6px;padding:7px 8px;border:1px solid rgba(255,255,255,.06);border-radius:7px;background:rgba(255,255,255,.025);">
+        <div class="prop-row">
+          <span class="prop-label">Schutz</span>
+          <select id="ftPhotoScrimMode" class="pi" style="flex:1;font-size:12px;">
+            <option value="auto">Auto</option>
+            <option value="manual">Manuell</option>
+          </select>
+        </div>
+        <div class="prop-row" style="margin-top:5px;">
+          <span class="prop-label">Richtung</span>
+          <select id="ftPhotoScrimDirection" class="pi" style="flex:1;font-size:12px;">
+            <option value="auto">Auto</option>
+            <option value="bottom">↑ Unten → oben</option>
+            <option value="top">↓ Oben → unten</option>
+            <option value="left">→ Links → rechts</option>
+            <option value="right">← Rechts → links</option>
+          </select>
+        </div>
+        <div class="prop-row" style="margin-top:5px;">
+          <span class="prop-label">Stärke</span><span class="prop-val" id="ftPhotoScrimStrengthVal">58%</span>
+        </div>
+        <input type="range" id="ftPhotoScrimStrength" min="0" max="100" value="58">
+        <div class="prop-row" style="margin-top:5px;">
+          <span class="prop-label">Reichweite</span><span class="prop-val" id="ftPhotoScrimReachVal">62%</span>
+        </div>
+        <input type="range" id="ftPhotoScrimReach" min="30" max="90" value="62">
       </div>
       <div class="prop-row" id="ftGradientPresetRow" style="margin-top:4px;display:none;">
         <span class="prop-label">Verlauf</span>
@@ -3351,6 +3485,31 @@ function syncFtProps() {
   const gpSel = document.getElementById('ftGradientPreset');
   if (gpRow) gpRow.style.display = ft.fgGradient ? 'flex' : 'none';
   if (gpSel) gpSel.value = ft.gradientPreset || 'brand';
+  const photoToneRow = document.getElementById('ftPhotoToneRow');
+  const photoToneSel = document.getElementById('ftPhotoToneMode');
+  const photoScrimPanel = document.getElementById('ftPhotoScrimPanel');
+  const photoScrimMode = document.getElementById('ftPhotoScrimMode');
+  const photoScrimDirection = document.getElementById('ftPhotoScrimDirection');
+  const photoScrimStrength = document.getElementById('ftPhotoScrimStrength');
+  const photoScrimReach = document.getElementById('ftPhotoScrimReach');
+  const photoScrimStrengthVal = document.getElementById('ftPhotoScrimStrengthVal');
+  const photoScrimReachVal = document.getElementById('ftPhotoScrimReachVal');
+  const isFullBleedStoryText = ft._layoutStyle === 'fullbleedstory' || S.layoutStyle === 'fullbleedstory';
+  if (photoToneRow) photoToneRow.style.display = isFullBleedStoryText ? 'flex' : 'none';
+  if (photoToneSel && isFullBleedStoryText) photoToneSel.value = ft.photoColorMode || 'auto';
+  if (photoScrimPanel) photoScrimPanel.style.display = isFullBleedStoryText ? 'block' : 'none';
+  if (isFullBleedStoryText) {
+    const sm = ft.photoScrimMode || 'auto';
+    const sd = ft.photoScrimDirection || 'auto';
+    const ss = Number.isFinite(ft.photoScrimStrength) ? ft.photoScrimStrength : 58;
+    const sr = Number.isFinite(ft.photoScrimReach) ? ft.photoScrimReach : 62;
+    if (photoScrimMode) photoScrimMode.value = sm;
+    if (photoScrimDirection) photoScrimDirection.value = sd;
+    if (photoScrimStrength) { photoScrimStrength.value = ss; photoScrimStrength.disabled = false; }
+    if (photoScrimReach) { photoScrimReach.value = sr; photoScrimReach.disabled = false; }
+    if (photoScrimStrengthVal) photoScrimStrengthVal.textContent = Math.round(ss) + '%';
+    if (photoScrimReachVal) photoScrimReachVal.textContent = Math.round(sr) + '%';
+  }
   if (typeof syncGlowUI === 'function') syncGlowUI();
   // Expand the section
   document.querySelectorAll('.prop-section[data-ctx="freetext"]').forEach(s => s.classList.remove('collapsed'));
@@ -3438,6 +3597,7 @@ function applyFtCanvasTracking(ctx, ft, designToCanvasScale) {
       d.addEventListener('click', () => {
         const ft=currentFt(); if(!ft) return;
         ft.color = c; ft.fgGradient = false; ft.gradientRange = null;
+        if (ft._layoutStyle === 'fullbleedstory') ft.photoColorMode = c.toLowerCase() === '#ffffff' ? 'white' : (c.toLowerCase() === '#040d33' ? 'navy' : 'custom');
         if(picker) picker.value = c;
         if(swatch) swatch.style.background = c;
         if(gradBtn) gradBtn.style.borderColor = 'transparent';
@@ -3495,6 +3655,59 @@ function applyFtCanvasTracking(ctx, ft, designToCanvasScale) {
   });
 
 
+  const photoToneSel = document.getElementById('ftPhotoToneMode');
+  if (photoToneSel) photoToneSel.addEventListener('change', () => {
+    const ft = currentFt(); if (!ft || ft._layoutStyle !== 'fullbleedstory') return;
+    const mode = photoToneSel.value || 'auto';
+    Object.values(S.freeTexts || {}).forEach(t => {
+      if (t._layoutStyle === 'fullbleedstory') t.photoColorMode = mode;
+    });
+    if (mode === 'white' || mode === 'navy') {
+      const col = mode === 'white' ? '#ffffff' : '#001155';
+      Object.values(S.freeTexts || {}).forEach(t => {
+        if (t._layoutStyle === 'fullbleedstory') {
+          t.color = col; t.fgGradient = false; t.gradientRange = null;
+        }
+      });
+    }
+    if (typeof _layoutUpdateFullBleedStoryReadability === 'function') _layoutUpdateFullBleedStoryReadability(LAYOUT_MODELS.fullbleedstory);
+    syncFtProps(); render();
+  });
+
+  const photoScrimMode = document.getElementById('ftPhotoScrimMode');
+  const photoScrimDirection = document.getElementById('ftPhotoScrimDirection');
+  const photoScrimStrength = document.getElementById('ftPhotoScrimStrength');
+  const photoScrimReach = document.getElementById('ftPhotoScrimReach');
+  const syncFullBleedScrimSettings = (patch, {syncUI=true}={}) => {
+    const ft=currentFt(); if(!ft || ft._layoutStyle!=='fullbleedstory') return;
+    Object.values(S.freeTexts||{}).forEach(t=>{
+      if(t._layoutStyle==='fullbleedstory') Object.assign(t,patch);
+    });
+    if(typeof _layoutUpdateFullBleedStoryReadability==='function') _layoutUpdateFullBleedStoryReadability(LAYOUT_MODELS.fullbleedstory);
+    if(syncUI) syncFtProps();
+    render();
+  };
+  if(photoScrimMode) photoScrimMode.addEventListener('change',()=>{
+    syncFullBleedScrimSettings({photoScrimMode:photoScrimMode.value||'auto'});
+  });
+  if(photoScrimDirection) photoScrimDirection.addEventListener('change',()=>{
+    syncFullBleedScrimSettings({photoScrimDirection:photoScrimDirection.value||'auto'});
+  });
+  if(photoScrimStrength) photoScrimStrength.addEventListener('input',()=>{
+    // Read the slider value BEFORE any inspector sync can rewrite the control.
+    const value=Number(photoScrimStrength.value);
+    syncFullBleedScrimSettings({photoScrimMode:'manual',photoScrimStrength:Number.isFinite(value)?value:0},{syncUI:false});
+    if(photoScrimMode) photoScrimMode.value='manual';
+    const val=document.getElementById('ftPhotoScrimStrengthVal'); if(val) val.textContent=Math.round(Number.isFinite(value)?value:0)+'%';
+  });
+  if(photoScrimReach) photoScrimReach.addEventListener('input',()=>{
+    // Batch mode + value in one state update so syncFtProps cannot snap the slider back.
+    const value=Number(photoScrimReach.value);
+    syncFullBleedScrimSettings({photoScrimMode:'manual',photoScrimReach:Number.isFinite(value)?value:62},{syncUI:false});
+    if(photoScrimMode) photoScrimMode.value='manual';
+    const val=document.getElementById('ftPhotoScrimReachVal'); if(val) val.textContent=Math.round(Number.isFinite(value)?value:62)+'%';
+  });
+
   // Tab inside the inspector text field = deterministic text indent, not focus navigation.
   // Store four normal spaces rather than a literal \t so Canvas text metrics stay predictable.
   if (inp) inp.addEventListener('keydown', (ev) => {
@@ -3511,7 +3724,7 @@ function applyFtCanvasTracking(ctx, ft, designToCanvasScale) {
     inp.style.height = 'auto';
     inp.style.height = Math.min(180, Math.max(76, inp.scrollHeight)) + 'px';
   });
-  if (picker) picker.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.color=picker.value; ft.fgGradient=false; ft.gradientRange=null; if(swatch)swatch.style.background=picker.value; if(gradBtn)gradBtn.style.borderColor='transparent'; render();} });
+  if (picker) picker.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.color=picker.value; ft.fgGradient=false; ft.gradientRange=null; if(ft._layoutStyle==='fullbleedstory') ft.photoColorMode='custom'; if(swatch)swatch.style.background=picker.value; if(gradBtn)gradBtn.style.borderColor='transparent'; syncFtProps(); render();} });
   if (swatch) swatch.addEventListener('click', () => picker && picker.click());
   if (slider) slider.addEventListener('input', () => { const ft=currentFt(); if(ft){ft.fontSize=Math.max(2,Math.round(parseInt(slider.value)*CW/DW)); ft._roleSize=false; if(sizeVal)sizeVal.textContent=slider.value+'px'; _reflowLayoutForFt(ft); render();} }); // Phase 7B.10A
   if (ftStyleSel) ftStyleSel.addEventListener('change', () => {
@@ -4890,12 +5103,18 @@ function applyProductBlob(blob) {
           S.product._layoutStyle = 'fullbleed';
           reflowDeclarativeLayout('fullbleed');
         }
+        if (S.layoutStyle === 'fullbleedstory' && S.product && typeof reflowDeclarativeLayout === 'function') {
+          S.product._layoutManaged = true; S.product._layoutAttached = true;
+          S.product._layoutStyle = 'fullbleedstory';
+          reflowDeclarativeLayout('fullbleedstory');
+        }
         setStatus('Fertig ✓','ok'); setProgress(-1);
         S.selected='product';
         const fitBtn=document.getElementById('fitToImageBtn'); if(fitBtn) fitBtn.style.display='block';
         const retouchBtnEl=document.getElementById('retouchBtn'); if(retouchBtnEl) retouchBtnEl.style.display='block';
         if (typeof updateFreistNowBtn === 'function') updateFreistNowBtn();
         bringToFront('product');
+        if (S.layoutStyle === 'fullbleedstory') { S.layerOrder=S.layerOrder.filter(id=>id!=='product'); S.layerOrder.unshift('product'); }
         // In typeimage layout the badge must render above the product image
         if (S.layoutStyle === 'typeimage' && S.badge) { bringToFront('badge'); }
         rebuildLayerPanel(); render();
@@ -8124,6 +8343,7 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
   }
 
   // Draw layers in dynamic order
+  let _fullBleedStoryScrimDrawn = false;
   for (const layerId of S.layerOrder) {
     if (layerId==='product' && S.product) {
       const p=S.product;
@@ -8213,6 +8433,10 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
       drawLabel(c,scX,scY,forExport);
     } else if (layerId.startsWith('ft_') && S.freeTexts && S.freeTexts[layerId] && layerId !== S._editingFt) {
       const ft = S.freeTexts[layerId];
+      if (!_fullBleedStoryScrimDrawn && ft._layoutStyle === 'fullbleedstory' && S.layoutStyle === 'fullbleedstory') {
+        drawFullBleedStoryReadabilityScrim(c,W,H);
+        _fullBleedStoryScrimDrawn = true;
+      }
       // Phase 7X.3B1 Hotfix (Option A): separate geometry scale from typography scale.
       // ftGeomX/Y maps DW/DH document coords → canvas pixels (W/DW).
       // scX (= W/CW) maps CW-space ft.fontSize → canvas pixels (font scale, unchanged).
@@ -10369,6 +10593,21 @@ const LAYOUT_MODELS = Object.freeze({
     // Reference Stripe controls: Position 80%, Winkel -14°, Dicke 28%.
     stripe: { y:80, angle:-14, width:28 },
   },
+  // Layout #3 — Full Bleed Image & Type. Image-led storytelling: the photo owns
+  // the canvas; typography is a semantic overlay anchored inside the safe area.
+  fullbleedstory: {
+    version: 2,
+    kind: 'full-bleed-story',
+    background: 'image',
+    textColorMode: 'auto',
+    readability: { enabled:true, maxScrimOpacity:0.58, reach:0.62 },
+    media: { fit:'cover', focalX:0.5, focalY:0.5 },
+    textRegion: { anchor:'bottom-left', width:0.76, bottom:0.10 },
+    textStack: [
+      { role:'expressiveHeadline', text:LAYOUT_PLACEHOLDERS.expressiveHeadline, color:'#ffffff' },
+      { role:'body', text:LAYOUT_PLACEHOLDERS.body, color:'#ffffff', gap:14 },
+    ],
+  },
 });
 
 function _layoutSafeDoc() {
@@ -10799,6 +11038,198 @@ function _layoutReflowOfferHero(model) {
   return true;
 }
 
+function _layoutFullBleedStoryTexts() {
+  // Readability belongs to the Full Bleed composition, not to attachment state.
+  // Detached/user-moved text must still drive the scrim and manual controls.
+  return Object.values(S.freeTexts || {})
+    .filter(ft => ft._layoutStyle === 'fullbleedstory')
+    .sort((a,b)=>(a._layoutIndex??0)-(b._layoutIndex??0));
+}
+
+function _layoutFullBleedStoryBoundsDoc() {
+  const texts = _layoutFullBleedStoryTexts();
+  if (!texts.length) return null;
+  let x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity;
+  texts.forEach(ft => {
+    const b=_layoutFtBoundsDoc(ft); if(!b) return;
+    const gx=Number.isFinite(b.glyphX)?b.glyphX:b.x;
+    x1=Math.min(x1,gx); y1=Math.min(y1,b.y);
+    x2=Math.max(x2,gx+b.w); y2=Math.max(y2,b.y+b.h);
+  });
+  if(!Number.isFinite(x1)||!Number.isFinite(y1)||!Number.isFinite(x2)||!Number.isFinite(y2)) return null;
+  const padX=18,padY=14;
+  return {x:Math.max(0,x1-padX),y:Math.max(0,y1-padY),w:Math.min(DW,x2+padX)-Math.max(0,x1-padX),h:Math.min(DH,y2+padY)-Math.max(0,y1-padY)};
+}
+
+function _photoLum(r,g,b) {
+  const f=v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+  return .2126*f(r)+.7152*f(g)+.0722*f(b);
+}
+function _photoContrast(a,b){const hi=Math.max(a,b),lo=Math.min(a,b);return (hi+.05)/(lo+.05);}
+
+function _layoutSampleFullBleedStory(boundsDoc) {
+  const p=S.product;
+  if(!boundsDoc || !p || !(p.img instanceof HTMLImageElement) || !p.img.complete || !p.img.naturalWidth) return null;
+  try {
+    const cL=(p.cropL||0)/100,cR=(p.cropR||0)/100,cT=(p.cropT||0)/100,cB=(p.cropB||0)/100;
+    const iw=p.img.naturalWidth,ih=p.img.naturalHeight;
+    const srcX=iw*cL,srcY=ih*cT,srcW=iw*Math.max(.001,1-cL-cR),srcH=ih*Math.max(.001,1-cT-cB);
+    const dx=p.x+p.w*cL,dy=p.y+p.h*cT,dw=p.w*Math.max(.001,1-cL-cR),dh=p.h*Math.max(.001,1-cT-cB);
+    const bx=boundsDoc.x*CW/DW,by=boundsDoc.y*CH/DH,bw=boundsDoc.w*CW/DW,bh=boundsDoc.h*CH/DH;
+    const x0=Math.max(0,bx),y0=Math.max(0,by),x1=Math.min(CW,bx+bw),y1=Math.min(CH,by+bh);
+    if(x1<=x0||y1<=y0) return null;
+    const sx=srcX+(x0-dx)/dw*srcW, sy=srcY+(y0-dy)/dh*srcH;
+    const sw=(x1-x0)/dw*srcW, sh=(y1-y0)/dh*srcH;
+    if(sw<=0||sh<=0) return null;
+    const oc=document.createElement('canvas'); oc.width=32; oc.height=24;
+    const ox=oc.getContext('2d',{willReadFrequently:true});
+    ox.drawImage(p.img,sx,sy,sw,sh,0,0,oc.width,oc.height);
+    const data=ox.getImageData(0,0,oc.width,oc.height).data;
+    const navyL=_photoLum(0,17,85), whiteL=1;
+    let n=0,wScore=0,nScore=0,wBad=0,nBad=0,lumSum=0,lum2=0;
+    for(let i=0;i<data.length;i+=4){
+      if(data[i+3]<24) continue;
+      const L=_photoLum(data[i],data[i+1],data[i+2]);
+      const wc=_photoContrast(whiteL,L), nc=_photoContrast(navyL,L);
+      wScore+=Math.min(wc,7); nScore+=Math.min(nc,7);
+      if(wc<4.5) wBad++; if(nc<4.5) nBad++;
+      lumSum+=L; lum2+=L*L; n++;
+    }
+    if(!n) return null;
+    const avg=lumSum/n, variance=Math.max(0,lum2/n-avg*avg);
+    return {whiteScore:wScore/n,navyScore:nScore/n,whiteBad:wBad/n,navyBad:nBad/n,avgLum:avg,variance};
+  } catch(e) { return null; }
+}
+
+function _layoutUpdateFullBleedStoryReadability(model) {
+  if(!model || model.kind!=='full-bleed-story') return;
+  const texts=_layoutFullBleedStoryTexts(); if(!texts.length) return;
+  const bounds=_layoutFullBleedStoryBoundsDoc();
+  const stats=_layoutSampleFullBleedStory(bounds);
+  let mode=texts[0].photoColorMode || model.textColorMode || 'auto';
+  if(!['auto','white','navy','custom'].includes(mode)) mode='auto';
+  texts.forEach(ft=>{if(!ft.photoColorMode) ft.photoColorMode=mode;});
+
+  // Full Bleed readability follows the brand/site pattern: Auto keeps typography
+  // predictably white and protects it by toning the IMAGE, not by flipping text colour.
+  // White uses the same protection; Navy and Custom are explicit user overrides.
+  let resolved=null;
+  if(mode==='auto' || mode==='white') resolved='#ffffff';
+  else if(mode==='navy') resolved='#001155';
+  if(resolved){texts.forEach(ft=>{if(!ft.fgGradient) ft.color=resolved;});}
+
+  const settingsFt=texts[0]||{};
+  const scrimMode=settingsFt.photoScrimMode || 'auto';
+  const scrimDirection=settingsFt.photoScrimDirection || 'auto';
+  const manualStrength=Math.max(0,Math.min(100,Number.isFinite(settingsFt.photoScrimStrength)?settingsFt.photoScrimStrength:58));
+  const manualReach=Math.max(30,Math.min(90,Number.isFinite(settingsFt.photoScrimReach)?settingsFt.photoScrimReach:62));
+  const maxOp=model.readability?.maxScrimOpacity??.58;
+  let scrimOpacity=0;
+  if(model.readability?.enabled!==false && (mode==='auto' || mode==='white')){
+    if(scrimMode==='manual') scrimOpacity=manualStrength/100;
+    else if(stats){
+      // White-text risk: bright pixels, insufficient contrast and local texture all
+      // contribute. Keep dark/quiet photos almost untouched; lift protection smoothly
+      // on bright or busy imagery.
+      const contrastNeed=Math.max(0, stats.whiteBad-.06) * .70;
+      const brightnessNeed=Math.max(0, stats.avgLum-.16) * .72;
+      const textureNeed=Math.min(.12, Math.sqrt(stats.variance) * .22);
+      scrimOpacity=Math.max(0,Math.min(maxOp,contrastNeed+brightnessNeed+textureNeed));
+    }
+  }
+  // Direction follows the ACTUAL text position. In Auto, use the nearest canvas edge
+  // so top/bottom/left/right text placements all get a natural protection gradient.
+  const cx=bounds.x+bounds.w/2, cy=bounds.y+bounds.h/2;
+  const edgeDist={top:cy,bottom:DH-cy,left:cx,right:DW-cx};
+  let autoDirection=Object.keys(edgeDist).reduce((best,k)=>edgeDist[k]<edgeDist[best]?k:best,'bottom');
+  const direction=(scrimDirection==='auto') ? autoDirection : scrimDirection;
+  const anchor=direction; // retained for backwards/debug visibility
+  S._fullBleedStoryReadability={
+    boundsDoc:bounds, mode, resolvedColor:resolved, scrimOpacity, stats,
+    anchor, direction, scrimMode, scrimDirection, reach:(scrimMode==='manual'?manualReach/100:(model.readability?.reach??.62))
+  };
+}
+
+function drawFullBleedStoryReadabilityScrim(c,W,H) {
+  const r=S._fullBleedStoryReadability;
+  if(!r || !(r.scrimOpacity>0)) return;
+  const reach=Math.max(.30,Math.min(.90,r.reach??.62));
+  const direction=r.direction || r.anchor || 'bottom';
+  c.save();
+  c.globalAlpha=1;
+  let g;
+  const stops=()=>{
+    g.addColorStop(0,`rgba(0,0,0,${r.scrimOpacity})`);
+    g.addColorStop(.28,`rgba(0,0,0,${r.scrimOpacity*.62})`);
+    g.addColorStop(.62,`rgba(0,0,0,${r.scrimOpacity*.22})`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+  };
+  if(direction==='top'){
+    const end=H*reach;
+    g=c.createLinearGradient(0,0,0,end); stops();
+    c.fillStyle=g; c.fillRect(0,0,W,end);
+  } else if(direction==='left'){
+    const end=W*reach;
+    g=c.createLinearGradient(0,0,end,0); stops();
+    c.fillStyle=g; c.fillRect(0,0,end,H);
+  } else if(direction==='right'){
+    const start=W*(1-reach);
+    g=c.createLinearGradient(W,0,start,0); stops();
+    c.fillStyle=g; c.fillRect(start,0,W-start,H);
+  } else {
+    const start=H*(1-reach);
+    g=c.createLinearGradient(0,H,0,start); stops();
+    c.fillStyle=g; c.fillRect(0,start,W,H-start);
+  }
+  c.restore();
+}
+
+function _layoutReflowFullBleedStory(model) {
+  const p=S.product;
+  if(p && p._layoutAttached !== false){
+    let ar=1;
+    if(p.img instanceof HTMLImageElement && p.img.naturalWidth && p.img.naturalHeight) ar=p.img.naturalWidth/p.img.naturalHeight;
+    else if(Number.isFinite(p._aspect) && p._aspect>0) ar=1/p._aspect;
+    const canvasAr=CW/CH;
+    let w,h;
+    if(ar>=canvasAr){ h=CH; w=Math.round(h*ar); }
+    else { w=CW; h=Math.round(w/ar); }
+    const fx=model.media?.focalX ?? .5, fy=model.media?.focalY ?? .5;
+    p.w=p.baseW=w; p.h=p.baseH=h;
+    p.x=Math.round((CW-w)*fx); p.y=Math.round((CH-h)*fy);
+    p.cropT=p.cropB=p.cropL=p.cropR=0; p.cornerRadius=0;
+    p._layoutManaged=true; p._layoutStyle='fullbleedstory';
+  }
+  const safe=_layoutSafeDoc();
+  const regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width ?? .76));
+  // Flow once to get actual wrapped heights, then move the complete stack as one unit
+  // to the semantic bottom-left anchor.
+  const managed=Object.values(S.freeTexts||{}).filter(ft=>ft._layoutManaged && ft._layoutStyle==='fullbleedstory' && ft._layoutAttached!==false).sort((a,b)=>(a._layoutIndex??0)-(b._layoutIndex??0));
+  if(managed.length){
+    let total=0, prev=null;
+    managed.forEach((ft,i)=>{
+      const item=(model.textStack||[])[ft._layoutIndex??i]||{};
+      _layoutApplyRoleMetrics(ft,item.role||ft.stylePreset);
+      ft.maxWidth=Math.round(regionW);
+      if(i>0) total += Number.isFinite(item.gap)?item.gap:_layoutRoleGap(prev,item.role);
+      total += _layoutTextHeightDoc(ft); prev=item.role;
+    });
+    let y=DH*(1-(model.textRegion?.bottom ?? .10))-total;
+    const x=safe;
+    prev=null;
+    managed.forEach((ft,i)=>{
+      const item=(model.textStack||[])[ft._layoutIndex??i]||{};
+      if(i>0) y += Number.isFinite(item.gap)?item.gap:_layoutRoleGap(prev,item.role);
+      ft.x=x; ft.y=y; _layoutAlignOpticalLeft(ft,x);
+      y += _layoutTextHeightDoc(ft); prev=item.role;
+    });
+  }
+  _layoutUpdateFullBleedStoryReadability(model);
+  // Full-bleed media must stay behind typography.
+  S.layerOrder=S.layerOrder.filter(id=>id!=='product'); S.layerOrder.unshift('product');
+  return true;
+}
+
 function reflowDeclarativeLayout(style) {
   // Phase 8L.2: re-project attached layout objects from semantic anchors + rhythm.
   // User-moved/resized objects detach from the layout and are deliberately left alone.
@@ -10806,6 +11237,7 @@ function reflowDeclarativeLayout(style) {
   if (!model) return false;
   if (model.kind === 'media-content-split') return _layoutReflowSplit(model);
   if (model.kind === 'offer-product-hero') return _layoutReflowOfferHero(model);
+  if (model.kind === 'full-bleed-story') return _layoutReflowFullBleedStory(model);
   const g = _layoutBaseGeometry(model);
   _layoutFlowTextStack(style, model.textStack || [], g.x, g.y, g.regionW);
   return true;
@@ -10814,6 +11246,25 @@ function reflowDeclarativeLayout(style) {
 function applyDeclarativeLayout(style) {
   const model = LAYOUT_MODELS[style];
   if (!model) return false;
+
+  if (model.kind === 'full-bleed-story') {
+    const findPreset=id=>BG_PRESETS.find(p=>p.id===id);
+    S.bg=findPreset('p-dn')||findPreset('p-ng')||findPreset('p-wh');
+    S.bgSplit=S.bgSplit||{enabled:false,angle:135,pos:50,color:'#ffffff'}; S.bgSplit.enabled=false;
+    S.stripe=false; S.badge=null; S.badge2=null;
+    if(!S.product || S.product.isPlaceholder){
+      S.product={img:null,opacity:1,shadow:0,x:0,y:0,w:CW,h:CH,baseW:CW,baseH:CH,cropT:0,cropB:0,cropL:0,cropR:0,isPlaceholder:true,_aspect:CH/CW,_layoutManaged:true,_layoutAttached:true,_layoutStyle:'fullbleedstory',glow:{enabled:false,opacity:.70,radius:.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+    } else { S.product._layoutManaged=true; S.product._layoutAttached=true; S.product._layoutStyle='fullbleedstory'; }
+    S.layerOrder=S.layerOrder.filter(id=>id!=='product'); S.layerOrder.unshift('product');
+    const safe=_layoutSafeDoc(), regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width??.76));
+    (model.textStack||[]).forEach((rawItem,idx)=>{
+      const item={...rawItem,_layoutIndex:idx};
+      const ft=_layoutAddText(item,safe,safe,regionW); ft._layoutStyle='fullbleedstory'; ft.photoColorMode=model.textColorMode||'auto';
+      ft.photoScrimMode='auto'; ft.photoScrimDirection='auto'; ft.photoScrimStrength=58; ft.photoScrimReach=Math.round((model.readability?.reach??.62)*100);
+    });
+    _layoutReflowFullBleedStory(model);
+    return true;
+  }
 
   if (model.kind === 'offer-product-hero') {
     const findPreset = id => BG_PRESETS.find(p => p.id === id);
