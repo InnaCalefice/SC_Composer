@@ -1050,26 +1050,10 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         <div class="lib-section-hd" style="margin-top:4px;"><span class="lib-label">Swisscom Icons</span></div>
         <div class="lib-grid" id="ftIconGrid"></div>
         <label class="upload-row">
-          <input type="file" accept="image/png,image/svg+xml" id="iconLibUpload" multiple>
+          <input type="file" accept=".svg,.png,image/svg+xml,image/png" id="iconLibUpload" multiple>
           + Icon laden
         </label>
 
-        <div class="lib-divider"></div>
-
-        <div class="lib-label" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>SDX Bibliothek</span>
-          <span id="sdxStatus" style="font-size:9px;color:var(--text-muted);">wird geprüft…</span>
-        </div>
-        <div id="sdxUnavail" style="display:none;">
-          <div class="sdx-status-box">
-            <span class="sdx-status-text">Nur im Swisscom-Netzwerk verfügbar</span>
-            <button id="sdxRetryBtn" class="sdx-retry-btn" onclick="sdxAvailable=null;checkSdxAccess();">↺ Verbindung prüfen</button>
-          </div>
-        </div>
-        <div id="sdxAvail" style="display:none;">
-          <input class="pi" id="sdxSearch" placeholder="Icon suchen…" style="margin-bottom:8px;">
-          <div class="lib-grid" id="sdxIconGrid"></div>
-        </div>
 
       </div><!-- /elPanel-icons-inner -->
     </div><!-- /libPanel-icons -->
@@ -1100,7 +1084,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
               <span style="font-size:10px;color:#888888;">Abstand</span>
               <span style="font-size:10px;color:#5a9aff;font-weight:700;" id="aiMarginVal">3%</span>
             </div>
-            <input type="range" id="aiMarginSlider" min="0" max="15" value="3" style="width:100%;">
+            <input type="range" id="aiMarginSlider" min="6" max="15" value="6" style="width:100%;">
           </div>
         </div>
       </div>
@@ -4306,13 +4290,16 @@ function computeAiLabelBaseR(labelAr) {
 function snapAiLabelToCorner(corner, marginFrac) {
   if (!S.aiLabel) return;
   const b = S.aiLabel;
-  const frac = marginFrac ?? b.aiMargin ?? 0.03;
+  const frac = Math.max(0.06, marginFrac ?? b.aiMargin ?? 0.06);
   b.aiMargin = frac;
   b.aiCorner = corner ?? b.aiCorner ?? 'bl';
   const hw = b.r * (b.aspect || b.svgAr || 1);
   const hh = b.r;
-  const mgX = Math.round(CW * frac);
-  const mgY = Math.round(CH * frac);
+  // Safe Area uses 6% of the SHORTER canvas side on all four edges.
+  // Keep AI label geometry on exactly the same boundary as drawMarginGuides().
+  const mg = Math.round(Math.min(CW, CH) * frac);
+  const mgX = mg;
+  const mgY = mg;
   const c = b.aiCorner;
   b.x = (c==='tl'||c==='bl') ? hw + mgX : CW - hw - mgX;
   b.y = (c==='tl'||c==='tr') ? hh + mgY : CH - hh - mgY;
@@ -4324,7 +4311,7 @@ function syncAiPosSection() {
   const isAi = !!(S.aiLabel);
   if (inline) inline.style.display = isAi ? '' : 'none';
   if (!isAi) return;
-  const mg = S.aiLabel.aiMargin ?? 0.03;
+  const mg = Math.max(0.06, S.aiLabel.aiMargin ?? 0.06);
   const sl = document.getElementById('aiMarginSlider');
   const vl = document.getElementById('aiMarginVal');
   if (sl) sl.value = Math.round(mg * 100);
@@ -4341,15 +4328,22 @@ function applyAiLabel(al) {
   pushUndo();
   const prev = S.aiLabel;  // keep existing position/size if switching variants
   const baseR = prev ? prev.baseR : computeAiLabelBaseR(al.ar);
-  const mg = prev?.aiMargin ?? 0.03;
+  const mg = Math.max(0.06, prev?.aiMargin ?? 0.06);
   const corner = prev?.aiCorner ?? 'bl';
   const hw = baseR * al.ar;
   const hh = baseR;
-  const mgX = Math.round(CW * mg);
-  const mgY = Math.round(CH * mg);
+  // Same metric as the visible Safe Area guide: 6% of min(CW, CH).
+  const safeMargin = Math.round(Math.min(CW, CH) * mg);
+  const mgX = safeMargin;
+  const mgY = safeMargin;
   let dx, dy;
   if (prev) {
     dx = prev.x; dy = prev.y;
+    // AI labels must remain fully inside the visible 6% Safe Area when variants change.
+    const safeX = Math.round(Math.min(CW, CH) * 0.06);
+    const safeY = safeX;
+    dx = Math.max(safeX + hw, Math.min(CW - safeX - hw, dx));
+    dy = Math.max(safeY + hh, Math.min(CH - safeY - hh, dy));
   } else {
     dx = (corner==='tl'||corner==='bl') ? hw + mgX : CW - hw - mgX;
     dy = (corner==='tl'||corner==='tr') ? hh + mgY : CH - hh - mgY;
@@ -4426,7 +4420,11 @@ const FT_ICONS = [
   {"id":"ft-icon-leaf-bold","name":"Leaf","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxwYXRoIGQ9Ik0yNSA0SDE1QzguOTM1IDQgNCA4LjkzNSA0IDE1YzAgMi42NzMuOTYgNS4xMjUgMi41NTIgNy4wMzRsLTIuMjU5IDIuMjU5YTEgMSAwIDEgMCAxLjQxNCAxLjQxNGwyLjI2LTIuMjZBMTAuOTQ3IDEwLjk0NyAwIDAgMCAxNSAyNmM2LjA2NSAwIDExLTQuOTM1IDExLTExVjVhMSAxIDAgMCAwLTEtMXptLTEgMTFjMCA0Ljk2My00LjAzNyA5LTkgOWE4Ljk1IDguOTUgMCAwIDEtNS42MTEtMS45NzVMMTEuNDE0IDIwSDE5YTEgMSAwIDEgMCAwLTJoLTUuNTg2bDYuMjkzLTYuMjkzYTEgMSAwIDEgMC0xLjQxNC0xLjQxNEwxMiAxNi41ODZWMTFhMSAxIDAgMCAwLTIgMHY3LjU4Nkw3Ljk3NSAyMC42MUE4Ljk1IDguOTUgMCAwIDEgNiAxNWMwLTQuOTYyIDQuMDM4LTkgOS05aDl2OXoiIGZpbGw9IiMzMzMiLz48L3N2Zz4=","w":200,"h":200},
   {"id":"ft-icon-lightbulb-bold-2","name":"Lightbulb","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxzdHlsZT4uc3Qye2ZpbGw6IzMzM308L3N0eWxlPjxnIGlkPSJMYXllcl8xIj48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTUgMmMtNC45NjIgMC05IDQuMDM4LTkgOSAwIDIuNzcgMS4zMjYgNC41NTkgMi42MDcgNi4yODdDOS44MzcgMTguOTQ3IDExIDIwLjUxNSAxMSAyM2ExIDEgMCAwIDAgMSAxaDZhMSAxIDAgMCAwIDEtMWMwLTIuNDg1IDEuMTYyLTQuMDUzIDIuMzkzLTUuNzEzQzIyLjY3NSAxNS41NiAyNCAxMy43NzEgMjQgMTFjMC00Ljk2Mi00LjAzNy05LTktOXptNC43ODYgMTQuMDk3Yy0xLjE2MiAxLjU2Ni0yLjQ2MiAzLjMyLTIuNzM0IDUuOTAzaC00LjEwNGMtLjI3Mi0yLjU4My0xLjU3Mi00LjMzNy0yLjczNC01LjkwM0M5LjAyNiAxNC40OTQgOCAxMy4xMSA4IDExYzAtMy44NiAzLjE0LTcgNy03czcgMy4xNCA3IDdjMCAyLjExLTEuMDI2IDMuNDk0LTIuMjE0IDUuMDk3ek0xOCAyNmgtNmExIDEgMCAxIDAgMCAyaDZhMSAxIDAgMSAwIDAtMnoiLz48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTUgNmMtMi43NTcgMC01IDIuMjQzLTUgNWExIDEgMCAwIDAgMiAwYzAtMS42NTQgMS4zNDYtMyAzLTNhMSAxIDAgMCAwIDAtMnoiLz48L2c+PC9zdmc+","w":200,"h":200},
   {"id":"ft-icon-security-bold-1","name":"Security","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxzdHlsZT4uc3Qye2ZpbGw6IzMzM308L3N0eWxlPjxnIGlkPSJMYXllcl8xIj48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTUgMjhhMSAxIDAgMCAxLS40NDctLjEwNUMxNC4xNjMgMjcuNjk4IDUgMjMuMDQ5IDUgMTdWNmExIDEgMCAwIDEgLjY4NC0uOTQ5bDktM2MuMjA2LS4wNjguNDI2LS4wNjguNjMyIDBsOSAzQTEgMSAwIDAgMSAyNSA2djExYzAgNi4wNDktOS4xNjMgMTAuNy05LjU1MyAxMC44OTVBMSAxIDAgMCAxIDE1IDI4ek03IDYuNzJWMTdjMCAzLjc3MiA1LjQwNyA3LjQ3MyA4IDguODcyIDIuNTkyLTEuNDAyIDgtNS4xMDggOC04Ljg3MlY2LjcybC04LTIuNjY2LTggMi42Njd6Ii8+PHBhdGggY2xhc3M9InN0MiIgZD0iTTE0LjUgMjBjLS4yNjMgMC0uNTE4LS4xMDQtLjcwNy0uMjkzbC00LTRhMSAxIDAgMSAxIDEuNDE0LTEuNDE0bDMuMDYzIDMuMDYyIDQuMzU2LTcuODRhMS4wMDEgMS4wMDEgMCAwIDEgMS43NDguOTdsLTUgOUEuOTk5Ljk5OSAwIDAgMSAxNC41IDIweiIvPjwvZz48L3N2Zz4=","w":200,"h":200},
-  {"id":"ft-icon-ticket-bold","name":"Ticket","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMzMzMzMzM7fQo8L3N0eWxlPgo8ZyBpZD0iTGF5ZXJfMSI+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOCwxOWMtMC42LDAtMSwwLjQtMSwxdjJjMCwwLjYsMC40LDEsMSwxczEtMC40LDEtMXYtMkM5LDE5LjQsOC42LDE5LDgsMTl6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTIsMjBoOC41YzAuNiwwLDEtMC40LDEtMXMtMC40LTEtMS0xSDEyYy0wLjYsMC0xLDAuNC0xLDFTMTEuNCwyMCwxMiwyMHoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xOS41LDIyYy0wLjYsMC0xLDAuNC0xLDFzMC40LDEsMSwxSDIxYzAuNiwwLDEtMC40LDEtMXMtMC40LTEtMS0xSDE5LjV6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYsMjJoLTAuNWMtMC42LDAtMSwwLjQtMSwxczAuNCwxLDEsMUgxNmMwLjYsMCwxLTAuNCwxLTFTMTYuNiwyMiwxNiwyMnoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMS45LDEzLjRjMC4xLDAsMC4zLDAsMC40LTAuMUwyMCw5LjdjMC41LTAuMiwwLjctMC44LDAuNS0xLjNzLTAuOC0wLjctMS4zLTAuNWwtNy43LDMuNgoJCWMtMC41LDAuMi0wLjcsMC44LTAuNSwxLjNDMTEuMSwxMy4xLDExLjUsMTMuNCwxMS45LDEzLjR6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkuNSwxMy4yYzAuMiwwLjQsMC41LDAuNiwwLjksMC42YzAuMSwwLDAuMywwLDAuNC0wLjFsMS40LTAuNmMwLjUtMC4yLDAuNy0wLjgsMC41LTEuM3MtMC44LTAuNy0xLjMtMC41CgkJTDIwLDExLjlDMTkuNCwxMi4xLDE5LjIsMTIuNywxOS41LDEzLjJ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjcuOSwxMy43TDIyLjgsMi44Yy0wLjItMC41LTAuOC0wLjctMS4zLTAuNUwzLDExYy0wLjIsMC4xLTAuNCwwLjMtMC41LDAuNmMtMC4xLDAuMi0wLjEsMC41LDAsMC44TDMuMywxNEgzCgkJYy0wLjYsMC0xLDAuNC0xLDF2MTJjMCwwLjYsMC40LDEsMSwxaDIyYzAuNiwwLDEtMC40LDEtMVYxNS43bDEuNC0wLjdjMC4yLTAuMSwwLjQtMC4zLDAuNS0wLjZDMjgsMTQuMiwyOCwxMy45LDI3LjksMTMuN3oKCQkgTTQuNywxMi40bDEuOC0wLjlMNi44LDEyYzAuMiwwLjQsMC41LDAuNiwwLjksMC42YzAuMSwwLDAuMywwLDAuNC0wLjFjMC41LTAuMiwwLjctMC44LDAuNS0xLjNsLTAuMi0wLjVsMTMuMS02LjFsNC4yLDkuMQoJCUwyNC45LDE0aC02Ljd2LTAuMWMtMC4yLTAuNS0wLjgtMC43LTEuMy0wLjVsLTAuNSwwLjJjLTAuMiwwLjEtMC4zLDAuMi0wLjQsMC40SDkuOGMtMC4zLTAuMy0wLjctMC40LTEuMS0wLjIKCQljLTAuMSwwLTAuMiwwLjEtMC4zLDAuMmgtM0w0LjcsMTIuNHogTTI0LDI2SDl2LTAuNWMwLTAuNi0wLjQtMS0xLTFzLTEsMC40LTEsMVYyNkg0VjE2aDN2MC41YzAsMC42LDAuNCwxLDEsMXMxLTAuNCwxLTFWMTZoMTVWMjYKCQl6Ii8+CjwvZz4KPC9zdmc+Cg==","w":200,"h":200}
+  {"id":"ft-icon-ticket-bold","name":"Ticket","dataUrl":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMzMzMzMzM7fQo8L3N0eWxlPgo8ZyBpZD0iTGF5ZXJfMSI+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOCwxOWMtMC42LDAtMSwwLjQtMSwxdjJjMCwwLjYsMC40LDEsMSwxczEtMC40LDEtMXYtMkM5LDE5LjQsOC42LDE5LDgsMTl6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTIsMjBoOC41YzAuNiwwLDEtMC40LDEtMXMtMC40LTEtMS0xSDEyYy0wLjYsMC0xLDAuNC0xLDFTMTEuNCwyMCwxMiwyMHoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xOS41LDIyYy0wLjYsMC0xLDAuNC0xLDFzMC40LDEsMSwxSDIxYzAuNiwwLDEtMC40LDEtMXMtMC40LTEtMS0xSDE5LjV6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYsMjJoLTAuNWMtMC42LDAtMSwwLjQtMSwxczAuNCwxLDEsMUgxNmMwLjYsMCwxLTAuNCwxLTFTMTYuNiwyMiwxNiwyMnoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMS45LDEzLjRjMC4xLDAsMC4zLDAsMC40LTAuMUwyMCw5LjdjMC41LTAuMiwwLjctMC44LDAuNS0xLjNzLTAuOC0wLjctMS4zLTAuNWwtNy43LDMuNgoJCWMtMC41LDAuMi0wLjcsMC44LTAuNSwxLjNDMTEuMSwxMy4xLDExLjUsMTMuNCwxMS45LDEzLjR6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkuNSwxMy4yYzAuMiwwLjQsMC41LDAuNiwwLjksMC42YzAuMSwwLDAuMywwLDAuNC0wLjFsMS40LTAuNmMwLjUtMC4yLDAuNy0wLjgsMC41LTEuM3MtMC44LTAuNy0xLjMtMC41CgkJTDIwLDExLjlDMTkuNCwxMi4xLDE5LjIsMTIuNywxOS41LDEzLjJ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjcuOSwxMy43TDIyLjgsMi44Yy0wLjItMC41LTAuOC0wLjctMS4zLTAuNUwzLDExYy0wLjIsMC4xLTAuNCwwLjMtMC41LDAuNmMtMC4xLDAuMi0wLjEsMC41LDAsMC44TDMuMywxNEgzCgkJYy0wLjYsMC0xLDAuNC0xLDF2MTJjMCwwLjYsMC40LDEsMSwxaDIyYzAuNiwwLDEtMC40LDEtMVYxNS43bDEuNC0wLjdjMC4yLTAuMSwwLjQtMC4zLDAuNS0wLjZDMjgsMTQuMiwyOCwxMy45LDI3LjksMTMuN3oKCQkgTTQuNywxMi40bDEuOC0wLjlMNi44LDEyYzAuMiwwLjQsMC41LDAuNiwwLjksMC42YzAuMSwwLDAuMywwLDAuNC0wLjFjMC41LTAuMiwwLjctMC44LDAuNS0xLjNsLTAuMi0wLjVsMTMuMS02LjFsNC4yLDkuMQoJCUwyNC45LDE0aC02Ljd2LTAuMWMtMC4yLTAuNS0wLjgtMC43LTEuMy0wLjVsLTAuNSwwLjJjLTAuMiwwLjEtMC4zLDAuMi0wLjQsMC40SDkuOGMtMC4zLTAuMy0wLjctMC40LTEuMS0wLjIKCQljLTAuMSwwLTAuMiwwLjEtMC4zLDAuMmgtM0w0LjcsMTIuNHogTTI0LDI2SDl2LTAuNWMwLTAuNi0wLjQtMS0xLTFzLTEsMC40LTEsMVYyNkg0VjE2aDN2MC41YzAsMC42LDAuNCwxLDEsMXMxLTAuNCwxLTFWMTZoMTVWMjYKCQl6Ii8+CjwvZz4KPC9zdmc+Cg==","w":200,"h":200},
+  {"id":"ft-icon-call-centre-bold","name":"Call Centre","dataUrl":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMzAgMzAiPjxzdHlsZT4uc3Qye2ZpbGw6IzMzM308L3N0eWxlPjxnIGlkPSJMYXllcl8xIj48cGF0aCBjbGFzcz0ic3QyIiBkPSJNMjQuMjQ3IDguMjhBOS45ODUgOS45ODUgMCAwIDAgMTUgMi4wMjcgOS45ODYgOS45ODYgMCAwIDAgNS43NTIgOC4yOCAyLjk5OCAyLjk5OCAwIDAgMCA0IDExdjRjMCAxLjY1NCAxLjM0NiAzIDMgM2gzYy4wMzIgMCAuMDYtLjAxNS4wOS0uMDE4YTYuOTc1IDYuOTc1IDAgMCAwIDkuOC4wMThIMjNjMS42NTQgMCAzLTEuMzQ2IDMtM3YtNGEyLjk5OCAyLjk5OCAwIDAgMC0xLjc1My0yLjcyek0xNSAzLjk3M2MyLjkgMCA1LjUzMiAxLjU3NiA2Ljk0NiA0LjAyN0gxOS44OWE2Ljk3NiA2Ljk3NiAwIDAgMC05LjguMDE4Yy0uMDMtLjAwMy0uMDU3LS4wMTgtLjA4OS0uMDE4SDguMDU0QTguMDM2IDguMDM2IDAgMCAxIDE1IDMuOTczek02IDE1di00YzAtLjU1MS40NDktMSAxLTFoMS42ODVBNi45NDYgNi45NDYgMCAwIDAgOCAxM2MwIDEuMDc1LjI1IDIuMDkuNjg1IDNIN2MtLjU1MSAwLTEtLjQ0OS0xLTF6bTQtMmMwLTIuNzU3IDIuMjQzLTUgNS01YTUuMDA2IDUuMDA2IDAgMCAxIDQuODk5IDZIMTVhMSAxIDAgMCAwIDAgMmgzLjk3NGMtLjkxMyAxLjIwNy0yLjM0NyAyLTMuOTc0IDItMi43NTcgMC01LTIuMjQzLTUtNXptMTQgMmExIDEgMCAwIDEtMSAxaC0xLjY4NWMuNDM0LS45MS42ODUtMS45MjUuNjg1LTNzLS4yNS0yLjA5LS42ODUtM0gyM2ExIDEgMCAwIDEgMSAxdjR6TTIwLjUgMjIuMDI3SDEwQTQuOTc4IDQuOTc4IDAgMCAwIDUuMDI3IDI3YzAgLjUzNy40MzUuOTczLjk3My45NzNoMTguNWEuOTczLjk3MyAwIDAgMCAuOTczLS45NzMgNC45NzggNC45NzggMCAwIDAtNC45NzMtNC45NzN6bS0xMy4zNjcgNEEzLjAzMyAzLjAzMyAwIDAgMSAxMCAyMy45NzNoMTAuNWMxLjMzIDAgMi40Ni44NjEgMi44NjYgMi4wNTRINy4xMzN6Ii8+PC9nPjwvc3ZnPg==","w":200,"h":200},
+  {"id":"ft-icon-ai-sparkle-outline-bold","name":"AI Sparkle","dataUrl":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMCAzMCI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogIzMzMzsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI4LjYuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDEuMi4wIEJ1aWxkIDcwOSkgIC0tPgogIDxnPgogICAgPGcgaWQ9IkViZW5lXzEiPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yNS42MzIsMTYuOTM0bC00LjQwNS0xLjYzYy0uMjY0LS4wOTgtLjQ3MS0uMzA1LS41NjktLjU2OWwtMS42My00LjQwNWMtLjA4Mi0uMjIxLS4yOTMtLjM2OC0uNTI5LS4zNjhzLS40NDcuMTQ3LS41MjkuMzY4bC0xLjYzLDQuNDA1aDBjLS4wOTguMjY0LS4zMDUuNDcxLS41NjkuNTY5bC00LjQwNSwxLjYzYy0uMjIxLjA4Mi0uMzY4LjI5My0uMzY4LjUyOXMuMTQ3LjQ0Ny4zNjguNTI5bDQuNDA1LDEuNjNjLjI2NC4wOTguNDcxLjMwNS41NjkuNTY5bDEuNjMsNC40MDVjLjA4Mi4yMjEuMjkzLjM2OC41MjkuMzY4cy40NDctLjE0Ny41MjktLjM2OGwxLjYzLTQuNDA1Yy4wOTgtLjI2NC4zMDUtLjQ3MS41NjktLjU2OWw0LjQwNS0xLjYzYy4yMjEtLjA4Mi4zNjgtLjI5My4zNjgtLjUyOXMtLjE0Ny0uNDQ3LS4zNjgtLjUyOVpNMjAuODM1LDE4LjU2NGMtLjU3My4yMTItMS4wMjQuNjYzLTEuMjM2LDEuMjM2bC0xLjEwMSwyLjk3NS0xLjEwMS0yLjk3NWMtLjIxMi0uNTczLS42NjMtMS4wMjQtMS4yMzYtMS4yMzZsLTIuOTc1LTEuMTAxLDIuOTc1LTEuMTAxYy41NzMtLjIxMiwxLjAyNC0uNjYzLDEuMjM2LTEuMjM2bDEuMTAxLTIuOTc1LDEuMTAxLDIuOTc1Yy4yMTIuNTczLjY2MywxLjAyNCwxLjIzNiwxLjIzNmwyLjk3NSwxLjEwMS0yLjk3NSwxLjEwMVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMy44MjYsMTMuNzY3YzAtLjIzNi0uMTQ3LS40NDctLjM2OC0uNTI5bC0yLjc2MS0xLjAyMmMtLjEwOC0uMDQtLjE5Mi0uMTI1LS4yMzItLjIzMmwtMS4wMjItMi43NjFjLS4wODItLjIyMS0uMjkzLS4zNjgtLjUyOS0uMzY4cy0uNDQ3LjE0Ny0uNTI5LjM2OGwtMS4wMjIsMi43NjFjLS4wNC4xMDgtLjEyNS4xOTItLjIzMi4yMzJsLTIuNzYxLDEuMDIyYy0uMjIxLjA4Mi0uMzY4LjI5My0uMzY4LjUyOXMuMTQ3LjQ0Ny4zNjguNTI5bDIuNzYxLDEuMDIyYy4xMDguMDQuMTkyLjEyNS4yMzIuMjMybDEuMDIyLDIuNzYxYy4wODIuMjIxLjI5My4zNjguNTI5LjM2OHMuNDQ3LS4xNDcuNTI5LS4zNjhsMS4wMjItMi43NjFjLjA0LS4xMDguMTI1LS4xOTIuMjMyLS4yMzJsMi43NjEtMS4wMjJjLjIyMS0uMDgyLjM2OC0uMjkzLjM2OC0uNTI5Wk0xMC4zMDUsMTQuMjU5Yy0uNDE3LjE1NC0uNzQ1LjQ4Mi0uODk5Ljg5OWwtLjQ5MywxLjMzMS0uNDkzLTEuMzMxYy0uMTU0LS40MTctLjQ4Mi0uNzQ1LS44OTktLjg5OWwtMS4zMzEtLjQ5MywxLjMzMS0uNDkzYy40MTctLjE1NC43NDUtLjQ4Mi44OTktLjg5OWwuNDkzLTEuMzMxLjQ5MywxLjMzMWMuMTU0LjQxNy40ODIuNzQ1Ljg5OS44OTlsMS4zMzEuNDkzLTEuMzMxLjQ5M1oiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMS4yNTIsOS4wNTFsMS45NzIuNzNjLjA1OS4wMjIuMTA0LjA2OC4xMjYuMTI2bC43MywxLjk3MmMuMDY4LjE4NS4yNDQuMzA3LjQ0MS4zMDdzLjM3My0uMTIzLjQ0MS0uMzA3bC43My0xLjk3MmMuMDIyLS4wNTkuMDY4LS4xMDQuMTI2LS4xMjZsMS45NzItLjczYy4xODUtLjA2OC4zMDctLjI0NC4zMDctLjQ0MXMtLjEyMy0uMzczLS4zMDctLjQ0MWwtMS45NzItLjczYy0uMDU5LS4wMjItLjEwNC0uMDY4LS4xMjYtLjEyNmwtLjczLTEuOTcyYy0uMDY4LS4xODUtLjI0NC0uMzA3LS40NDEtLjMwN3MtLjM3My4xMjMtLjQ0MS4zMDdsLS43MywxLjk3MmMtLjAyMi4wNTktLjA2OC4xMDQtLjEyNi4xMjZsLTEuOTcyLjczYy0uMTg1LjA2OC0uMzA3LjI0NC0uMzA3LjQ0MXMuMTIzLjM3My4zMDcuNDQxWk0xMy41NSw4LjMyMWMuMzE2LS4xMTcuNTY1LS4zNjYuNjgyLS42ODJsLjI4OS0uNzguMjg5Ljc4Yy4xMTcuMzE2LjM2Ni41NjUuNjgyLjY4MmwuNzguMjg5LS43OC4yODljLS4zMTYuMTE3LS41NjUuMzY2LS42ODIuNjgybC0uMjg5Ljc4LS4yODktLjc4Yy0uMTE3LS4zMTYtLjM2Ni0uNTY1LS42ODItLjY4MmwtLjc4LS4yODkuNzgtLjI4OVoiLz4KICAgICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+","w":200,"h":200},
+  {"id":"ft-icon-handset-up-bold","name":"Handset Up","dataUrl":"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMzAgMzAiPjxwYXRoIGQ9Ik0yNi43MDggMjMuMjUybC01Ljk4NS01Ljk4NWEuOTkzLjk5MyAwIDAgMC0xLjQwNiAwbC0yLjI5NSAyLjI3NC02LjU3My02LjU3MyAyLjI4NC0yLjI4NWEuOTkzLjk5MyAwIDAgMCAwLTEuNDA2TDYuNzQ4IDMuMjkyYS45OTMuOTkzIDAgMCAwLTEuNDA3IDBMMy40NzYgNS4xNTdjLTEuNjE2IDEuNjE2LTEuOTE1IDQuMjctLjg0OCA3LjQ3MS45ODggMi45NzMgMy4wNjMgNi4xMzUgNS44MzYgOC45MDhzNS45MzUgNC44NDggOC45MDcgNS44MzZjMy4yMDIgMS4wNjcgNS44NTYuNzY4IDcuNDcyLS44NDhsMS44NjUtMS44NjZhLjk5NC45OTQgMCAwIDAgMC0xLjQwNnptLTMuMjcyIDEuODU1Yy0xLjAzNyAxLjAzOC0zLjAxMiAxLjE2Ny01LjQyNi4zNy0yLjY4My0uODk4LTUuNTY2LTIuNzk0LTguMTItNS4zNTctMi41NTQtMi41NjQtNC40NTktNS40NDctNS4zNTctOC4xMi0uODA4LTIuNDI0LS42NzgtNC4zOTkuMzYtNS40MzdMNi4wNSA1LjQwNmw0LjU3OCA0LjU2OS0yLjI4NCAyLjI4NGEuOTkzLjk5MyAwIDAgMCAwIDEuNDA3bDcuOTggNy45OGEuOTkzLjk5MyAwIDAgMCAxLjQwNyAwbDIuMjg0LTIuMjc0IDQuNTc5IDQuNTc4LTEuMTU4IDEuMTU3eiIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==","w":200,"h":200},
+  {"id": "ft-icon-wlan-3-bold", "name": "WLAN 3", "dataUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPgoJPHBhdGggZmlsbD0iIzMzMzMzMyIgZD0iTTI2LDE0LjRjLTAuMiwwLTAuNS0wLjEtMC43LTAuM2MtNS43LTUuNS0xNC45LTUuNS0yMC42LDBjLTAuNCwwLjQtMSwwLjQtMS40LDBjLTAuNC0wLjQtMC40LTEsMC0xLjQKCQljNi40LTYuMiwxNi45LTYuMiwyMy40LDBjMC40LDAuNCwwLjQsMSwwLDEuNEMyNi41LDE0LjMsMjYuMywxNC40LDI2LDE0LjR6Ii8+Cgk8cGF0aCBmaWxsPSIjMzMzMzMzIiBkPSJNNy43LDE3LjljLTAuMywwLTAuNS0wLjEtMC43LTAuM2MtMC40LTAuNC0wLjQtMSwwLTEuNGM0LjQtNC4zLDExLjYtNC4zLDE2LDBjMC40LDAuNCwwLjQsMSwwLDEuNAoJCWMtMC40LDAuNC0xLDAuNC0xLjQsMGMtMy43LTMuNS05LjYtMy41LTEzLjMsMEM4LjIsMTcuOCw3LjksMTcuOSw3LjcsMTcuOXoiLz4KCTxwYXRoIGZpbGw9IiMzMzMzMzMiIGQ9Ik0xMS4zLDIxLjRjLTAuMywwLTAuNS0wLjEtMC43LTAuM2MtMC40LTAuNC0wLjQtMSwwLTEuNGMyLjQtMi4zLDYuMy0yLjMsOC44LDBjMC40LDAuNCwwLjQsMSwwLDEuNAoJCWMtMC40LDAuNC0xLDAuNC0xLjQsMGMtMS43LTEuNi00LjMtMS42LTYsMEMxMS44LDIxLjQsMTEuNiwyMS40LDExLjMsMjEuNHoiLz4KCTxjaXJjbGUgZmlsbD0iIzMzMzMzMyIgY3g9IjE1IiBjeT0iMjQiIHI9IjEiLz4KPC9zdmc+", "w": 200, "h": 200}
 ];
 
 // ── Mutable icon library (persisted to localStorage) ──────────────────
@@ -4437,13 +4435,18 @@ const FT_ICONS = [
     try {
       S.iconLib = JSON.parse(stored);
       // Ensure pinned icons are always at top (prepend if missing)
-      const pinned = ['ft-icon-thumb-up-bold','ft-icon-mysecurity-bold','ft-icon-present-bold'];
+      const pinned = ['ft-icon-thumb-up-bold','ft-icon-mysecurity-bold','ft-icon-present-bold','ft-icon-wlan-3-bold','ft-icon-call-centre-bold','ft-icon-ai-sparkle-outline-bold','ft-icon-handset-up-bold'];
       pinned.slice().reverse().forEach(pid => {
-        if (!S.iconLib.find(ic => ic.id === pid)) {
-          const def = FT_ICONS.find(ic => ic.id === pid);
+        const def = FT_ICONS.find(ic => ic.id === pid);
+        const idx = S.iconLib.findIndex(ic => ic.id === pid);
+        if (idx < 0) {
           if (def) S.iconLib.unshift({...def});
+        } else if (def && ['ft-icon-wlan-3-bold','ft-icon-call-centre-bold','ft-icon-ai-sparkle-outline-bold','ft-icon-handset-up-bold'].includes(pid)) {
+          // Refresh bundled assets so older localStorage copies cannot keep stale/broken SVG data.
+          S.iconLib[idx] = {...def};
         }
       });
+      saveIconLib();
       return;
     } catch(e){}
   }
@@ -4487,6 +4490,7 @@ function applyFtIconToBadge(item) {
     getBadgeBySlot(slot).iconUrl = item.dataUrl;
     getBadgeBySlot(slot).iconImg = tempImg;
     getBadgeBySlot(slot).iconBounds = null;
+    getBadgeBySlot(slot).iconCenterYFrac = null;
     delete getBadgeBySlot(slot).iconTint;
     // Detect tight bounding box (same as uploaded icons) for correct centering
     try {
@@ -4671,16 +4675,81 @@ if (_shapeUpload) _shapeUpload.addEventListener('change',async e=>{
 });
 
 document.getElementById('iconLibUpload').addEventListener('change', async e => {
-  for (const f of e.target.files) {
-    const dataUrl = await toDataUrl(f);
-    const id = 'ic-' + Date.now() + rnd();
-    const name = f.name.replace(/\.[^.]+$/, ''); // strip extension
-    const img = new Image(); img.src = dataUrl;
-    await new Promise(r => { img.onload = r; });
-    S.iconLib.push({ id, name, dataUrl, w: img.naturalWidth || 200, h: img.naturalHeight || 200 });
-    saveIconLib();
+  const input = e.currentTarget;
+  const files = Array.from(input.files || []);
+  for (const f of files) {
+    try {
+      const lower = (f.name || '').toLowerCase();
+      const isSvg = f.type === 'image/svg+xml' || lower.endsWith('.svg');
+      const isPng = f.type === 'image/png' || lower.endsWith('.png');
+      if (!isSvg && !isPng) throw new Error('Nur SVG und PNG werden unterstützt.');
+
+      let dataUrl;
+      let dims = {w:0,h:0};
+
+      if (isSvg) {
+        // User SVGs can contain wildly different Illustrator/SDX viewBoxes, CSS classes,
+        // transforms and intrinsic sizes. Browser <img> previews handle those well, but
+        // canvas source-cropping does not. Rasterise once to a large transparent PNG.
+        // From this point on every uploaded icon follows exactly the same reliable path.
+        const raw = await f.text();
+        const doc = new DOMParser().parseFromString(raw, 'image/svg+xml');
+        if (doc.querySelector('parsererror') || !doc.documentElement || doc.documentElement.localName !== 'svg') {
+          throw new Error('SVG konnte nicht gelesen werden.');
+        }
+        const svg = doc.documentElement;
+        if (!svg.getAttribute('xmlns')) svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+        svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+        const vb = (svg.getAttribute('viewBox') || '').trim().split(/[ ,]+/).map(Number);
+        let ar = 1;
+        if (vb.length === 4 && vb.every(Number.isFinite) && vb[2] > 0 && vb[3] > 0) ar = vb[2] / vb[3];
+        else {
+          const sw=parseFloat(svg.getAttribute('width')), sh=parseFloat(svg.getAttribute('height'));
+          if (Number.isFinite(sw) && sw>0 && Number.isFinite(sh) && sh>0) ar=sw/sh;
+        }
+
+        // Square transparent raster keeps crop coordinates simple and leaves room for any aspect ratio.
+        const REF = 1024;
+        svg.setAttribute('width', String(REF));
+        svg.setAttribute('height', String(REF));
+        const clean = new XMLSerializer().serializeToString(svg);
+        const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(clean);
+        const source = await new Promise((resolve,reject)=>{
+          const im=new Image();
+          const timer=setTimeout(()=>reject(new Error('SVG konnte nicht gerendert werden.')),5000);
+          im.onload=()=>{clearTimeout(timer);resolve(im);};
+          im.onerror=()=>{clearTimeout(timer);reject(new Error('SVG konnte nicht gerendert werden.'));};
+          im.src=svgUrl;
+        });
+        const oc=document.createElement('canvas'); oc.width=REF; oc.height=REF;
+        const ox=oc.getContext('2d');
+        ox.clearRect(0,0,REF,REF);
+        ox.drawImage(source,0,0,REF,REF);
+        dataUrl=oc.toDataURL('image/png');
+        dims={w:REF,h:REF};
+      } else {
+        dataUrl = await toDataUrl(f);
+        dims = await new Promise((resolve,reject)=>{
+          const im=new Image();
+          const timer=setTimeout(()=>reject(new Error('Icon konnte nicht geladen werden.')),5000);
+          im.onload=()=>{clearTimeout(timer);resolve({w:im.naturalWidth,h:im.naturalHeight});};
+          im.onerror=()=>{clearTimeout(timer);reject(new Error('Icon konnte nicht geladen werden.'));};
+          im.src=dataUrl;
+        });
+      }
+
+      const id = 'ic-' + Date.now() + rnd();
+      const name = f.name.replace(/\.[^.]+$/, '');
+      S.iconLib.push({ id, name, dataUrl, w: dims.w || 1024, h: dims.h || 1024, rasterized: isSvg });
+      saveIconLib();
+    } catch (err) {
+      console.warn('Icon upload failed:', err);
+      showToast?.('Icon konnte nicht geladen werden: ' + (err?.message || 'Unbekannter Fehler'));
+    }
   }
-  rebuildFtIcons(); e.target.value = '';
+  rebuildFtIcons();
+  input.value = '';
 });
 
 // ────────────────────────────────────────────────────
@@ -8768,9 +8837,11 @@ function drawStripeOverlay(c, W, H, stripe) {
 // intermediate canvas, then crop using bounds (sx,sy,sw,sh are in that 200×200 space).
 function drawIconTinted(c, img, x, y, w, h, tint, sx=0, sy=0, sw=null, sh=null) {
   const pw = Math.ceil(w)||1, ph = Math.ceil(h)||1;
+  const src = String(img.currentSrc || img.src || '');
+  const isSvg = src.startsWith('data:image/svg+xml') || /\.svg(?:$|[?#])/i.test(src);
   const hasDims = img.naturalWidth > 0;
 
-  if (!hasDims) {
+  if (isSvg || !hasDims) {
     // ── SVG path ──
     // 1. Render SVG at 200×200 into an intermediate canvas (reliable cross-browser)
     const REF = 200;
@@ -9160,8 +9231,10 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
 
 function drawBadgeIcon(c,b,cx,cy,r,t1,t2) {
   const img = b.iconImg;
-  const hasDimsSvg = img.naturalWidth > 0; // false for SVGs without explicit width/height attrs
-  const bounds = b.iconBounds; // tight content bounds (detected at 200×200 for SVGs)
+  const iconSrc = String(img?.currentSrc || img?.src || b.iconUrl || '');
+  const isSvgIcon = iconSrc.startsWith('data:image/svg+xml') || /\.svg(?:$|[?#])/i.test(iconSrc);
+  const hasDimsSvg = !isSvgIcon; // historical name: true means use raster/native pixel coordinates
+  const bounds = b.iconBounds; // SVG bounds are measured in 200×200 render space; raster bounds in native pixels
 
   // Determine scaling dimensions and crop region.
   // For SVGs (hasDimsSvg=false): drawIconTinted renders to 200×200 intermediate canvas.
@@ -10188,183 +10261,7 @@ setTimeout(() => document.addEventListener('click', function h(e){ if(!picker.co
 
 
 
-// ────────────────────────────────────────────────────
-// SDX ICON LIBRARY
-// ────────────────────────────────────────────────────
-// Icon names (alphabetical) — used for both v2 and v3
-const SDX_ICONS = [
-  "account","alert","arrow-down","arrow-left","arrow-right","arrow-up",
-  "attachment","battery","bell","bluetooth","bookmark","bullet-list",
-  "calendar","call","camera","chart","chat","check","check-circle",
-  "chevron-down","chevron-left","chevron-right","chevron-up",
-  "clock","close","cloud","cloud-download","cloud-upload",
-  "coffee","copy","crown","cursor-hand-click",
-  "data","delete","download","edit","email","error",
-  "external-link","eye","eye-closed","favorite","filter",
-  "flag","folder","football","gift","globe","grid",
-  "heart","home","hourglass","info","key","laptop",
-  "leaf","lightbulb","link","list","location","lock",
-  "login","logout","menu","message","mic","minus",
-  "mobile","moon","move","music","notification",
-  "pause","phone","picture","pin","play","plus",
-  "print","puzzle","refresh","search","security","settings",
-  "share","shopping-cart","signal","smart-home","smiley",
-  "sort","star","stop","sun","swap","tablet","tag",
-  "thumb-down","thumb-up","ticket","time","trash",
-  "tv","umbrella","unlock","upload","user","users",
-  "video","volume","warning","wifi","world","zoom-in","zoom-out"
-];
-
-// Candidate URLs — v3 first (new format: NNN-name.svg), v2 fallback (sdx-icon-name.svg)
-const SDX_CANDIDATES = [
-  { base: 'https://sdx.scsstatic.ch/v3.22.0/icons/', v3: true,  probe: '001-account.svg' },
-  { base: 'https://sdx.scsstatic.ch/v2.30.0/icons/', v3: false, probe: 'sdx-icon-alert.svg' },
-  { base: 'https://sdx.scsstatic.ch/v2/icons/',       v3: false, probe: 'sdx-icon-alert.svg' },
-];
-
-let sdxAvailable = null; // null=unknown, true, false
-let SDX_BASE_WORKING = SDX_CANDIDATES[0].base;
-let SDX_V3 = true; // current candidate uses v3 naming?
-
-// Build icon URL based on detected version
-function sdxIconUrl(name, index) {
-  if (SDX_V3) {
-    return SDX_BASE_WORKING + String(index + 1).padStart(3, '0') + '-' + name + '.svg';
-  }
-  return SDX_BASE_WORKING + 'sdx-icon-' + name + '.svg';
-}
-
-function checkSdxAccess() {
-  let idx = 0;
-  function tryNext() {
-    if (idx >= SDX_CANDIDATES.length) {
-      sdxAvailable = false;
-      updateSdxUI();
-      return;
-    }
-    const cand = SDX_CANDIDATES[idx++];
-    const probe = new Image();
-    const timer = setTimeout(() => { probe.src = ''; tryNext(); }, 8000);
-    probe.onload = () => {
-      clearTimeout(timer);
-      SDX_BASE_WORKING = cand.base;
-      SDX_V3 = cand.v3;
-      sdxAvailable = true;
-      updateSdxUI();
-    };
-    probe.onerror = () => { clearTimeout(timer); tryNext(); };
-    probe.src = cand.base + cand.probe + '?' + Date.now();
-  }
-  tryNext();
-}
-
-function updateSdxUI(filter='') {
-  const avail  = document.getElementById('sdxAvail');
-  const unavail= document.getElementById('sdxUnavail');
-  const status = document.getElementById('sdxStatus');
-  if (sdxAvailable === false) {
-    status.textContent = '✗ nicht erreichbar';
-    status.style.color = '#e06060';
-    unavail.style.display = 'block';
-    avail.style.display   = 'none';
-    return;
-  }
-  if (sdxAvailable === true) {
-    status.textContent = '✓ verfügbar';
-    status.style.color = '#6ee7b7';
-    unavail.style.display = 'none';
-    avail.style.display   = 'block';
-  }
-  const grid = document.getElementById('sdxIconGrid');
-  const q = filter.toLowerCase().trim();
-  const filtered = q ? SDX_ICONS.filter(n => n.includes(q)) : SDX_ICONS;
-  grid.innerHTML = '';
-  filtered.forEach((name, i) => {
-    // Resolve actual index in full SDX_ICONS list for correct v3 numbering
-    const fullIdx = SDX_ICONS.indexOf(name);
-    const url = sdxIconUrl(name, fullIdx >= 0 ? fullIdx : i);
-    const wrap = document.createElement('div');
-    wrap.className = 'shape-thumb';
-    wrap.setAttribute('data-tip', name);
-    wrap.style.cssText = 'cursor:pointer;';
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = name;
-    img.style.cssText = 'width:70%;height:70%;object-fit:contain;filter:brightness(0) invert(1);opacity:.85;';
-    img.onerror = () => {
-      wrap.style.display = 'none'; // hide broken icons
-    };
-    img.onload  = () => { sdxAvailable = true; updateSdxStatusOnly(); };
-    wrap.appendChild(img);
-    wrap.onclick = () => addSdxIconToLib(name, url);
-    grid.appendChild(wrap);
-  });
-}
-
-function updateSdxStatusOnly() {
-  const status = document.getElementById('sdxStatus');
-  if (sdxAvailable === true && status) {
-    status.textContent = '✓ verfügbar';
-    status.style.color = '#6ee7b7';
-    document.getElementById('sdxUnavail').style.display = 'none';
-    document.getElementById('sdxAvail').style.display   = 'block';
-  }
-}
-
-async function addSdxIconToLib(name, url) {
-  const id = 'sdx-' + name;
-  // Already in lib?
-  const existing = S.iconLib.find(ic => ic.id === id);
-  if (existing) { applyFtIconToBadge(existing); return; }
-
-  // Try fetch with CORS (works if CDN sends CORS headers)
-  try {
-    const res = await fetch(url, {signal: AbortSignal.timeout(5000)});
-    if (!res.ok) throw new Error('not ok');
-    const blob = await res.blob();
-    const reader = new FileReader();
-    reader.onload = e => {
-      S.iconLib.push({ id, name: 'sdx ' + name, dataUrl: e.target.result });
-      saveIconLib(); rebuildFtIcons();
-      applyFtIconToBadge(S.iconLib[S.iconLib.length-1]);
-    };
-    reader.readAsDataURL(blob);
-  } catch(e) {
-    // CORS blocked — store URL directly, load as img (no canvas tinting but works for display)
-    const im = new Image();
-    im.crossOrigin = 'anonymous';
-    im.onload = () => {
-      S.iconLib.push({ id, name: 'sdx ' + name, dataUrl: url });
-      saveIconLib(); rebuildFtIcons();
-      applyFtIconToBadge(S.iconLib[S.iconLib.length-1]);
-    };
-    im.onerror = () => {
-      // Last resort: just store URL, user may need to reload in Swisscom network
-      S.iconLib.push({ id, name: 'sdx ' + name, dataUrl: url });
-      saveIconLib(); rebuildFtIcons();
-    };
-    im.src = url;
-  }
-}
-
-document.getElementById('sdxSearch').addEventListener('input', e => {
-  updateSdxUI(e.target.value);
-});
-
-// Try SDX access when icons panel is opened
-document.querySelectorAll('.lib-nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.panel === 'icons' && sdxAvailable === null) {
-      document.getElementById('sdxStatus').textContent = 'wird geprüft…';
-      checkSdxAccess();
-    }
-  });
-});
-
-// Check access on load (deferred)
-setTimeout(checkSdxAccess, 600);
-
-
+// SDX online library removed: the Composer uses the local embedded/user icon library only.
 
 // ── Auto-expand sections based on canvas selection ────────────────────
 const SECTION_MAP = {
