@@ -2748,7 +2748,10 @@ function auditDocumentModel() {
 
 const canvas = document.getElementById('mainCanvas');
 const ctx    = canvas.getContext('2d');
-const DPR = () => Math.round(window.devicePixelRatio || 1);
+// Keep raster assets crisp on HiDPI / fractional-scale displays.
+ctx.imageSmoothingEnabled = true;
+ctx.imageSmoothingQuality = 'high';
+const DPR = () => Math.max(1, Math.min(3, window.devicePixelRatio || 1));
 
 function setupCanvas() {
   const dpr = DPR();
@@ -2759,6 +2762,9 @@ function setupCanvas() {
   canvas.style.width  = PW + 'px';
   canvas.style.height = PH + 'px';
   canvas.style.aspectRatio = PW + ' / ' + PH;
+  // Resizing a canvas resets its 2D state, so restore high-quality resampling.
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 }
 const imgCache = {};
 
@@ -8477,6 +8483,10 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
   // Sync context panel (memoized, guarded)
   try { if (typeof syncPropPanel==='function' && S._panelCtx!==S.selected){S._panelCtx=S.selected;syncPropPanel();} } catch(e){}
   const c=ec||ctx, W=ec?EW:CW, H=ec?EH:CH;
+  // Always sample uploaded PNG/JPG assets from the original HTMLImageElement.
+  // High-quality browser resampling avoids the soft 'downscale then upscale' look.
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
   const scX=W/CW, scY=H/CH;
   if (!forExport) {
     const dpr=DPR();
