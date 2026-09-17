@@ -3763,7 +3763,21 @@ function applyFtCanvasTracking(ctx, ft, designToCanvasScale) {
   });
   if (inp) inp.addEventListener('input', () => {
     const ft=currentFt();
-    if(ft){ ft.text=inp.value; ft.gradientRange=null; _reflowLayoutForFt(ft); render(); }
+    // Normalize literal tabs from paste to four spaces; repeated/leading spaces remain intact.
+    if (inp.value.includes('\t')) {
+      const pos = inp.selectionStart ?? inp.value.length;
+      const before = inp.value.slice(0, pos);
+      inp.value = inp.value.replace(/\t/g, '    ');
+      const newPos = before.replace(/\t/g, '    ').length;
+      inp.setSelectionRange(newPos, newPos);
+    }
+    if(ft){
+      const _prevText = ft.text || '';
+      const _prevRange = ft.gradientRange ? {...ft.gradientRange} : null;
+      ft.text=inp.value;
+      if (_prevRange) ft.gradientRange=remapFtGradientRange(_prevText, ft.text, _prevRange);
+      _reflowLayoutForFt(ft); render();
+    }
     inp.style.height = 'auto';
     inp.style.height = Math.min(180, Math.max(76, inp.scrollHeight)) + 'px';
   });
@@ -5559,7 +5573,11 @@ function hitFreeText(mx, my) {
                   : al === 'right'  ? xCW + containerW - textW
                   :                   xCW;
     const pad = fs * 0.15;
-    if (mxCW >= hitLeft - pad && mxCW <= hitLeft + textW + pad && myCW >= yCW - pad && myCW <= yCW + h + pad) return id;
+    // Layout text owns its whole text box, not only painted glyph pixels. This prevents
+    // an image placeholder underneath from stealing clicks in spaces / indented lines.
+    const boxLeft = ft.maxWidth ? xCW : hitLeft;
+    const boxWidth = ft.maxWidth ? containerW : textW;
+    if (mxCW >= boxLeft - pad && mxCW <= boxLeft + boxWidth + pad && myCW >= yCW - pad && myCW <= yCW + h + pad) return id;
   }
   return null;
 }
@@ -5600,6 +5618,23 @@ function docXY(e) {
   const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
   const cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
   return { x: cx * sx, y: cy * sy };
+}
+
+// Upload affordance has its own deliberately small hit target. The placeholder image
+// itself is selectable, but it must never open the file dialog from an arbitrary canvas click.
+function getProductUploadHintGeometry() {
+  const p = S.product;
+  if (!p || !p.isPlaceholder) return null;
+  const cx = p.x + p.w / 2;
+  const cy = p.y + p.h * 0.32;
+  const r = Math.max(18, Math.round(Math.min(p.w, p.h) * 0.085));
+  return {cx, cy, r};
+}
+function hitProductUploadHint(x, y) {
+  const g = getProductUploadHintGeometry();
+  if (!g) return false;
+  // Small forgiving halo around the icon only; the text label is not a giant invisible button.
+  return Math.hypot(x - g.cx, y - g.cy) <= g.r * 1.35;
 }
 
 canvas.addEventListener('mousedown',e=>{
@@ -5652,6 +5687,26 @@ canvas.addEventListener('mousedown',e=>{
     multiSel.clear(); updateAlignToolbar();
   }
 
+  // Text must win over an overlapping product/image placeholder. Otherwise the first
+  // click of a text double-click can open the image upload dialog and editing is impossible.
+  const _textFirstHit = hitFreeText(dox, doy);
+  if (_textFirstHit) {
+    pushUndo();
+    S.selected = _textFirstHit;
+    S.dragging = true;
+    const ft = S.freeTexts[_textFirstHit];
+    S.dragStart = {x: dox, y: doy, fx: ft.x, fy: ft.y};
+    syncFtProps(); render(); return;
+  }
+
+  // Placeholder upload is an explicit action: only the compact upload icon opens the picker.
+  // This prevents text editing / ordinary canvas clicks from unexpectedly launching a file dialog.
+  if (hitProductUploadHint(x, y)) {
+    S.selected='product'; rebuildLayerPanel(); render();
+    const inp=document.getElementById('productInput'); if(inp) inp.click();
+    return;
+  }
+
   const ce=hitCropEdge(x,y);
   if (ce) {
     const p=S.product;
@@ -5684,18 +5739,6 @@ canvas.addEventListener('mousedown',e=>{
     // Phase 7X.3B1: dragStart.x/y in DW space; origMaxW default in DW space
     S.dragStart = {x: dox, y: doy, origMaxW: ft.maxWidth || Math.round(DW * 0.82), origSize: ft.fontSize || 32, ftId: S.selected};
     canvas.style.cursor = ftResize === 'right' ? 'ew-resize' : 'nwse-resize'; render(); return;
-  }
-  // Phase 7X.3B1: use dox/doy (DW/DH document space) for freeText hit test
-  const ftHit2 = hitFreeText(dox, doy);
-  if (ftHit2) {
-    pushUndo();
-    S.selected = ftHit2;
-    S.dragging = true;
-    const ft = S.freeTexts[ftHit2];
-    // Phase 7X.3B1: dragStart.x/y in DW space (matches ft.x/ft.y coordinate space)
-    S.dragStart = {x: dox, y: doy, fx: ft.x, fy: ft.y};
-    syncFtProps();
-    render(); return;
   }
   if (hitAiLabel(x,y)) {
     pushUndo();
@@ -5751,10 +5794,10 @@ canvas.addEventListener('mousedown',e=>{
     canvas.style.cursor='ns-resize'; render(); return;
   }
   if (hitProduct(x,y)) {
-    // Placeholder: open upload dialog on click
+    // Placeholder is selectable across its bounds, but upload is intentionally restricted
+    // to hitProductUploadHint() above.
     if (S.product?.isPlaceholder) {
       S.selected='product'; rebuildLayerPanel(); render();
-      const inp=document.getElementById('productInput'); if(inp) inp.click();
       return;
     }
     pushUndo();
@@ -6230,6 +6273,34 @@ canvas.addEventListener('dblclick', e => {
 // Contract: character offsets in the raw ft.text string, scoped to one FreeText id.
 let _ftEditorSel = null;
 
+// Keep character-range formatting stable when text is edited. Insertions before a styled
+// word shift its range; insertions after it leave it untouched; edits inside extend/contract it.
+function remapFtGradientRange(oldText, newText, range) {
+  if (!range || !Number.isFinite(range.start) || !Number.isFinite(range.end)) return range;
+  oldText = oldText || ''; newText = newText || '';
+  let pre = 0;
+  const minLen = Math.min(oldText.length, newText.length);
+  while (pre < minLen && oldText[pre] === newText[pre]) pre++;
+  let suf = 0;
+  while (suf < oldText.length - pre && suf < newText.length - pre &&
+         oldText[oldText.length - 1 - suf] === newText[newText.length - 1 - suf]) suf++;
+  const oldEnd = oldText.length - suf;
+  const newEnd = newText.length - suf;
+  const delta = (newEnd - pre) - (oldEnd - pre);
+  let start = range.start, end = range.end;
+  if (oldEnd <= start) { start += delta; end += delta; }
+  else if (pre >= end) { /* edit after range */ }
+  else {
+    // Edit intersects the formatted range: preserve the surviving selection and include
+    // newly typed characters that were inserted inside it.
+    if (pre < start) start = pre;
+    end = Math.max(start, end + delta);
+  }
+  start = Math.max(0, Math.min(newText.length, start));
+  end = Math.max(start, Math.min(newText.length, end));
+  return end > start ? {start, end} : null;
+}
+
 function openFtInlineEditor(ftId) {
   const ft = S.freeTexts[ftId];
   if (!ft) return;
@@ -6251,7 +6322,9 @@ function openFtInlineEditor(ftId) {
   const trackingScreen = applyFtCanvasTracking(mc2, ft, scaleX);
   const measuredW = Math.max(...lines.map(l => mc2.measureText(l).width));
   const minW = Math.max(40, fsScreen);       // cursor-visible minimum
-  const w = Math.max(minW, measuredW + 16);  // 16px typing allowance
+  const w = ft.maxWidth
+    ? Math.max(minW, ft.maxWidth * scaleX)
+    : Math.max(minW, measuredW + 16);  // 16px typing allowance
   const lh = ft.lineHeightFactor || 1.2;
   const h = lines.length * fsScreen * lh + fsScreen * 0.5;
 
@@ -6300,14 +6373,23 @@ function openFtInlineEditor(ftId) {
   ed.onpointerup = _cacheFtSelection;
 
   ed.oninput = () => {
+    const _prevText = ft.text || '';
+    const _prevRange = ft.gradientRange ? {...ft.gradientRange} : null;
     ft.text = ed.value;
-    // v1 policy: any text edit invalidates character-range formatting.
-    if (ft.gradientRange) ft.gradientRange = null;
+    if (_prevRange) ft.gradientRange = remapFtGradientRange(_prevText, ft.text, _prevRange);
+    // Reflow semantic layout live while typing: when Headline wraps to another line,
+    // the following attached text blocks move down immediately instead of waiting for blur.
+    _reflowLayoutForFt(ft);
     _cacheFtSelection();
     const ls2 = ft.text.split('\n');
-    // auto-grow width: collapse → read scrollWidth → expand
-    ed.style.width = '1px';
-    ed.style.width = Math.max(40, ed.scrollWidth + 2) + 'px';
+    // A layout-managed text box with maxWidth must keep that width while typing.
+    // Collapsing it to 1px made the browser wrap every new character vertically.
+    if (ft.maxWidth) {
+      ed.style.width = Math.max(40, ft.maxWidth * scaleX) + 'px';
+    } else {
+      ed.style.width = '1px';
+      ed.style.width = Math.max(40, ed.scrollWidth + 2) + 'px';
+    }
     // auto-grow height
     const newH = ls2.length * fsScreen * lh + fsScreen * 0.5;
     ed.style.height = newH + 'px';
@@ -8772,11 +8854,13 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
 
   if (!forExport) drawSnapGuides(c);
   if (!forExport && S.showGuides) drawMarginGuides(c, W, H);
-  // Upload-Hint: only on placeholder product, not selected, not exporting
-  if (!forExport && S.product?.isPlaceholder && S.selected !== 'product') {
+  // Upload-Hint stays visible for as long as the product is still a placeholder.
+  // Selection or text editing must not make the upload affordance disappear.
+  if (!forExport && S.product?.isPlaceholder) {
     const p = S.product;
-    const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
-    const r = Math.round(Math.min(p.w, p.h) * 0.13);
+    // Use the exact same geometry as hit-testing so visual and clickable areas cannot drift apart.
+    const ug = getProductUploadHintGeometry();
+    const cx = ug.cx, cy = ug.cy, r = ug.r;
     c.save();
     c.globalAlpha = 0.72;
     c.fillStyle = 'rgba(0,0,0,0.38)';
@@ -9894,19 +9978,24 @@ function wrapFtLines(ft, c, fontScale, widthScale) {
   const fs = Math.round((ft.fontSize||32) * fontScale);
   c.font = `${ft.fontWeight||'800'} ${fs}px ${getFtFontName(ft)}`;
   applyFtCanvasTracking(c, ft, widthScale);
-  const rawLines = (ft.text||'').split('\n');
+  // Preserve author-entered whitespace. Canvas renders normal spaces, while tabs are
+  // normalized to four spaces so editor, preview and export use identical metrics.
+  const rawLines = (ft.text||'').replace(/\t/g, '    ').split('\n');
   if (!ft.maxWidth) return rawLines;
   const maxPx = ft.maxWidth * widthScale;
   const result = [];
   for (const line of rawLines) {
     if (!line) { result.push(''); continue; }
-    const words = line.split(' ');
+    // Keep whitespace tokens instead of split(' '), which used to collapse repeated spaces.
+    const tokens = line.match(/\s+|\S+/g) || [''];
     let cur = '';
-    for (const word of words) {
-      const test = cur ? cur + ' ' + word : word;
-      if (c.measureText(test).width > maxPx && cur) {
-        result.push(cur); cur = word;
-      } else { cur = test; }
+    for (const token of tokens) {
+      const test = cur + token;
+      if (c.measureText(test).width > maxPx && cur && !/^\s+$/.test(token)) {
+        result.push(cur); cur = token;
+      } else {
+        cur = test;
+      }
     }
     result.push(cur);
   }
