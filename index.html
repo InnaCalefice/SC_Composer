@@ -1469,6 +1469,13 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           <button type="button" class="hbtn ribbonFmtScale" data-scale="1.2" title="Auswahl крупнее">120%</button>
         </div>
         <div id="ribbonFmtHint" style="font-size:9.5px;color:var(--text-muted);margin-top:4px;line-height:1.35;">Wort markieren → Gewicht oder Größe wählen</div>
+        <div id="ribbonLineHeightRow" style="margin-top:9px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:10px;color:var(--text2);">Zeilenabstand</span>
+            <span id="ribbonLineHeightVal" style="font-size:10px;color:var(--text-muted);">100%</span>
+          </div>
+          <input id="ribbonLineHeight" type="range" min="80" max="140" step="1" value="100" style="width:100%;">
+        </div>
         <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
       <div id="langBtns" style="display:flex;gap:4px;margin-top:4px;align-items:center;">
@@ -3901,6 +3908,13 @@ function syncBadgeProps() {
   const _rih = document.getElementById('ribbonFmtHint');
   if (_rif) _rif.style.display = b.priceMode ? 'none' : 'flex';
   if (_rih) _rih.style.display = b.priceMode ? 'none' : '';
+  const _rlhr = document.getElementById('ribbonLineHeightRow');
+  const _rlh = document.getElementById('ribbonLineHeight');
+  const _rlhv = document.getElementById('ribbonLineHeightVal');
+  const _lhPct = Math.round((Number.isFinite(b.lineHeightFactor) ? b.lineHeightFactor : 1) * 100);
+  if (_rlhr) _rlhr.style.display = b.priceMode ? 'none' : '';
+  if (_rlh) _rlh.value = Math.max(80, Math.min(140, _lhPct));
+  if (_rlhv) _rlhv.textContent = _lhPct + '%';
   // Size slider
   const pct = b.baseR ? Math.round(b.r / b.baseR * 100) : 100;
   const szSlider = document.getElementById('shapeSize');
@@ -7064,6 +7078,16 @@ document.querySelectorAll('.ribbonFmtScale').forEach(btn=>btn.addEventListener('
   e.preventDefault(); applyRibbonInlineFormat({scale:+btn.dataset.scale});
 }));
 
+document.getElementById('ribbonLineHeight')?.addEventListener('input', e => {
+  const ab = targetBadge(); if (!ab || ab.priceMode) return;
+  const pct = Math.max(80, Math.min(140, +e.target.value || 100));
+  ab.lineHeightFactor = pct / 100;
+  const val = document.getElementById('ribbonLineHeightVal');
+  if (val) val.textContent = pct + '%';
+  render();
+});
+document.getElementById('ribbonLineHeight')?.addEventListener('change', () => pushUndo());
+
 // ── Badge label-word translation ──────────────────────────────────
 const LANG_MAP = [
   { de: 'Rabatt',       fr: 'Rabais',        it: 'Sconto' },
@@ -9535,7 +9559,9 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
     if (maxHalf > 0) halfSpanX = maxHalf;
   }
 
-  const lh1 = fs1 * 1.18; // line height for t1 lines
+  // Ribbon-specific line spacing. 100% = compact badge typography; user-adjustable 80–140%.
+  const lhFactor = Number.isFinite(b.lineHeightFactor) ? b.lineHeightFactor : 1;
+  const lh1 = fs1 * lhFactor;
 
   if (hasT1 && t2) {
     // t1 (multi-line) + t2: t1 block above, t2 below
