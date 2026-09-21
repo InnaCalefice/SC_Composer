@@ -1457,7 +1457,18 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         </div>
       </div>
       <div id="txt12Row">
-        <textarea class="pi" id="txt1" placeholder="Text (Enter = neue Zeile)" rows="2" style="resize:none;line-height:1.4;padding:6px 8px;font-family:inherit;"></textarea>
+        <textarea class="pi" id="txt1" placeholder="Text (Enter = neue Zeile)" rows="5" style="resize:vertical;min-height:110px;max-height:420px;overflow-y:auto;line-height:1.45;padding:9px 10px;font-family:inherit;white-space:pre-wrap;"></textarea>
+        <div id="ribbonInlineFormat" style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--text2);margin-right:2px;">Auswahl:</span>
+          <button type="button" class="hbtn ribbonFmtWeight" data-weight="400" title="Auswahl Regular">W4</button>
+          <button type="button" class="hbtn ribbonFmtWeight" data-weight="600" title="Auswahl Semibold">W6</button>
+          <button type="button" class="hbtn ribbonFmtWeight" data-weight="700" title="Auswahl Bold">W7</button>
+          <span style="width:1px;height:18px;background:var(--border);margin:0 2px;"></span>
+          <button type="button" class="hbtn ribbonFmtScale" data-scale="0.8" title="Auswahl kleiner">80%</button>
+          <button type="button" class="hbtn ribbonFmtScale" data-scale="1" title="Standardgröße">100%</button>
+          <button type="button" class="hbtn ribbonFmtScale" data-scale="1.2" title="Auswahl крупнее">120%</button>
+        </div>
+        <div id="ribbonFmtHint" style="font-size:9.5px;color:var(--text-muted);margin-top:4px;line-height:1.35;">Wort markieren → Gewicht oder Größe wählen</div>
         <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
       <div id="langBtns" style="display:flex;gap:4px;margin-top:4px;align-items:center;">
@@ -3881,11 +3892,15 @@ function syncBadgeProps() {
     if (txt12Row) txt12Row.style.display = '';
     const t1 = document.getElementById('txt1');
     const t2 = document.getElementById('txt2');
-    if (t1) t1.value = b.text1 || '';
+    if (t1) { t1.value = b.text1 || ''; requestAnimationFrame(autoSizeRibbonTextarea); }
     if (t2) t2.value = b.text2 || '';
   }
   const t1 = document.getElementById('txt1');
   const t2 = document.getElementById('txt2');
+  const _rif = document.getElementById('ribbonInlineFormat');
+  const _rih = document.getElementById('ribbonFmtHint');
+  if (_rif) _rif.style.display = b.priceMode ? 'none' : 'flex';
+  if (_rih) _rih.style.display = b.priceMode ? 'none' : '';
   // Size slider
   const pct = b.baseR ? Math.round(b.r / b.baseR * 100) : 100;
   const szSlider = document.getElementById('shapeSize');
@@ -3956,6 +3971,8 @@ function addCircleBadge(cc) {
   const slot = targetSlot();
   const prev = getBadgeBySlot(slot);
   if (prev && prev.kind === 'circle' && !prev.priceMode) {
+    // Circle already on canvas — update colour in-place. Hard-lock geometry to 1:1.
+    prev.aspect = 1;
     // Circle already on canvas — update colour in-place
     prev.colorId = cc.id;
     prev.fill    = JSON.parse(JSON.stringify(cc.fill));
@@ -3980,6 +3997,7 @@ function addCircleBadge(cc) {
       y: prev?.y ?? baseR+18,
       r: prev?.r ?? baseR,
       baseR: prev?.baseR ?? baseR,
+      aspect: 1,
       text1: document.getElementById('txt1').value,
       text2: document.getElementById('txt2').value,
       iconUrl:    prev?.iconUrl,
@@ -5433,6 +5451,8 @@ function badgeBounds(bd) {
   const b = bd || (S.selected==='aiLabel' ? S.aiLabel : activeBadge());
   if (!b) return null;
   const {x,y,r}=b;
+  // Circle is a protected 1:1 shape; aspect must never influence its bounds.
+  if (b.kind === 'circle' && b.aspect !== 1) b.aspect = 1;
   if (b.kind==='image') {
     const hw=r, hh=r*(b.ar||1);
     return {x:x-hw,y:y-hh,w:hw*2,h:hh*2};
@@ -5994,6 +6014,9 @@ canvas.addEventListener('mousemove',e=>{
         const dist = (dx*signX + dy*signY) * 0.5;
         ab.r = Math.max(15, br + dist);
         ab.baseR = ab.r;
+        // Circle ribbons are mathematically locked to 1:1. Any stale aspect
+        // value from presets / older documents is neutralised during resize.
+        if (ab.kind === 'circle') ab.aspect = 1;
       }
       document.getElementById('shapeSize').value=100;
       document.getElementById('shapeSizeVal').textContent='100%';
@@ -6997,15 +7020,49 @@ document.getElementById('aiMarginSlider').addEventListener('input', e => {
   snapAiLabelToCorner(null, mg);
 });
 
+// Keep the Ribbon text selection even when the user clicks a formatting control.
+let ribbonTextSelection = {start:0,end:0};
+function rememberRibbonSelection(force=false){
+  const el=document.getElementById('txt1'); if(!el) return;
+  const a=el.selectionStart, z=el.selectionEnd;
+  if(Number.isFinite(a)&&Number.isFinite(z)&&(z>a || force)) ribbonTextSelection={start:a,end:z};
+  const h=document.getElementById('ribbonFmtHint');
+  if(h && z>a) h.textContent=`Auswahl: ${z-a} Zeichen · jetzt Gewicht oder Größe wählen`;
+}
+function autoSizeRibbonTextarea(){
+  const el=document.getElementById('txt1'); if(!el) return;
+  el.style.height='auto';
+  el.style.height=Math.min(420,Math.max(110,el.scrollHeight+4))+'px';
+}
+['select','mouseup','keyup','focus'].forEach(ev=>document.getElementById('txt1')?.addEventListener(ev,rememberRibbonSelection));
+
 ['txt1','txt2'].forEach(id=>{
   document.getElementById(id).addEventListener('input',e=>{
     const ab = targetBadge();
     if (!ab) return;
-    if (id==='txt1') ab.text1=e.target.value;
-    else             ab.text2=e.target.value;
+    if (id==='txt1') {
+      const _old=ab.text1||'';
+      const _runs=Array.isArray(ab.richRuns)?ab.richRuns.map(r=>({...r})):[];
+      ab.text1=e.target.value;
+      ab.richRuns=remapRibbonRuns(_old,ab.text1,_runs);
+      normalizeRibbonRuns(ab);
+      rememberRibbonSelection();
+      autoSizeRibbonTextarea();
+    } else ab.text2=e.target.value;
     render();
   });
 });
+
+
+document.querySelectorAll('.ribbonFmtWeight,.ribbonFmtScale').forEach(btn=>{
+  btn.addEventListener('pointerdown',e=>{ rememberRibbonSelection(); e.preventDefault(); });
+});
+document.querySelectorAll('.ribbonFmtWeight').forEach(btn=>btn.addEventListener('click',e=>{
+  e.preventDefault(); applyRibbonInlineFormat({weight:+btn.dataset.weight});
+}));
+document.querySelectorAll('.ribbonFmtScale').forEach(btn=>btn.addEventListener('click',e=>{
+  e.preventDefault(); applyRibbonInlineFormat({scale:+btn.dataset.scale});
+}));
 
 // ── Badge label-word translation ──────────────────────────────────
 const LANG_MAP = [
@@ -9329,13 +9386,104 @@ function drawPriceMode(c, b, cx, cy, r) {
   c.restore();
 }
 
+// ── Ribbon inline rich text ───────────────────────────────────────────────
+function normalizeRibbonRuns(b) {
+  if (!Array.isArray(b.richRuns)) b.richRuns = [];
+  const n = (b.text1 || '').length;
+  b.richRuns = b.richRuns.filter(r => Number.isFinite(r.start) && Number.isFinite(r.end) && r.end > r.start)
+    .map(r => ({...r, start:Math.max(0,Math.min(n,r.start)), end:Math.max(0,Math.min(n,r.end))}))
+    .filter(r => r.end > r.start);
+}
+function ribbonFontForWeight(weight){
+  // Ribbon rich text must switch the actual font face, not only CSS font-weight.
+  // Uploaded TheSans files are registered as separate families (Regular/SemiBold/Bold),
+  // so asking the current family for weight 700 can look identical to 600.
+  if (weight >= 700) {
+    if (fontLib?.some(f=>f.name==='TheSans Bold')) return '"TheSans Bold","TheSansB",Helvetica,Arial,sans-serif';
+    // TheSansB is embedded in the Composer and is our reliable bold fallback.
+    return '"TheSansB",Helvetica,Arial,sans-serif';
+  }
+  if (weight >= 600) {
+    if (fontLib?.some(f=>f.name==='TheSans SemiBold')) return '"TheSans SemiBold","TheSansB",Helvetica,Arial,sans-serif';
+    return S.fontName;
+  }
+  if (fontLib?.some(f=>f.name==='TheSans Regular')) return '"TheSans Regular",Helvetica,Arial,sans-serif';
+  return S.fontName;
+}
+function ribbonStyleAt(b, idx) {
+  const out = {weight:600, scale:1};
+  (b.richRuns || []).forEach(r => {
+    if (idx >= r.start && idx < r.end) {
+      if (r.weight) out.weight = r.weight;
+      if (Number.isFinite(r.scale)) out.scale = r.scale;
+    }
+  });
+  return out;
+}
+function ribbonLineMetrics(c,b,text,startIdx,baseFs) {
+  let w=0, maxScale=1;
+  for(let i=0;i<text.length;i++){
+    const st=ribbonStyleAt(b,startIdx+i), fs=Math.max(8,Math.round(baseFs*st.scale));
+    c.font=`${st.weight} ${fs}px ${ribbonFontForWeight(st.weight)}`;
+    w += c.measureText(text[i]).width;
+    maxScale=Math.max(maxScale,st.scale||1);
+  }
+  return {w,maxScale};
+}
+function drawRibbonStyledLine(c,b,text,startIdx,cx,y,baseFs,fill) {
+  if (!text) return;
+  const m=ribbonLineMetrics(c,b,text,startIdx,baseFs);
+  let x=cx-m.w/2;
+  c.textAlign='left'; c.textBaseline='middle'; c.fillStyle=fill;
+  for(let i=0;i<text.length;i++){
+    const st=ribbonStyleAt(b,startIdx+i), fs=Math.max(8,Math.round(baseFs*st.scale));
+    c.font=`${st.weight} ${fs}px ${ribbonFontForWeight(st.weight)}`;
+    c.fillText(text[i],x,y);
+    x += c.measureText(text[i]).width;
+  }
+  c.textAlign='center';
+}
+function remapRibbonRuns(oldText,newText,runs) {
+  if (!Array.isArray(runs) || !runs.length) return [];
+  let pre=0; while(pre<oldText.length && pre<newText.length && oldText[pre]===newText[pre]) pre++;
+  let os=oldText.length, ns=newText.length;
+  while(os>pre && ns>pre && oldText[os-1]===newText[ns-1]) {os--;ns--;}
+  const delta=(ns-pre)-(os-pre);
+  return runs.map(r=>{
+    let a=r.start,e=r.end;
+    if(e<=pre) return {...r};
+    if(a>=os) return {...r,start:a+delta,end:e+delta};
+    // Edit intersects the formatted selection: keep formatting around the edited content.
+    return {...r,start:Math.min(a,pre),end:Math.max(pre, e+delta)};
+  }).filter(r=>r.end>r.start);
+}
+function applyRibbonInlineFormat(patch) {
+  const b=targetBadge(), el=document.getElementById('txt1');
+  if(!b || !el || b.priceMode) return;
+  // Inspector buttons can steal focus; use the cached textarea range first.
+  let a=ribbonTextSelection.start, z=ribbonTextSelection.end;
+  if(!(Number.isFinite(a)&&Number.isFinite(z)&&z>a)) { a=el.selectionStart; z=el.selectionEnd; }
+  if(!(Number.isFinite(a)&&Number.isFinite(z)&&z>a)) {
+    const h=document.getElementById('ribbonFmtHint');
+    if(h){ const old=h.textContent; h.textContent='Zuerst ein Wort oder Textstück markieren'; setTimeout(()=>h.textContent=old,1400); }
+    el.focus(); return;
+  }
+  pushUndo(); normalizeRibbonRuns(b);
+  // Newer runs win, so one selection can override a previous format.
+  b.richRuns.push({start:a,end:z,...patch});
+  ribbonTextSelection={start:a,end:z};
+  const _fh=document.getElementById('ribbonFmtHint'); if(_fh) _fh.textContent=`Formatiert: ${z-a} Zeichen`;
+  render();
+  requestAnimationFrame(()=>{el.focus();el.setSelectionRange(a,z);});
+}
+
 function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
   // Normalize short hyphen to en dash
   if (t1) t1 = t1.replace(/([.,])-$/, '$1–');
   if (t2) t2 = t2.replace(/([.,])-$/, '$1–');
 
   // Split t1 on newlines — treat as multi-line single text block
-  const lines1 = t1 ? t1.split('\n').map(l=>l.trim()).filter(l=>l.length>0) : [];
+  const lines1 = t1 ? t1.split('\n') : [];
   const hasT1 = lines1.length > 0;
   if (!hasT1 && !t2) return;
 
@@ -9393,10 +9541,11 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
     // t1 (multi-line) + t2: t1 block above, t2 below
     const totalT1H = lines1.length * lh1;
     const blockTop = cy + offset - totalT1H / 2 - fs2 * 0.38;
-    c.font=`800 ${fs1}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    let _off=0;
     lines1.forEach((ln, i) => {
-      c.fillText(ln, cx, blockTop + i * lh1 + lh1 / 2);
+      const _idx=(t1||'').indexOf(ln,_off); _off=(_idx>=0?_idx:_off)+ln.length;
+      drawRibbonStyledLine(c,b,ln,Math.max(0,_idx),cx,blockTop + i * lh1 + lh1 / 2,fs1,c.fillStyle);
     });
     c.font=`600 ${fs2}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
@@ -9405,10 +9554,11 @@ function drawBadgeText(c,b,cx,cy,r,t1,t2,hasIcon,iconH=0) {
     // Only t1 (multi-line): center the whole block vertically
     const totalT1H = lines1.length * lh1;
     const blockTop = cy + offset - totalT1H / 2;
-    c.font=`800 ${fs1}px ${S.fontName}`;
     c.fillStyle=makeTextFill(c,b,cx,cy,r,halfSpanX);
+    let _off=0;
     lines1.forEach((ln, i) => {
-      c.fillText(ln, cx, blockTop + i * lh1 + lh1 / 2);
+      const _idx=(t1||'').indexOf(ln,_off); _off=(_idx>=0?_idx:_off)+ln.length;
+      drawRibbonStyledLine(c,b,ln,Math.max(0,_idx),cx,blockTop + i * lh1 + lh1 / 2,fs1,c.fillStyle);
     });
   } else {
     // Only t2 (single line)
