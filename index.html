@@ -732,6 +732,10 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
     inset 0 1px 0 rgba(255,255,255,.035);
 }
 
+
+/* Typography architecture */
+.typo-card{margin-top:10px;padding:11px;border:1px solid #586675;border-radius:9px;background:#29333d}.typo-selection-card{border-color:#49647f;background:#27333f}.typo-block-card{background:#303a44}.typo-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}.typo-card-title{font-size:13px;font-weight:700;color:#f2f5f8;line-height:1.2}.typo-card-help,.typo-font-note{font-size:11px;color:#aeb9c4;line-height:1.35;margin-top:3px}.typo-selection-badge,.typo-block-badge{font-size:10px;font-weight:700;line-height:1;padding:5px 7px;border-radius:999px;white-space:nowrap}.typo-selection-badge{color:#7eb7ff;background:#163c68;border:1px solid #286fc1}.typo-block-badge{color:#c5cdd5;background:#202831;border:1px solid #53606d}.typo-format-controls{display:flex;flex-direction:column;gap:9px}.typo-control-group{display:flex;align-items:center;gap:9px}.typo-control-label{width:56px;flex:0 0 56px;font-size:11px;font-weight:600;color:#b8c2cc}.typo-button-row{display:flex;gap:5px;flex-wrap:wrap}.typo-button-row .hbtn{min-width:0;padding:6px 9px;font-size:11px}.typo-status-hint{font-size:10.5px;color:#93a2b0;margin-top:9px;line-height:1.35;padding-top:8px;border-top:1px solid #44515e}.typo-font-row{margin:0!important;align-items:center}.typo-font-row .prop-label{font-size:12px;font-weight:600;color:#cbd3da}.typo-font-row .sel-res{font-size:12px!important;padding:7px 8px!important;min-height:34px;background:#202a34;border-color:#607080}.typo-upload-btn{cursor:pointer;flex-shrink:0;padding:7px 10px;background:#202a34;border:1px solid #607080;border-radius:6px;font-size:12px;display:flex;align-items:center;color:#dbe2e8}.typo-font-note{margin-top:7px}.typo-lineheight-row{margin-top:12px;padding-top:10px;border-top:1px solid #4b5865}.typo-slider-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11.5px;color:#c3ccd4}.typo-slider-head span:last-child{color:#aeb9c4}.typo-lineheight-row input{width:100%}.typo-language-row{display:flex;gap:5px;margin-top:10px;align-items:center;padding:9px 0 2px}.typo-language-row>span{font-size:11px;color:#aeb9c4;margin-right:3px}
+
 </style>
 </head>
 <body>
@@ -1474,45 +1478,26 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
       </div>
       <div id="txt12Row">
         <textarea class="pi" id="txt1" placeholder="Text (Enter = neue Zeile)" rows="5" style="resize:vertical;min-height:110px;max-height:420px;overflow-y:auto;line-height:1.45;padding:9px 10px;font-family:inherit;white-space:pre-wrap;"></textarea>
-        <div id="ribbonInlineFormat" style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap;">
-          <span style="font-size:10px;color:var(--text2);margin-right:2px;">Auswahl:</span>
-          <button type="button" class="hbtn ribbonFmtWeight" data-weight="400" title="Auswahl Regular">W4</button>
-          <button type="button" class="hbtn ribbonFmtWeight" data-weight="600" title="Auswahl Semibold">W6</button>
-          <button type="button" class="hbtn ribbonFmtWeight" data-weight="700" title="Auswahl Bold">W7</button>
-          <span style="width:1px;height:18px;background:var(--border);margin:0 2px;"></span>
-          <button type="button" class="hbtn ribbonFmtScale" data-scale="0.8" title="Auswahl kleiner">80%</button>
-          <button type="button" class="hbtn ribbonFmtScale" data-scale="1" title="Standardgröße">100%</button>
-          <button type="button" class="hbtn ribbonFmtScale" data-scale="1.2" title="Auswahl крупнее">120%</button>
-        </div>
-        <div id="ribbonFmtHint" style="font-size:9.5px;color:var(--text-muted);margin-top:4px;line-height:1.35;">Wort markieren → Gewicht oder Größe wählen</div>
-        <div id="ribbonLineHeightRow" style="margin-top:9px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-size:10px;color:var(--text2);">Zeilenabstand</span>
-            <span id="ribbonLineHeightVal" style="font-size:10px;color:var(--text-muted);">100%</span>
-          </div>
-          <input id="ribbonLineHeight" type="range" min="80" max="140" step="1" value="100" style="width:100%;">
+        <div class="typo-card typo-selection-card">
+          <div class="typo-card-head"><div><div class="typo-card-title">Auswahl formatieren</div><div class="typo-card-help">Text markieren, dann Format anwenden</div></div><span class="typo-selection-badge">Auswahl</span></div>
+          <div id="ribbonInlineFormat" class="typo-format-controls">
+            <div class="typo-control-group"><span class="typo-control-label">Gewicht</span><div class="typo-button-row">
+              <button type="button" class="hbtn ribbonFmtWeight" data-weight="300" title="Auswahl Light">Light</button><button type="button" class="hbtn ribbonFmtWeight" data-weight="400" title="Auswahl Regular">Regular</button><button type="button" class="hbtn ribbonFmtWeight" data-weight="600" title="Auswahl Semibold">Semibold</button><button type="button" class="hbtn ribbonFmtWeight" data-weight="700" title="Auswahl Bold">Bold</button>
+            </div></div>
+            <div class="typo-control-group"><span class="typo-control-label">Größe</span><div class="typo-button-row">
+              <button type="button" class="hbtn ribbonFmtScale" data-scale="0.8" title="Auswahl kleiner">80%</button><button type="button" class="hbtn ribbonFmtScale" data-scale="1" title="Standardgröße">100%</button><button type="button" class="hbtn ribbonFmtScale" data-scale="1.2" title="Auswahl größer">120%</button>
+            </div></div>
+          </div><div id="ribbonFmtHint" class="typo-status-hint">Text markieren → Gewicht oder Größe wählen</div>
         </div>
         <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
-      <div id="langBtns" style="display:flex;gap:4px;margin-top:4px;align-items:center;">
-        <span style="font-size:10px;color:var(--text2);flex-shrink:0;">Übersetzen:</span>
-        <button class="hbtn" id="langDE" title="Deutsch">DE</button>
-        <button class="hbtn" id="langFR" title="Français">FR</button>
-        <button class="hbtn" id="langIT" title="Italiano">IT</button>
+      <div class="typo-card typo-block-card">
+        <div class="typo-card-head"><div><div class="typo-card-title">Textblock</div><div class="typo-card-help">Einstellungen für den gesamten Ribbon-Text</div></div><span class="typo-block-badge">Gesamt</span></div>
+        <div class="prop-row typo-font-row"><span class="prop-label">Grundschrift</span><div style="display:flex;gap:5px;flex:1;min-width:0;"><select id="fontSelect" class="sel-res" style="flex:1;min-width:0;"><option value="">System</option></select><label class="typo-upload-btn" title="Schriftdatei laden">↑<input type="file" accept=".ttf,.otf,.woff,.woff2" id="fontFileInput" style="display:none" multiple></label></div></div>
+        <div class="typo-font-note">Ändert die Grundschrift des ganzen Textblocks. Markierte Wörter können oben abweichend formatiert werden.</div>
+        <div id="ribbonLineHeightRow" class="typo-lineheight-row"><div class="typo-slider-head"><span>Zeilenabstand</span><span id="ribbonLineHeightVal">100%</span></div><input id="ribbonLineHeight" type="range" min="80" max="140" step="1" value="100"></div>
       </div>
-      <div class="insp-sub-label" style="margin-top:6px;">Typografie</div>
-      <div class="prop-row" style="margin-top:2px;align-items:center;">
-        <span class="prop-label">Schrift</span>
-        <div style="display:flex;gap:5px;flex:1;min-width:0;">
-          <select id="fontSelect" class="sel-res" style="flex:1;min-width:0;font-size:11px;padding:3px 5px;">
-            <option value="">System</option>
-          </select>
-          <label style="cursor:pointer;flex-shrink:0;padding:3px 8px;background:#2a2a2a;border-radius:4px;font-size:11px;white-space:nowrap;display:flex;align-items:center;">
-            ↑
-            <input type="file" accept=".ttf,.otf,.woff,.woff2" id="fontFileInput" style="display:none" multiple>
-          </label>
-        </div>
-      </div>
+      <div id="langBtns" class="typo-language-row"><span>Übersetzen</span><button class="hbtn" id="langDE" title="Deutsch">DE</button><button class="hbtn" id="langFR" title="Français">FR</button><button class="hbtn" id="langIT" title="Italiano">IT</button></div>
       <div class="prop-row">
         <span class="prop-label">Farbe</span>
         <div class="color-row">
@@ -7793,6 +7778,7 @@ function rebuildFontSelect(selectName) {
 }
 
 function applyFont(name) {
+  S.activeFontName = name || '';
   S.fontName = name ? `"${name}",Helvetica,Arial,sans-serif` : FALLBACK_FONT;
   document.getElementById('fontSelect').value = name || '';
   render();
@@ -9434,24 +9420,27 @@ function normalizeRibbonRuns(b) {
     .map(r => ({...r, start:Math.max(0,Math.min(n,r.start)), end:Math.max(0,Math.min(n,r.end))}))
     .filter(r => r.end > r.start);
 }
+function ribbonBaseWeight(){
+  const n=(S.activeFontName||'').toLowerCase();
+  if(/black|extra\s*bold|extrabold/.test(n)) return 800;
+  if(/(^|\s)bold/.test(n)) return 700;
+  if(/semi\s*bold|semibold/.test(n)) return 600;
+  if(/semi\s*light|semilight/.test(n)) return 350;
+  if(/light/.test(n)) return 300;
+  return 400;
+}
 function ribbonFontForWeight(weight){
-  // Ribbon rich text must switch the actual font face, not only CSS font-weight.
-  // Uploaded TheSans files are registered as separate families (Regular/SemiBold/Bold),
-  // so asking the current family for weight 700 can look identical to 600.
-  if (weight >= 700) {
-    if (fontLib?.some(f=>f.name==='TheSans Bold')) return '"TheSans Bold","TheSansB",Helvetica,Arial,sans-serif';
-    // TheSansB is embedded in the Composer and is our reliable bold fallback.
-    return '"TheSansB",Helvetica,Arial,sans-serif';
-  }
-  if (weight >= 600) {
-    if (fontLib?.some(f=>f.name==='TheSans SemiBold')) return '"TheSans SemiBold","TheSansB",Helvetica,Arial,sans-serif';
-    return S.fontName;
-  }
-  if (fontLib?.some(f=>f.name==='TheSans Regular')) return '"TheSans Regular",Helvetica,Arial,sans-serif';
-  return S.fontName;
+  const active=S.activeFontName||''; const wantsItalic=/italic/i.test(active); const candidates=fontLib||[];
+  const pick=(rx)=>{const all=candidates.filter(f=>rx.test(f.name)); const styled=all.find(f=>wantsItalic?/italic/i.test(f.name):!/italic/i.test(f.name)); return (styled||all[0])?.name||null;};
+  let face=weight>=800?pick(/black|extra\s*bold|extrabold/i):weight>=700?pick(/(^|\s)bold/i):weight>=600?pick(/semibold|semi bold/i):weight<=350?pick(/(^|\s)light|semilight|semi light/i):pick(/regular|book/i);
+  if(face)return `"${face}","TheSansB",Helvetica,Arial,sans-serif`;
+  // For the unformatted base text, use the exact selected face if available.
+  if(active && weight===ribbonBaseWeight()) return `"${active}","TheSansB",Helvetica,Arial,sans-serif`;
+  if(weight>=700&&!wantsItalic)return '"TheSansB",Helvetica,Arial,sans-serif';
+  return S.fontName||FALLBACK_FONT;
 }
 function ribbonStyleAt(b, idx) {
-  const out = {weight:600, scale:1};
+  const out = {weight:ribbonBaseWeight(), scale:1};
   (b.richRuns || []).forEach(r => {
     if (idx >= r.start && idx < r.end) {
       if (r.weight) out.weight = r.weight;
