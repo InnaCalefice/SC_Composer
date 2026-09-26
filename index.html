@@ -178,9 +178,14 @@ header .spacer { flex:1; min-width:12px; }
 .icon-search-glyph { position:absolute; left:9px; z-index:1; color:var(--text-muted); font-size:15px; pointer-events:none; transform:translateY(-1px); }
 .icon-search-clear { position:absolute; right:5px; width:22px; height:22px; border:0; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:16px; line-height:20px; display:none; }
 .icon-search-clear:hover { background:var(--surface-hover); color:var(--text-primary); }
-.icon-category-chips { display:flex; gap:4px; overflow-x:auto; padding:1px 0 3px; scrollbar-width:none; }
-.icon-category-chips::-webkit-scrollbar { display:none; }
+.icon-category-row { position:relative; display:flex; align-items:center; gap:4px; min-width:0; }
+.icon-category-chips { display:flex; gap:4px; min-width:0; flex:1 1 auto; overflow:hidden; padding:1px 0; }
 .icon-cat { flex:0 0 auto; border:1px solid var(--border); background:var(--surface-elevated); color:var(--text-muted); border-radius:999px; padding:4px 8px; font-size:10.5px; line-height:1.2; cursor:pointer; transition:all .15s; }
+.icon-cat.icon-cat-overflow { display:none; }
+.icon-cat-more { flex:0 0 auto; min-width:34px; padding-inline:8px; font-weight:700; }
+.icon-cat-popover { position:absolute; z-index:40; top:calc(100% + 5px); right:0; width:210px; max-height:300px; overflow:auto; padding:6px; border:1px solid var(--border-strong); border-radius:9px; background:var(--surface-panel); box-shadow:0 12px 28px rgba(0,0,0,.35); display:none; grid-template-columns:1fr 1fr; gap:4px; }
+.icon-cat-popover.open { display:grid; }
+.icon-cat-popover .icon-cat { width:100%; text-align:left; border-radius:7px; }
 .icon-cat:hover { color:var(--text-primary); border-color:var(--border-strong); background:var(--surface-hover); }
 .icon-cat.active { color:#dbe8ff; border-color:#3978f6; background:rgba(34,94,214,.22); box-shadow:inset 0 0 0 1px rgba(57,120,246,.08); }
 .icon-result-meta { min-height:13px; margin:0 0 5px; font-size:10.5px; color:var(--text-muted); }
@@ -858,10 +863,6 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
       <div class="lib-section-hd">
         <span class="lib-label">Layout-Stile</span>
       </div>
-      <div class="dev-badge">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M5 1v4"/><circle cx="5" cy="8" r=".6" fill="currentColor" stroke="none"/></svg>
-        In Entwicklung
-      </div>
       <div id="layoutStyleGrid" class="lib-grid" style="margin-bottom:4px;">
         <div class="layout-style-card" onclick="applyLayoutStyle('split')" title="Split">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
@@ -916,7 +917,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
           </svg>
           <div class="layout-style-label">Offer Hero</div>
         </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedstory')" title="Full Bleed Image & Type">
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedstory')" title="Image + Copy">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="fbStoryPreview" x1="0" y1="0" x2="1" y2="1">
@@ -934,39 +935,20 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
             <rect x="5" y="66" width="29" height="5" rx="1" fill="#fff"/>
             <rect x="5" y="73" width="22" height="2.5" rx="1" fill="#fff" opacity=".78"/>
           </svg>
-          <div class="layout-style-label">Full Bleed</div>
+          <div class="layout-style-label">Image + Copy</div>
         </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('typeproduct')" title="Type and Product">
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedimage')" title="Image Only">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <rect width="60" height="80" fill="#f0f4ff"/>
-            <rect x="4" y="12" width="26" height="4" rx="2" fill="#040D33" opacity="0.85"/>
-            <rect x="4" y="19" width="20" height="3" rx="1.5" fill="#040D33" opacity="0.45"/>
-            <rect x="4" y="26" width="16" height="6" rx="3" fill="#E4003A"/>
-            <rect x="33" y="8" width="22" height="64" rx="6" fill="#0028A5" opacity="0.10"/>
-            <rect x="37" y="16" width="14" height="46" rx="4" fill="#0028A5" opacity="0.22"/>
+            <defs>
+              <linearGradient id="fbImagePreview" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8eb7c9"/><stop offset=".48" stop-color="#d8c0a9"/><stop offset="1" stop-color="#536c78"/>
+              </linearGradient>
+            </defs>
+            <rect width="60" height="80" fill="url(#fbImagePreview)"/>
+            <circle cx="43" cy="24" r="12" fill="#f0d5bd" opacity=".78"/>
+            <path d="M0 54 C12 43 24 49 35 38 C45 29 52 34 60 26 V80 H0Z" fill="#294553" opacity=".55"/>
           </svg>
-          <div class="layout-style-label">Type &amp; Product</div>
-        </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('lifeform')" title="Lifeform & Logo as Hero">
-          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <defs><radialGradient id="lg5" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#1FBFFF" stop-opacity="0.4"/><stop offset="1" stop-color="#040D33"/></radialGradient></defs>
-            <rect width="60" height="80" fill="#040D33"/>
-            <rect width="60" height="80" fill="url(#lg5)"/>
-            <path d="M30,14 C40,14 50,24 50,36 C50,50 38,60 28,56 C16,52 12,38 20,27 C25,19 27,14 30,14Z" fill="#E4003A" opacity="0.7"/>
-            <path d="M30,17 C38,17 46,27 44,39 C42,51 30,58 22,51 C14,44 18,28 26,21 C28,18 30,17 30,17Z" fill="#0028A5" opacity="0.8"/>
-            <path d="M30,20 C36,20 42,30 40,40 C38,50 28,56 22,48 C16,40 22,26 28,21 C30,19 30,20 30,20Z" fill="white" opacity="0.9"/>
-          </svg>
-          <div class="layout-style-label">Lifeform Hero</div>
-        </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('typeonly')" title="Type Only">
-          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="lg6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4003A"/><stop offset="0.5" stop-color="#0028A5"/><stop offset="1" stop-color="#1FBFFF"/></linearGradient></defs>
-            <rect width="60" height="80" fill="url(#lg6)"/>
-            <rect x="8" y="22" width="38" height="7" rx="3.5" fill="white" opacity="0.95"/>
-            <rect x="8" y="33" width="30" height="5" rx="2.5" fill="white" opacity="0.7"/>
-            <rect x="8" y="42" width="22" height="4" rx="2" fill="white" opacity="0.5"/>
-          </svg>
-          <div class="layout-style-label">Type Only</div>
+          <div class="layout-style-label">Image Only</div>
         </div>
       </div>
       <div class="lib-divider" style="margin:6px 0 10px;"></div>
@@ -1091,30 +1073,35 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
             <input id="iconLibrarySearch" class="icon-search" type="search" placeholder="Icons suchen" autocomplete="off" spellcheck="false">
             <button id="iconSearchClear" class="icon-search-clear" type="button" title="Suche löschen" aria-label="Suche löschen">×</button>
           </div>
-          <div class="icon-category-chips" id="iconCategoryChips" aria-label="Icon-Kategorien">
-            <button class="icon-cat active" data-icon-cat="all">Alle</button>
-            <button class="icon-cat" data-icon-cat="connectivity">Connectivity</button>
-            <button class="icon-cat" data-icon-cat="devices">Devices</button>
-            <button class="icon-cat" data-icon-cat="communication">Communication</button>
-            <button class="icon-cat" data-icon-cat="service">Service</button>
-            <button class="icon-cat" data-icon-cat="ai">AI & Digital</button>
-            <button class="icon-cat" data-icon-cat="commerce">Commerce</button>
-            <button class="icon-cat" data-icon-cat="media">Media</button>
-            <button class="icon-cat" data-icon-cat="navigation">Navigation</button>
-            <button class="icon-cat" data-icon-cat="people">People</button>
-            <button class="icon-cat" data-icon-cat="places">Places</button>
-            <button class="icon-cat" data-icon-cat="security">Security</button>
-            <button class="icon-cat" data-icon-cat="status">Status</button>
-            <button class="icon-cat" data-icon-cat="documents">Documents</button>
-            <button class="icon-cat" data-icon-cat="development">Development</button>
-            <button class="icon-cat" data-icon-cat="health">Health</button>
-            <button class="icon-cat" data-icon-cat="mobility">Mobility</button>
-            <button class="icon-cat" data-icon-cat="social">Social</button>
-            <button class="icon-cat" data-icon-cat="food">Food</button>
-            <button class="icon-cat" data-icon-cat="sustainability">Sustainability</button>
-            <button class="icon-cat" data-icon-cat="symbols">Symbols</button>
-            <button class="icon-cat" data-icon-cat="other">Other</button>
-            <button class="icon-cat" data-icon-cat="custom">Eigene</button>
+          <div class="icon-category-row">
+            <div class="icon-category-chips" id="iconCategoryChips" aria-label="Icon-Kategorien">
+              <button class="icon-cat active" data-icon-cat="all">Alle</button>
+              <button class="icon-cat" data-icon-cat="connectivity">Connectivity</button>
+              <button class="icon-cat" data-icon-cat="devices">Devices</button>
+              <button class="icon-cat" data-icon-cat="communication">Communication</button>
+              <button class="icon-cat" data-icon-cat="service">Service</button>
+              <button class="icon-cat" data-icon-cat="ai">AI & Digital</button>
+            </div>
+            <button class="icon-cat icon-cat-more" id="iconCategoryMore" type="button" aria-expanded="false" aria-haspopup="true">Mehr</button>
+            <div class="icon-cat-popover" id="iconCategoryPopover" aria-label="Weitere Icon-Kategorien">
+              <button class="icon-cat" data-icon-cat="commerce">Commerce</button>
+              <button class="icon-cat" data-icon-cat="media">Media</button>
+              <button class="icon-cat" data-icon-cat="navigation">Navigation</button>
+              <button class="icon-cat" data-icon-cat="people">People</button>
+              <button class="icon-cat" data-icon-cat="places">Places</button>
+              <button class="icon-cat" data-icon-cat="security">Security</button>
+              <button class="icon-cat" data-icon-cat="status">Status</button>
+              <button class="icon-cat" data-icon-cat="documents">Documents</button>
+              <button class="icon-cat" data-icon-cat="development">Development</button>
+              <button class="icon-cat" data-icon-cat="health">Health</button>
+              <button class="icon-cat" data-icon-cat="mobility">Mobility</button>
+              <button class="icon-cat" data-icon-cat="social">Social</button>
+              <button class="icon-cat" data-icon-cat="food">Food</button>
+              <button class="icon-cat" data-icon-cat="sustainability">Sustainability</button>
+              <button class="icon-cat" data-icon-cat="symbols">Symbols</button>
+              <button class="icon-cat" data-icon-cat="other">Other</button>
+              <button class="icon-cat" data-icon-cat="custom">Eigene</button>
+            </div>
           </div>
         </div>
         <div class="icon-result-meta" id="iconResultMeta"></div>
@@ -1178,7 +1165,7 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
       <span id="zoomLabel" style="font-size:var(--font-sm);color:var(--text-muted);padding:0 2px;min-width:34px;text-align:center;font-variant-numeric:tabular-nums;">100%</span>
       <button class="fmt-btn" id="zoomIn" title="Vergrössern" style="padding:4px 7px;">+</button>
     </div>
-    <div id="customFmtRow" style="display:none;gap:6px;align-items:center;padding:4px 0;justify-content:center;">
+    <div id="customFmtRow" style="display:none;position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:11;gap:7px;align-items:center;padding:7px 9px;justify-content:center;background:var(--surface-panel);border:1px solid var(--border);border-radius:9px;box-shadow:0 6px 18px rgba(0,0,0,.28);">
       <input id="customW" type="number" min="1" max="9999" placeholder="Breite" style="width:70px;padding:4px 6px;border-radius:5px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:12px;text-align:center;">
       <span style="color:#666;font-size:13px;">×</span>
       <input id="customH" type="number" min="1" max="9999" placeholder="Höhe" style="width:70px;padding:4px 6px;border-radius:5px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:12px;text-align:center;">
@@ -4646,9 +4633,10 @@ function rebuildFtIcons() {
   const meta = document.getElementById('iconResultMeta');
   if (meta) {
     const total = (S.iconLib || []).length;
-    meta.textContent = (iconLibraryCategory === 'all' && !iconLibraryQuery)
-      ? `${total} Icons · A–Z · Full Library`
-      : `${Math.min(items.length, iconLibraryRenderLimit)} von ${items.length} Treffern · ${total} Icons gesamt`;
+    const catLabels = {all:'Alle',connectivity:'Connectivity',devices:'Devices',communication:'Communication',service:'Service',ai:'AI & Digital',commerce:'Commerce',media:'Media',navigation:'Navigation',people:'People',places:'Places',security:'Security',status:'Status',documents:'Documents',development:'Development',health:'Health',mobility:'Mobility',social:'Social',food:'Food',sustainability:'Sustainability',symbols:'Symbols',other:'Other',custom:'Eigene'};
+    if (iconLibraryCategory === 'all' && !iconLibraryQuery) meta.textContent = `${total} Icons  ·  A–Z`;
+    else if (iconLibraryQuery) meta.textContent = `${items.length} Treffer${iconLibraryCategory !== 'all' ? ` in ${catLabels[iconLibraryCategory] || iconLibraryCategory}` : ''}`;
+    else meta.textContent = `${items.length} Icons in ${catLabels[iconLibraryCategory] || iconLibraryCategory}`;
   }
   const empty = document.getElementById('iconEmptyState');
   if (empty) empty.style.display = items.length ? 'none' : 'block';
@@ -4687,6 +4675,8 @@ function rebuildFtIcons() {
   const search = document.getElementById('iconLibrarySearch');
   const clear = document.getElementById('iconSearchClear');
   const chips = document.getElementById('iconCategoryChips');
+  const moreBtn = document.getElementById('iconCategoryMore');
+  const popover = document.getElementById('iconCategoryPopover');
   if (search) search.addEventListener('input', e => {
     iconLibraryQuery = e.currentTarget.value || '';
     iconLibraryRenderLimit = 72;
@@ -4698,12 +4688,24 @@ function rebuildFtIcons() {
     if (search) { search.value = ''; search.focus(); }
     rebuildFtIcons();
   });
-  if (chips) chips.addEventListener('click', e => {
-    const btn = e.target.closest('.icon-cat');
+  const chooseCategory = btn => {
     if (!btn) return;
     iconLibraryCategory = btn.dataset.iconCat || 'all';
     iconLibraryRenderLimit = 72;
+    if (popover) popover.classList.remove('open');
+    if (moreBtn) moreBtn.setAttribute('aria-expanded','false');
     rebuildFtIcons();
+  };
+  if (chips) chips.addEventListener('click', e => chooseCategory(e.target.closest('.icon-cat')));
+  if (popover) popover.addEventListener('click', e => chooseCategory(e.target.closest('.icon-cat')));
+  if (moreBtn) moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = popover && popover.classList.toggle('open');
+    moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', e => {
+    if (!popover || !moreBtn) return;
+    if (!popover.contains(e.target) && e.target !== moreBtn) { popover.classList.remove('open'); moreBtn.setAttribute('aria-expanded','false'); }
   });
 })();
 
@@ -5321,10 +5323,10 @@ function applyProductBlob(blob) {
           S.product._layoutStyle = 'fullbleed';
           reflowDeclarativeLayout('fullbleed');
         }
-        if (S.layoutStyle === 'fullbleedstory' && S.product && typeof reflowDeclarativeLayout === 'function') {
+        if ((S.layoutStyle === 'fullbleedstory' || S.layoutStyle === 'fullbleedimage') && S.product && typeof reflowDeclarativeLayout === 'function') {
           S.product._layoutManaged = true; S.product._layoutAttached = true;
-          S.product._layoutStyle = 'fullbleedstory';
-          reflowDeclarativeLayout('fullbleedstory');
+          S.product._layoutStyle = S.layoutStyle;
+          reflowDeclarativeLayout(S.layoutStyle);
         }
         setStatus('Fertig ✓','ok'); setProgress(-1);
         S.selected='product';
@@ -5332,7 +5334,7 @@ function applyProductBlob(blob) {
         const retouchBtnEl=document.getElementById('retouchBtn'); if(retouchBtnEl) retouchBtnEl.style.display='block';
         if (typeof updateFreistNowBtn === 'function') updateFreistNowBtn();
         bringToFront('product');
-        if (S.layoutStyle === 'fullbleedstory') { S.layerOrder=S.layerOrder.filter(id=>id!=='product'); S.layerOrder.unshift('product'); }
+        if (S.layoutStyle === 'fullbleedstory' || S.layoutStyle === 'fullbleedimage') { S.layerOrder=S.layerOrder.filter(id=>id!=='product'); S.layerOrder.unshift('product'); }
         // In typeimage layout the badge must render above the product image
         if (S.layoutStyle === 'typeimage' && S.badge) { bringToFront('badge'); }
         rebuildLayerPanel(); render();
@@ -7623,6 +7625,13 @@ document.querySelectorAll('.fmt-btn[data-ratio]').forEach(b=>{
 document.getElementById('customFmtBtn').addEventListener('click',()=>{
   document.querySelectorAll('.fmt-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('customFmtBtn').classList.add('active');
+  // Always expose the physical output size for Eigenes. This is independent of layout style.
+  const wInput = document.getElementById('customW');
+  const hInput = document.getElementById('customH');
+  if (wInput && hInput) {
+    wInput.value = Math.round(S.format === 'custom' ? (S.customW || DW * RETINA_SCALE) : DW * RETINA_SCALE);
+    hInput.value = Math.round(S.format === 'custom' ? (S.customH || DH * RETINA_SCALE) : DH * RETINA_SCALE);
+  }
   document.getElementById('customFmtRow').style.display='flex';
 });
 
@@ -10881,6 +10890,14 @@ const LAYOUT_MODELS = Object.freeze({
       { role:'body', text:LAYOUT_PLACEHOLDERS.body, color:'#ffffff', gap:14 },
     ],
   },
+  // Layout #4 — pure full-bleed image. No text, badge, stripe or decorative layer.
+  fullbleedimage: {
+    version: 1,
+    kind: 'full-bleed-image',
+    background: 'image',
+    media: { fit:'cover', focalX:0.5, focalY:0.5 },
+    textStack: [],
+  },
 });
 
 function _layoutSafeDoc() {
@@ -11457,7 +11474,7 @@ function drawFullBleedStoryReadabilityScrim(c,W,H) {
   c.restore();
 }
 
-function _layoutReflowFullBleedStory(model) {
+function _layoutReflowFullBleedStory(model, layoutStyle='fullbleedstory') {
   const p=S.product;
   if(p && p._layoutAttached !== false){
     let ar=1;
@@ -11471,7 +11488,7 @@ function _layoutReflowFullBleedStory(model) {
     p.w=p.baseW=w; p.h=p.baseH=h;
     p.x=Math.round((CW-w)*fx); p.y=Math.round((CH-h)*fy);
     p.cropT=p.cropB=p.cropL=p.cropR=0; p.cornerRadius=0;
-    p._layoutManaged=true; p._layoutStyle='fullbleedstory';
+    p._layoutManaged=true; p._layoutStyle=layoutStyle;
   }
   const safe=_layoutSafeDoc();
   const regionW=Math.max(1,(DW-2*safe)*(model.textRegion?.width ?? .76));
@@ -11503,6 +11520,17 @@ function _layoutReflowFullBleedStory(model) {
   return true;
 }
 
+function _layoutReflowFullBleedImage(model) {
+  _layoutReflowFullBleedStory(model, 'fullbleedimage');
+  // Pure image layout owns no typography/readability overlay.
+  S.freeTexts = {};
+  S.badge = null; S.badge2 = null; S.aiLabel = null; S.label = null;
+  S.stripe = false;
+  S.layerOrder = S.layerOrder.filter(id => id === 'product' || id === 'product2');
+  if (!S.layerOrder.includes('product')) S.layerOrder.unshift('product');
+  return true;
+}
+
 function reflowDeclarativeLayout(style) {
   // Phase 8L.2: re-project attached layout objects from semantic anchors + rhythm.
   // User-moved/resized objects detach from the layout and are deliberately left alone.
@@ -11511,6 +11539,7 @@ function reflowDeclarativeLayout(style) {
   if (model.kind === 'media-content-split') return _layoutReflowSplit(model);
   if (model.kind === 'offer-product-hero') return _layoutReflowOfferHero(model);
   if (model.kind === 'full-bleed-story') return _layoutReflowFullBleedStory(model);
+  if (model.kind === 'full-bleed-image') return _layoutReflowFullBleedImage(model);
   const g = _layoutBaseGeometry(model);
   _layoutFlowTextStack(style, model.textStack || [], g.x, g.y, g.regionW);
   return true;
@@ -11519,6 +11548,20 @@ function reflowDeclarativeLayout(style) {
 function applyDeclarativeLayout(style) {
   const model = LAYOUT_MODELS[style];
   if (!model) return false;
+
+  if (model.kind === 'full-bleed-image') {
+    const findPreset=id=>BG_PRESETS.find(p=>p.id===id);
+    S.bg=findPreset('p-dn')||findPreset('p-ng')||findPreset('p-wh');
+    S.bgSplit=S.bgSplit||{enabled:false,angle:135,pos:50,color:'#ffffff'}; S.bgSplit.enabled=false;
+    S.stripe=false; S.badge=null; S.badge2=null; S.aiLabel=null; S.label=null;
+    S.freeTexts={};
+    if(!S.product || S.product.isPlaceholder){
+      S.product={img:null,opacity:1,shadow:0,x:0,y:0,w:CW,h:CH,baseW:CW,baseH:CH,cropT:0,cropB:0,cropL:0,cropR:0,isPlaceholder:true,_aspect:CH/CW,_layoutManaged:true,_layoutAttached:true,_layoutStyle:'fullbleedimage',glow:{enabled:false,opacity:.70,radius:.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}};
+    } else { S.product._layoutManaged=true; S.product._layoutAttached=true; S.product._layoutStyle='fullbleedimage'; }
+    S.layerOrder=['product'];
+    _layoutReflowFullBleedImage(model);
+    return true;
+  }
 
   if (model.kind === 'full-bleed-story') {
     const findPreset=id=>BG_PRESETS.find(p=>p.id===id);
