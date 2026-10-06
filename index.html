@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!-- SC Composer Alpha | intern | v0.9.1 | 2026-08-31 -->
 <!-- v0.9.1 — Onboarding-Overlay: Card-Positionierung fix (Library-Overlap), Spotlight-Transition, Snap-Guides, Margin-Overlay, Frame-Defaults (Brandcenter-Radius, Bottom-Aligned), Undo-Fix (frameImg), Cut-out-Toggle -->
@@ -741,6 +740,14 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
 /* Typography architecture */
 .typo-card{margin-top:10px;padding:11px;border:1px solid #586675;border-radius:9px;background:#29333d}.typo-selection-card{border-color:#49647f;background:#27333f}.typo-block-card{background:#303a44}.typo-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}.typo-card-title{font-size:13px;font-weight:700;color:#f2f5f8;line-height:1.2}.typo-card-help,.typo-font-note{font-size:11px;color:#aeb9c4;line-height:1.35;margin-top:3px}.typo-selection-badge,.typo-block-badge{font-size:10px;font-weight:700;line-height:1;padding:5px 7px;border-radius:999px;white-space:nowrap}.typo-selection-badge{color:#7eb7ff;background:#163c68;border:1px solid #286fc1}.typo-block-badge{color:#c5cdd5;background:#202831;border:1px solid #53606d}.typo-format-controls{display:flex;flex-direction:column;gap:9px}.typo-control-group{display:flex;align-items:center;gap:9px}.typo-control-label{width:56px;flex:0 0 56px;font-size:11px;font-weight:600;color:#b8c2cc}.typo-button-row{display:flex;gap:5px;flex-wrap:wrap}.typo-button-row .hbtn{min-width:0;padding:6px 9px;font-size:11px}.typo-status-hint{font-size:10.5px;color:#93a2b0;margin-top:9px;line-height:1.35;padding-top:8px;border-top:1px solid #44515e}.typo-font-row{margin:0!important;align-items:center}.typo-font-row .prop-label{font-size:12px;font-weight:600;color:#cbd3da}.typo-font-row .sel-res{font-size:12px!important;padding:7px 8px!important;min-height:34px;background:#202a34;border-color:#607080}.typo-upload-btn{cursor:pointer;flex-shrink:0;padding:7px 10px;background:#202a34;border:1px solid #607080;border-radius:6px;font-size:12px;display:flex;align-items:center;color:#dbe2e8}.typo-font-note{margin-top:7px}.typo-lineheight-row{margin-top:12px;padding-top:10px;border-top:1px solid #4b5865}.typo-slider-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11.5px;color:#c3ccd4}.typo-slider-head span:last-child{color:#aeb9c4}.typo-lineheight-row input{width:100%}.typo-language-row{display:flex;gap:5px;margin-top:10px;align-items:center;padding:9px 0 2px}.typo-language-row>span{font-size:11px;color:#aeb9c4;margin-right:3px}
 
+
+/* ── Motion PoC ───────────────────────────────────────────── */
+.motion-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:112px;border:1.5px dashed #66717b;border-radius:10px;background:#222a31;color:#dce3e8;cursor:pointer;text-align:center;padding:14px;transition:.15s}
+.motion-drop:hover{background:#28323a;border-color:#8b98a3}
+.motion-drop strong{font-size:14px}.motion-drop span{font-size:12px;color:#aeb9c1;line-height:1.35}
+.motion-status{margin-top:10px;padding:9px 10px;border-radius:8px;background:#1f262c;font-size:12px;color:#b9c4cb;line-height:1.4}
+.motion-controls{display:none;margin-top:12px}.motion-controls.on{display:block}
+.motion-row{display:flex;gap:6px;margin-top:8px}.motion-row button{flex:1}
 </style>
 </head>
 <body>
@@ -844,6 +851,11 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         <svg class="nav-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l1.8 5.4H17l-4.5 3.3 1.7 5.3L10 14l-4.2 3 1.7-5.3L3 8.4h5.2z"/></svg>
         <span class="nav-label">Icons</span>
         <span class="nav-tip">Icons</span>
+      </button>
+      <button class="lib-nav-btn" data-panel="motion">
+        <svg class="nav-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2"/><path d="M8 7.2l5 2.8-5 2.8z" fill="currentColor" stroke="none"/></svg>
+        <span class="nav-label">Motion</span>
+        <span class="nav-tip">Motion PoC</span>
       </button>
       <button class="lib-nav-btn" data-panel="ai">
         <svg class="nav-svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4l1.2 3.6H15l-3 2.2 1.1 3.6L10 11.2l-3.1 2.2 1.1-3.6-3-2.2h3.8z"/><circle cx="10" cy="10" r="8" stroke-opacity=".3"/></svg>
@@ -1115,6 +1127,29 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
 
       </div><!-- /elPanel-icons-inner -->
     </div><!-- /libPanel-icons -->
+
+    <!-- Motion PoC Panel -->
+    <div class="lib-panel hidden" id="libPanel-motion">
+      <div class="lib-label">Motion · PoC</div>
+      <label class="motion-drop" id="motionDrop">
+        <input id="motionUpload" type="file" accept="video/webm,video/mp4,.webm,.mp4,.mov,.zip,application/zip" hidden>
+        <strong>+ Motion laden</strong>
+        <span>WebM für schnelle Vorschau oder Binkies Image Strip ZIP für Production-GIF.</span>
+      </label>
+      <div class="motion-status" id="motionStatus">Noch keine Animation geladen.</div>
+      <div class="motion-controls" id="motionControls">
+        <div class="insp-sub-label">Vorschau</div>
+        <div class="motion-row">
+          <button class="isp-btn-secondary" id="motionPlay">▶ Play</button>
+          <button class="isp-btn-secondary" id="motionPause">Ⅱ Pause</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:4px"><span class="insp-sub-label" style="margin:0">Größe</span><span id="motionScaleVal" style="font-size:12px;color:#8fb9ff;font-weight:700">80%</span></div>
+        <input type="range" id="motionScale" min="20" max="140" value="80" style="width:100%">
+        <label style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:#c8d1d7"><input type="checkbox" id="motionLoop" checked> Loop</label>
+        <button class="isp-btn-secondary" id="motionRemove" style="width:100%;margin-top:12px;color:var(--danger-action);border-color:var(--danger-border)">✕ Motion entfernen</button>
+      </div>
+      <div class="motion-status" style="margin-top:12px"><b>Motion Sources</b><br>WebM = schnelle Vorschau · Image Strip ZIP = originale RGBA-Frames für Production-GIF.</div>
+    </div><!-- /libPanel-motion -->
 
     <!-- AI Labels Panel -->
     <div class="lib-panel hidden" id="libPanel-ai">
@@ -7423,7 +7458,7 @@ document.getElementById('p2ShadowSlider').addEventListener('input',e=>{
 
 // ── Icon Sidebar Navigation ──────────────────────────────────────────────
 (function(){
-  const PANELS = ['bg','badge','frame','icons','ai'];
+  const PANELS = ['bg','badge','frame','icons','motion','ai'];
   window.showLibPanel = function(name) {
     PANELS.forEach(p => {
       const el = document.getElementById('libPanel-' + p);
@@ -7764,13 +7799,26 @@ updateBgModeLabel();
 // ────────────────────────────────────────────────────
 // FONT UPLOAD
 // ────────────────────────────────────────────────────
-let fontLib = JSON.parse(safeLS.get('swc_fonts') || '[]');
+let fontLib = (() => {
+  try {
+    const v = JSON.parse(safeLS.get('swc_fonts') || '[]');
+    return Array.isArray(v) ? v : [];
+  } catch(e) {
+    console.warn('Saved font library is invalid', e);
+    return [];
+  }
+})();
 
 async function registerFont(dataUrl, name) {
-  if ([...document.fonts].some(f => f.family === name)) return; // already loaded
-  const face = new FontFace(name, `url(${dataUrl})`);
-  await face.load();
-  document.fonts.add(face);
+  if (!dataUrl || !name) throw new Error('Font data/name missing');
+  const already = [...document.fonts].find(f => f.family === name && f.status === 'loaded');
+  if (already) return already;
+  const face = new FontFace(name, `url(${dataUrl})`, { style:'normal', weight:'100 900' });
+  const loaded = await face.load();
+  document.fonts.add(loaded);
+  // Force a real browser font check before canvas rendering.
+  await document.fonts.load(`16px "${name}"`);
+  return loaded;
 }
 
 const FALLBACK_FONT = '"TheSansB","Helvetica Neue",Arial,sans-serif';
@@ -7786,10 +7834,28 @@ function rebuildFontSelect(selectName) {
   sel.value = selectName || '';
 }
 
-function applyFont(name) {
+async function applyFont(name) {
+  const requested = name || '';
+  if (requested) {
+    const item = fontLib.find(f => f.name === requested);
+    if (!item) {
+      console.warn('Selected font is not available:', requested);
+      name = '';
+    } else {
+      try { await registerFont(item.dataUrl, item.name); }
+      catch(err) {
+        console.warn('Selected font could not be loaded:', requested, err);
+        alert(`Schrift "${requested}" konnte nicht geladen werden.`);
+        name = '';
+      }
+    }
+  }
   S.activeFontName = name || '';
-  S.fontName = name ? `"${name}",Helvetica,Arial,sans-serif` : FALLBACK_FONT;
-  document.getElementById('fontSelect').value = name || '';
+  S.fontName = name ? `"${name}","TheSansB","Helvetica Neue",Arial,sans-serif` : FALLBACK_FONT;
+  const sel=document.getElementById('fontSelect');
+  if(sel) sel.value = name || '';
+  // Canvas text must be rendered only after the selected face is ready.
+  try { await document.fonts.ready; } catch(e) {}
   render();
 }
 
@@ -7800,7 +7866,7 @@ function applyFont(name) {
   }
   const saved = safeLS.get('swc_activeFont') || '';
   rebuildFontSelect(saved);
-  applyFont(saved);
+  await applyFont(fontLib.some(f=>f.name===saved) ? saved : '');
 })();
 
 function friendlyFontName(filename) {
@@ -7834,20 +7900,32 @@ document.getElementById('fontFileInput').addEventListener('change', async e => {
       fontLib.push({ name, dataUrl });
     } catch(err) { console.warn('Font failed:', name, err); }
   }
-  safeLS.set('swc_fonts', JSON.stringify(fontLib));
-  // Select Regular if available, otherwise last
-  const preferred = fontLib.find(f => f.name.includes('SemiBold'))?.name
-                 || fontLib.find(f => f.name.includes('Regular'))?.name
+  // Select Regular if available, otherwise SemiBold/last.
+  const preferred = fontLib.find(f => /regular/i.test(f.name))?.name
+                 || fontLib.find(f => /semibold|semi bold/i.test(f.name))?.name
                  || fontLib[fontLib.length-1]?.name || '';
   rebuildFontSelect(preferred);
-  applyFont(preferred);
-  safeLS.set('swc_activeFont', preferred);
+  await applyFont(preferred);
+
+  // localStorage can silently run out of quota with several font files.
+  // Verify persistence instead of pretending the upload succeeded.
+  let persisted = false;
+  try {
+    localStorage.setItem('swc_fonts', JSON.stringify(fontLib));
+    localStorage.setItem('swc_activeFont', preferred);
+    persisted = localStorage.getItem('swc_fonts') !== null;
+  } catch(err) {
+    console.warn('Font persistence failed', err);
+  }
+  if (!persisted && fontLib.length) {
+    alert('Schrift ist für diese Sitzung geladen, konnte aber nicht dauerhaft im Browser gespeichert werden. Tipp: weniger Schriftschnitte laden oder „Embed Fonts“ verwenden.');
+  }
   e.target.value = '';
 });
 
-document.getElementById('fontSelect').addEventListener('change', e => {
-  applyFont(e.target.value);
-  safeLS.set('swc_activeFont', e.target.value);
+document.getElementById('fontSelect').addEventListener('change', async e => {
+  await applyFont(e.target.value);
+  safeLS.set('swc_activeFont', S.activeFontName || '');
 });
 
 // ────────────────────────────────────────────────────
@@ -8672,6 +8750,50 @@ function render(forExport=false,ec=null,EW=0,EH=0) {
   c.clearRect(0,0,W,H);
 
   drawBg(c,W,H,forExport);
+
+  // ── Motion PoC: alpha-safe transparent video layer above background ──
+  if ((!forExport || window.__motionExportActive) && window.__motionPoc && window.__motionPoc.ready && (window.__motionPoc.video || window.__motionPoc.frameImage)) {
+    const m=window.__motionPoc, v=m.video, src=m.frameImage||v;
+    const vw=m.frameImage?(src.naturalWidth||src.width||1):(v.videoWidth||1), vh=m.frameImage?(src.naturalHeight||src.height||1):(v.videoHeight||1);
+    const scale=(m.scale||80)/100;
+    const fit=Math.min(W/vw,H/vh)*scale;
+    const dw=vw*fit, dh=vh*fit;
+
+    c.save();
+    c.globalAlpha=1;
+    c.globalCompositeOperation='source-over';
+    c.filter='none';
+    c.shadowColor='rgba(0,0,0,0)';
+    c.imageSmoothingEnabled=true;
+    c.imageSmoothingQuality='high';
+
+    if (m.frameImage) {
+      // Image Strip is already the production RGBA master. Draw the original
+      // decoded PNG directly into the Composer/output canvas: no intermediate
+      // canvas, getImageData, palette conversion or GIF path is involved.
+      c.drawImage(src,(W-dw)/2,(H-dh)/2,dw,dh);
+    } else {
+      // Video keeps the alpha-isolation canvas used by the VP9 diagnostic.
+      if (!m.frameCanvas || m.frameCanvas.width!==vw || m.frameCanvas.height!==vh) {
+        m.frameCanvas=document.createElement('canvas');
+        m.frameCanvas.width=vw; m.frameCanvas.height=vh;
+        m.frameCtx=m.frameCanvas.getContext('2d',{alpha:true,willReadFrequently:true});
+      }
+      const mc=m.frameCtx;
+      mc.save();
+      mc.setTransform(1,0,0,1,0,0);
+      mc.globalAlpha=1;
+      mc.globalCompositeOperation='copy';
+      mc.clearRect(0,0,vw,vh);
+      mc.globalCompositeOperation='source-over';
+      mc.imageSmoothingEnabled=true;
+      mc.imageSmoothingQuality='high';
+      mc.drawImage(src,0,0,vw,vh);
+      mc.restore();
+      c.drawImage(m.frameCanvas,(W-dw)/2,(H-dh)/2,dw,dh);
+    }
+    c.restore();
+  }
 
   // ── Swisscom Stripe (fixed: always above BG, below all elements) ──
   if (S.stripe) {
@@ -10421,6 +10543,8 @@ function updateExportFormatUI() {
   const isPng = S.exportFmt !== 'jpg';
   const elPng = document.getElementById('expPng');
   const elJpg = document.getElementById('expJpg');
+  const elGif = document.getElementById('expGif');
+  const elGifQuality = document.getElementById('expGifQuality');
   if (!elPng || !elJpg) return;
   elPng.classList.toggle('active', isPng);
   elJpg.classList.toggle('active', !isPng);
@@ -10429,13 +10553,248 @@ function updateExportFormatUI() {
   elPng.style.color       = isPng  ? '#fff'    : '#aaa';
   elJpg.style.borderColor = !isPng ? '#3878f0' : '#333';
   elJpg.style.background  = !isPng ? '#1e2a4a' : 'transparent';
-  elJpg.style.color       = !isPng ? '#fff'    : '#aaa';
+  elJpg.style.color       = !isPng && S.exportFmt==='jpg' ? '#fff' : '#aaa';
+  if (elGif) {
+    const isGif=S.exportFmt==='gif';
+    const isGifQuality=S.exportFmt==='gif-quality';
+    elGif.classList.toggle('active',isGif);
+    elGif.style.borderColor=isGif?'#3878f0':'#333';
+    elGif.style.background=isGif?'#1e2a4a':'transparent';
+    elGif.style.color=isGif?'#fff':'#aaa';
+    if(elGifQuality){
+      elGifQuality.classList.toggle('active',isGifQuality);
+      elGifQuality.style.borderColor=isGifQuality?'#3878f0':'#333';
+      elGifQuality.style.background=isGifQuality?'#1e2a4a':'transparent';
+      elGifQuality.style.color=isGifQuality?'#fff':'#aaa';
+    }
+    elPng.style.borderColor=S.exportFmt==='png'?'#3878f0':'#333';
+    elPng.style.background=S.exportFmt==='png'?'#1e2a4a':'transparent';
+    elPng.style.color=S.exportFmt==='png'?'#fff':'#aaa';
+    elJpg.style.borderColor=S.exportFmt==='jpg'?'#3878f0':'#333';
+    elJpg.style.background=S.exportFmt==='jpg'?'#1e2a4a':'transparent';
+  }
 }
 document.getElementById('expPng').addEventListener('click', () => { S.exportFmt = 'png'; updateExportFormatUI(); });
 document.getElementById('expJpg').addEventListener('click', () => { S.exportFmt = 'jpg'; updateExportFormatUI(); });
+document.getElementById('expGif').addEventListener('click', () => { S.exportFmt = 'gif'; const info=document.getElementById('gifExportInfo'); if(info){info.style.color='#8d9aa5';info.textContent='E-Mail Preset · Local ImageMagick · ~24 Frames · 256 Farben · variable Timing · max. 600 px';} updateExportFormatUI(); });
 S.exportFmt = S.exportFmt || 'png';
 
-(document.getElementById('exportBtn')||{addEventListener:()=>{}}).addEventListener('click',()=>{
+async function exportCurrentMotionFramePng(){
+  const m=window.__motionPoc;
+  if(!m||!m.ready||(!m.video && !(m.type==='strip'&&m.frames?.length))) throw new Error('Bitte zuerst eine Motion-Animation oder Image Strip laden.');
+  const info=document.getElementById('gifExportInfo');
+  const resValue=document.getElementById('exportRes').value;
+  const canvasDims=getCanvasExportDimensions();
+  let EW,EH;
+  if(resValue==='canvas'&&canvasDims){EW=canvasDims.w;EH=canvasDims.h;}
+  else if(S.format==='custom'){EW=S.customW||CW;EH=S.customH||CH;}
+  else {const res=+resValue;const f=FORMATS[S.format];EW=res;EH=Math.round(res*f.h/f.w);}
+  const ec=document.createElement('canvas');ec.width=EW;ec.height=EH;
+  const ex=ec.getContext('2d',{alpha:true});
+  const oldExportActive=window.__motionExportActive;
+  window.__motionExportActive=true;
+  try{
+    render(true,ex,EW,EH);
+    const blob=await new Promise((resolve,reject)=>ec.toBlob(b=>b?resolve(b):reject(new Error('PNG konnte nicht erstellt werden.')),'image/png'));
+    const produktRaw=(document.getElementById('produktName')?.value||'').trim();
+    const produkt=produktRaw?'-'+produktRaw.replace(/[^a-zA-Z0-9äöüÄÖÜß\-_.]/g,'-').replace(/-+/g,'-'):'';
+    const a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download='motion-frame'+produkt+'-'+EW+'x'+EH+'.png';a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+    if(info){info.style.color='#65d18a';info.textContent=`✓ Pre-GIF PNG · ${EW} × ${EH} · ${(blob.size/1024).toFixed(0)} KB`;}
+  } finally {window.__motionExportActive=oldExportActive;}
+}
+
+document.getElementById('exportMotionFrameBtn')?.addEventListener('click',async()=>{
+  const b=document.getElementById('exportMotionFrameBtn'),old=b.textContent;
+  try{b.disabled=true;b.textContent='PNG wird erstellt …';await exportCurrentMotionFramePng();}
+  catch(e){console.error('[Motion Frame PNG]',e);const info=document.getElementById('gifExportInfo');if(info){info.style.color='#ff8f8f';info.textContent='⚠ '+(e?.message||'PNG Export fehlgeschlagen');}}
+  finally{b.disabled=false;b.textContent=old;}
+});
+
+document.getElementById('exportMotionRawFrameBtn')?.addEventListener('click',async()=>{
+  const m=window.__motionPoc,info=document.getElementById('gifExportInfo');
+  try{
+    if(!m||m.type!=='strip'||!m.frameImage) throw new Error('Bitte zuerst einen Image Strip laden.');
+    const img=m.frameImage, w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+    const rc=document.createElement('canvas');rc.width=w;rc.height=h;
+    const rx=rc.getContext('2d',{alpha:true});rx.imageSmoothingEnabled=true;rx.imageSmoothingQuality='high';rx.drawImage(img,0,0);
+    const blob=await new Promise((res,rej)=>rc.toBlob(b=>b?res(b):rej(new Error('Original-Frame konnte nicht erstellt werden.')),'image/png'));
+    const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=`binkies-original-frame-${String(m.frameIndex||0).padStart(3,'0')}.png`;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
+    if(info){info.style.color='#65d18a';info.textContent=`✓ Original RGBA Frame · ${w} × ${h} · ${(blob.size/1024).toFixed(0)} KB`;}
+  }catch(e){console.error('[Motion Raw Frame]',e);if(info){info.style.color='#ff8f8f';info.textContent='⚠ '+(e?.message||'Original-Frame Export fehlgeschlagen');}}
+});
+
+async function waitForVideoSeek(v,t){
+  return new Promise((resolve,reject)=>{
+    const done=()=>{cleanup();resolve();}, fail=()=>{cleanup();reject(new Error('Video seek failed'));};
+    const cleanup=()=>{v.removeEventListener('seeked',done);v.removeEventListener('error',fail);};
+    v.addEventListener('seeked',done,{once:true}); v.addEventListener('error',fail,{once:true});
+    const safe=Math.max(0,Math.min(t,Math.max(0,(v.duration||0)-0.001)));
+    if(Math.abs(v.currentTime-safe)<0.0005){cleanup();resolve();} else v.currentTime=safe;
+  });
+}
+
+async function exportMotionGif(){
+  const m=window.__motionPoc, v=m&&m.video;
+  if(!m||!m.ready||(!v && !(m.type==='strip'&&m.frames?.length))) throw new Error('Bitte zuerst eine Motion-Animation oder Image Strip laden.');
+  const isStrip=m.type==='strip'&&m.frames?.length;
+  if(!isStrip) throw new Error('GIF · E-Mail verwendet für den PoC einen Binkies Image Strip ZIP. WebM bleibt Vorschauquelle.');
+
+  const btn=document.getElementById('exportBtn'), info=document.getElementById('gifExportInfo');
+  const oldText=btn.textContent, oldStripPlaying=m.playing, oldStripIndex=m.frameIndex, oldStripImage=m.frameImage;
+  btn.disabled=true;
+  m.playing=false;
+  if(m.raf)cancelAnimationFrame(m.raf);
+  m.raf=0;
+  window.__motionExportActive=true;
+
+  try{
+    const dims=getCanvasExportDimensions()||{w:CW,h:CH};
+    const EW=Math.min(600,Math.max(1,Math.round(dims.w)));
+    const EH=Math.max(1,Math.round(EW*dims.h/dims.w));
+    const sourceCount=m.frames.length, wanted=Math.min(24,sourceCount);
+
+    const stripIndices=[];
+    for(let i=0;i<wanted;i++){
+      stripIndices.push(Math.round(i*(sourceCount-1)/Math.max(1,wanted-1)));
+    }
+
+    // Golden E-Mail timing: 24 Frames => 5.4 s total.
+    // Keep the E-Mail animation at 5.4 s independent of frame count.
+    // Four hold frames retain the Golden rhythm; remaining time is spread
+    // evenly across motion frames.
+    const targetDurationMs=5400;
+    const delays=new Array(wanted).fill(100);
+    if(wanted>=4){
+      const holdA=0;
+      const holdB=Math.round((wanted-1)/3);
+      const holdC=Math.round((wanted-1)*2/3);
+      const holdD=wanted-1;
+      const holdTotal=1000+300+300+1000;
+      const motionCount=Math.max(1,wanted-4);
+      const motionDelay=Math.max(20,Math.round((targetDurationMs-holdTotal)/motionCount/10)*10);
+      delays.fill(motionDelay);
+      delays[holdA]=1000;
+      delays[holdB]=300;
+      delays[holdC]=300;
+      delays[holdD]=1000;
+      // Correct rounding on the last motion frame so total is exactly 5.4 s.
+      const delta=targetDurationMs-delays.reduce((a,b)=>a+b,0);
+      if(delta){
+        const correctionIndex=Math.max(1,holdD-1);
+        delays[correctionIndex]=Math.max(20,delays[correctionIndex]+delta);
+      }
+    }
+
+    // First verify that the local ImageMagick export service is alive.
+    btn.textContent='GIF Engine prüfen …';
+    if(info){
+      info.style.color='#8d9aa5';
+      info.textContent='Lokaler ImageMagick Engine · localhost:8787 wird geprüft …';
+    }
+    let health;
+    try{
+      health=await fetch('http://localhost:8787/health',{cache:'no-store'});
+    }catch(err){
+      throw new Error('GIF Engine nicht erreichbar. Bitte START.bat / START-DEBUG.bat starten und dieses Fenster offen lassen.');
+    }
+    if(!health.ok) throw new Error('GIF Engine antwortet nicht korrekt (HTTP '+health.status+').');
+
+    const ec=document.createElement('canvas');
+    ec.width=EW; ec.height=EH;
+    const ex=ec.getContext('2d',{alpha:true});
+    ex.imageSmoothingEnabled=true;
+    ex.imageSmoothingQuality='high';
+
+    const form=new FormData();
+    for(let i=0;i<wanted;i++){
+      m.frameIndex=stripIndices[i];
+      m.frameImage=m.frames[m.frameIndex];
+
+      ex.setTransform(1,0,0,1,0,0);
+      ex.clearRect(0,0,EW,EH);
+      render(true,ex,EW,EH);
+
+      const png=await new Promise((resolve,reject)=>{
+        ec.toBlob(
+          b=>b?resolve(b):reject(new Error('PNG Frame '+(i+1)+' konnte nicht erstellt werden.')),
+          'image/png'
+        );
+      });
+
+      form.append('frames[]',png,'frame_'+String(i).padStart(3,'0')+'.png');
+
+      const pct=Math.round((i+1)/wanted*70);
+      btn.textContent='Frames '+pct+'%';
+      if(info){
+        info.textContent=`GIF · E-Mail · ${EW} × ${EH} · ${wanted} Frames · PNG Render ${i+1}/${wanted}`;
+      }
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    form.append('timings',delays.join(','));
+    form.append('preset','email');
+    form.append('qualityMode','smooth');
+
+    btn.textContent='GIF optimieren …';
+    if(info){
+      info.textContent=`ImageMagick · 256 Farben · +dither · Delta-Optimierung · ${wanted} Frames`;
+    }
+
+    let response;
+    try{
+      response=await fetch('http://localhost:8787/api/gif',{method:'POST',body:form});
+    }catch(err){
+      throw new Error('Verbindung zum GIF Engine während des Exports verloren.');
+    }
+
+    if(!response.ok){
+      let detail='';
+      try{
+        const payload=await response.json();
+        detail=payload?.error||payload?.status||'';
+      }catch(_){}
+      throw new Error('GIF Engine Fehler'+(detail?': '+detail:' (HTTP '+response.status+')'));
+    }
+
+    const blob=await response.blob();
+    if(!blob.size) throw new Error('GIF Engine hat eine leere Datei geliefert.');
+
+    const frames=response.headers.get('x-sc-frames')||String(wanted);
+    const durationMs=Number(response.headers.get('x-sc-duration-ms')||delays.reduce((a,b)=>a+b,0));
+    const produktRaw=(document.getElementById('produktName')?.value||'').trim();
+    const produkt=produktRaw?'-'+produktRaw.replace(/[^a-zA-Z0-9äöüÄÖÜß\-_.]/g,'-').replace(/-+/g,'-'):'';
+
+    const a=document.createElement('a'),u=URL.createObjectURL(blob);
+    a.href=u;
+    a.download='email-banner'+produkt+'-'+EW+'x'+EH+'.gif';
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),30000);
+
+    if(info){
+      info.style.color='#65d18a';
+      info.textContent=`✓ GIF · E-Mail · ImageMagick · ${(blob.size/1024/1024).toFixed(2)} MB · ${EW} × ${EH} · ${frames} Frames · ${(durationMs/1000).toFixed(1)} s`;
+    }
+  }finally{
+    window.__motionExportActive=false;
+    btn.disabled=false;
+    btn.textContent=oldText;
+    m.frameIndex=oldStripIndex;
+    m.frameImage=oldStripImage||m.frames[m.frameIndex];
+    m.playing=oldStripPlaying;
+    if(m.playing&&typeof requestAnimationFrame==='function'&&typeof m.startStripLoop==='function')m.startStripLoop();
+    render();
+  }
+}
+
+(document.getElementById('exportBtn')||{addEventListener:()=>{}}).addEventListener('click',async()=>{
+  if(S.exportFmt==='gif'){
+    try{await exportMotionGif();}catch(e){console.error('[Motion GIF Export]',e);const info=document.getElementById('gifExportInfo');if(info){info.textContent='⚠ '+(e&&e.message?e.message:'GIF Export fehlgeschlagen');info.style.color='#ff8f8f';}}
+    return;
+  }
   let EW, EH;
   const resValue = document.getElementById('exportRes').value;
   const canvasDims = getCanvasExportDimensions();
@@ -10732,17 +11091,70 @@ rebuildAiLabels();
 // Undo button
 document.getElementById('undoBtn').addEventListener('click', applyUndo);
 
-// Reset button
+// Reset button — full document reset (uploaded files + previews included)
 document.getElementById('resetBtn').addEventListener('click', () => {
   if (!confirm('Alles zurücksetzen?')) return;
   pushUndo();
-  S.badge = null; S.aiLabel = null; S.label = null; S.product = null;
-  S.stripe = false; S.bg = null; S.selected = null;
-  document.getElementById('txt1').value = '';
-  document.getElementById('txt2').value = '';
-  document.getElementById('labelTxt1').value = '';
-  document.getElementById('labelTxt2').value = '';
-  rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons(); syncBadgeProps(); render(); rebuildLayerPanel();
+
+  // Document objects
+  S.badge = null; S.badge2 = null; S.extraBadges = [];
+  S.aiLabel = null; S.label = null;
+  S.product = null; S.product2 = null;
+  S.freistellen = false;
+  S.freeTexts = {};
+  S.stripe = false;
+  S.bg = null;
+  S.bgStripe = {enabled:false, angle:135, pos:50, color:'#ffffff'};
+  S.bgSplit  = {enabled:false, angle:135, pos:50, color:'#ffffff'};
+  S.bgFlipped = false;
+  S.selected = null;
+  S.layerOrder = ['product','product2','badge','badge2','aiLabel','label'];
+  multiSel.clear();
+
+  // Text fields
+  ['txt1','txt2','labelTxt1','labelTxt2','productUrlInput'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+
+  // Native file inputs: clearing state is important because selecting the
+  // same file again otherwise may not fire a change event.
+  ['productInput','product2Input','noSelProductInput','motionUpload'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+
+  // Upload previews
+  const p1 = document.getElementById('productThumb');
+  if (p1) { p1.removeAttribute('src'); p1.style.display = 'none'; }
+  const h1 = document.getElementById('productHint');
+  if (h1) h1.style.display = '';
+  const p2 = document.getElementById('product2Thumb');
+  if (p2) { p2.removeAttribute('src'); p2.style.display = 'none'; }
+  const h2 = document.getElementById('product2Hint');
+  if (h2) h2.style.display = '';
+
+  // Reset product controls to neutral values.
+  const defaults = {
+    sizeSlider:100, shadowSlider:0,
+    filterBr:100, filterCon:100, filterSat:100,
+    cropT:0, cropB:0, cropL:0, cropR:0
+  };
+  Object.entries(defaults).forEach(([id,val]) => {
+    const el=document.getElementById(id); if(el) el.value=val;
+  });
+  ['sizeVal','filterBrVal','filterConVal','filterSatVal'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent='100%';
+  });
+  const shadowVal=document.getElementById('shadowVal'); if(shadowVal) shadowVal.textContent='0%';
+  ['cropTVal','cropBVal','cropLVal','cropRVal'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent='0%';
+  });
+
+  // Motion PoC owns object URLs/video state; let it dispose them too.
+  if (typeof window.__clearMotionPoc === 'function') window.__clearMotionPoc();
+
+  updateFreistNowBtn?.();
+  rebuildPalette(); rebuildCustomShapes(); rebuildFtIcons();
+  syncBadgeProps(); render(); rebuildLayerPanel();
 });
 
 
@@ -11939,6 +12351,9 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
   makeResizable(hRight, propsEl, 'left',  KEY_R, DEFAULT_R);
 })();
 
+// Motion PoC bridge: render() lives in this ES module, so expose only a narrow redraw hook.
+window.__composerRender = render;
+
 </script>
 
 <!-- ── Export Modal ── -->
@@ -11952,6 +12367,8 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
         style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #3878f0;background:#1e2a4a;color:#fff;font-size:12px;font-weight:700;cursor:pointer;" class="active">PNG</button>
       <button id="expJpg"
         style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #333;background:transparent;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;">JPG</button>
+      <button id="expGif"
+        style="flex:1;padding:7px;border-radius:7px;border:1.5px solid #333;background:transparent;color:#aaa;font-size:12px;font-weight:700;cursor:pointer;">GIF · E-Mail</button>
     </div>
     <!-- Produktname -->
     <div style="font-size:10px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:6px;">PRODUKTNAME (optional)</div>
@@ -11968,6 +12385,11 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
       <option value="2000">2000 px (Gross)</option>
       <option value="3000">3000 px (Druck)</option>
     </select>
+    <div id="gifExportInfo" style="font-size:10px;color:#8d9aa5;line-height:1.35;margin:-10px 0 10px;min-height:14px;">GIF · E-Mail: Local ImageMagick Engine · ~24 Frames · 256 Farben · variable Timing · max. 600 px</div>
+    <button id="exportMotionFrameBtn" type="button"
+      style="width:100%;padding:8px 10px;margin:0 0 16px;border-radius:8px;border:1px solid #3a4650;background:#151b20;color:#dce5eb;font-size:11px;font-weight:700;cursor:pointer;">PNG · aktueller Motion Frame</button>
+    <button id="exportMotionRawFrameBtn" type="button"
+      style="width:100%;padding:8px 10px;margin:-8px 0 16px;border-radius:8px;border:1px solid #303a43;background:#11171c;color:#9fb0bc;font-size:11px;font-weight:700;cursor:pointer;">PNG · Original-Frame prüfen</button>
     <!-- Buttons -->
     <div style="display:flex;gap:8px;">
       <button onclick="document.getElementById('exportModal').style.display='none';"
@@ -11978,6 +12400,73 @@ try { localStorage.removeItem('panel_left_w'); localStorage.removeItem('panel_ri
   </div>
 </div>
 
+
+<script>
+// ── Motion PoC 2: WebM preview + Binkies Image Strip ZIP ─────────────
+(function(){
+  const upload=document.getElementById('motionUpload'); if(!upload) return;
+  const status=document.getElementById('motionStatus'), controls=document.getElementById('motionControls');
+  const play=document.getElementById('motionPlay'), pause=document.getElementById('motionPause'), remove=document.getElementById('motionRemove');
+  const scale=document.getElementById('motionScale'), scaleVal=document.getElementById('motionScaleVal'), loop=document.getElementById('motionLoop');
+  const fresh=()=>({type:null,video:null,url:null,ready:false,scale:+scale.value||80,raf:0,frameCanvas:null,frameCtx:null,frames:[],frameUrls:[],frameIndex:0,frameImage:null,fps:15,playing:false,lastTick:0,name:''});
+  window.__motionPoc=fresh();
+  const redraw=()=>{ if(typeof window.__composerRender==='function') window.__composerRender(); };
+  function stopTick(){const m=window.__motionPoc;if(m.raf)cancelAnimationFrame(m.raf);m.raf=0;}
+  function tick(ts){
+    const m=window.__motionPoc;
+    if(m.type==='strip'){
+      if(!m.playing){m.raf=0;return;}
+      if(!m.lastTick)m.lastTick=ts;
+      if(ts-m.lastTick>=1000/(m.fps||15)){m.lastTick=ts;m.frameIndex++;if(m.frameIndex>=m.frames.length){if(loop.checked)m.frameIndex=0;else{m.frameIndex=m.frames.length-1;m.playing=false;}}m.frameImage=m.frames[m.frameIndex];redraw();}
+      if(m.playing)m.raf=requestAnimationFrame(tick);else m.raf=0; return;
+    }
+    if(!m.video || m.video.paused || m.video.ended){m.raf=0;redraw();return;} redraw();m.raf=requestAnimationFrame(tick);
+  }
+  function startTick(){const m=window.__motionPoc;if(!m.raf)m.raf=requestAnimationFrame(tick);}
+  function clearMotion(){
+    const m=window.__motionPoc;stopTick();
+    if(m.video){m.video.pause();m.video.removeAttribute('src');m.video.load();}
+    if(m.url)URL.revokeObjectURL(m.url); (m.frameUrls||[]).forEach(u=>URL.revokeObjectURL(u));
+    window.__motionPoc=fresh(); upload.value='';controls.classList.remove('on');status.textContent='Noch keine Animation geladen.';redraw();
+  }
+  // Expose cleanup so the global Reset can perform a real full reset.
+  window.__clearMotionPoc = clearMotion;
+  async function loadJSZip(){
+    if(window.JSZip)return window.JSZip;
+    for(const src of ['https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js','https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js']){
+      try{await new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});if(window.JSZip)return window.JSZip;}catch(e){}
+    } throw new Error('ZIP-Modul konnte nicht geladen werden. Internet/CDN prüfen.');
+  }
+  async function loadStrip(f){
+    status.textContent='Image Strip wird gelesen …'; const JSZip=await loadJSZip(); const zip=await JSZip.loadAsync(f);
+    const entries=Object.values(zip.files).filter(x=>!x.dir && /\.png$/i.test(x.name)).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
+    if(!entries.length)throw new Error('Keine PNG-Frames im ZIP gefunden.');
+    const m=window.__motionPoc;m.type='strip';m.name=f.name;m.fps=15;
+    for(let i=0;i<entries.length;i++){
+      status.textContent=`Image Strip wird geladen … ${i+1}/${entries.length}`;
+      const blob=await entries[i].async('blob'), url=URL.createObjectURL(blob), img=new Image();
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url;});m.frameUrls.push(url);m.frames.push(img);
+      if(i%8===0)await new Promise(r=>setTimeout(r,0));
+    }
+    m.frameIndex=0;m.frameImage=m.frames[0];m.ready=true;m.playing=true;controls.classList.add('on');
+    const first=m.frames[0];status.innerHTML=`<b>${f.name.replace(/[<>]/g,'')}</b><br>${m.frames.length} PNG Frames · ${first.naturalWidth} × ${first.naturalHeight} · ${(f.size/1024/1024).toFixed(1)} MB<br><span style="color:#65d18a">✓ Image Strip · RGBA Master</span>`;
+    redraw();startTick();
+  }
+  function loadVideo(f){
+    const url=URL.createObjectURL(f),v=document.createElement('video');v.muted=true;v.playsInline=true;v.loop=loop.checked;v.preload='auto';v.src=url;
+    Object.assign(window.__motionPoc,{type:'video',video:v,url,ready:false,name:f.name});status.textContent='Animation wird geladen …';
+    v.addEventListener('loadeddata',()=>{const m=window.__motionPoc;m.ready=true;const dur=isFinite(v.duration)?v.duration.toFixed(1)+' s':'–',safe=f.name.replace(/[<>]/g,'');controls.classList.add('on');
+      let alphaLine='<span style="color:#9fb0bc">Alpha wird geprüft …</span>';
+      try{const tc=document.createElement('canvas');tc.width=v.videoWidth;tc.height=v.videoHeight;const tx=tc.getContext('2d',{alpha:true,willReadFrequently:true});tx.clearRect(0,0,tc.width,tc.height);tx.drawImage(v,0,0);const d=tx.getImageData(0,0,tc.width,tc.height).data;let n=0;for(let i=3;i<d.length;i+=4)if(d[i]<255)n++;alphaLine=n?`<span style="color:#65d18a">✓ Alpha erkannt · ${(n/(d.length/4)*100).toFixed(1)}% nicht-opake Pixel</span>`:'<span style="color:#ffb25c">⚠ Kein Alpha erkannt</span>';}catch(e){}
+      status.innerHTML=`<b>${safe}</b><br>${v.videoWidth} × ${v.videoHeight} · ${dur} · ${(f.size/1024/1024).toFixed(1)} MB<br>${alphaLine}`;redraw();v.play().then(startTick).catch(()=>{});
+    },{once:true});v.addEventListener('play',startTick);v.addEventListener('seeked',redraw);v.addEventListener('error',()=>status.textContent='Dieses Video konnte der Browser nicht laden.');
+  }
+  upload.addEventListener('change',async()=>{const f=upload.files&&upload.files[0];if(!f)return;clearMotion();try{/\.zip$/i.test(f.name)?await loadStrip(f):loadVideo(f);}catch(e){console.error('[Motion load]',e);status.innerHTML='<span style="color:#ff8f8f">⚠ '+(e.message||'Motion konnte nicht geladen werden.')+'</span>';}});
+  play.addEventListener('click',()=>{const m=window.__motionPoc;if(m.type==='strip'){m.playing=true;m.lastTick=0;startTick();}else if(m.video)m.video.play().then(startTick).catch(()=>{});});
+  pause.addEventListener('click',()=>{const m=window.__motionPoc;if(m.type==='strip'){m.playing=false;stopTick();}else if(m.video)m.video.pause();redraw();});
+  remove.addEventListener('click',clearMotion);scale.addEventListener('input',()=>{window.__motionPoc.scale=+scale.value;scaleVal.textContent=scale.value+'%';redraw();});loop.addEventListener('change',()=>{if(window.__motionPoc.video)window.__motionPoc.video.loop=loop.checked;});
+})();
+</script>
 </body>
 </html>
 <style>
