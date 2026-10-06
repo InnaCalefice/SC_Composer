@@ -7773,12 +7773,22 @@ document.getElementById('fontBtn').addEventListener('click', () => document.getE
 // API KEY
 // ────────────────────────────────────────────────────
 document.getElementById('apiBtn').addEventListener('click',()=>{
-  document.getElementById('apiInput').value=S.removeBgKeys.join('\n')||S.removeBgKey;
-  document.getElementById('proxyInput').value=S.removeBgProxyUrl||'';
-  document.getElementById('apiModal').classList.add('show');
+  const modal=document.getElementById('apiModal');
+  const apiInput=document.getElementById('apiInput');
+  const proxyInput=document.getElementById('proxyInput');
+  if(!modal || !apiInput || !proxyInput){
+    console.error('Key settings UI is missing');
+    return;
+  }
+  apiInput.value=(S.removeBgKeys||[]).join('\n')||S.removeBgKey||'';
+  proxyInput.value=S.removeBgProxyUrl||'';
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>apiInput.focus(),0);
 });
-(document.getElementById('apiCancel')||{addEventListener:()=>{}}).addEventListener('click',()=>
-  document.getElementById('apiModal').classList.remove('show'));
+(document.getElementById('apiCancel')||{addEventListener:()=>{}}).addEventListener('click',()=>{
+  const m=document.getElementById('apiModal'); if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+});
 (document.getElementById('apiSave')||{addEventListener:()=>{}}).addEventListener('click',()=>{
   const raw=document.getElementById('apiInput').value;
   const keys=raw.split('\n').map(k=>k.trim()).filter(k=>k.length);
@@ -12467,6 +12477,25 @@ window.__composerRender = render;
   remove.addEventListener('click',clearMotion);scale.addEventListener('input',()=>{window.__motionPoc.scale=+scale.value;scaleVal.textContent=scale.value+'%';redraw();});loop.addEventListener('change',()=>{if(window.__motionPoc.video)window.__motionPoc.video.loop=loop.checked;});
 })();
 </script>
+
+<!-- remove.bg / proxy settings -->
+<div class="modal-overlay" id="apiModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="apiModalTitle" style="width:min(460px,calc(100vw - 32px))">
+    <h3 id="apiModalTitle">Freistellung · Key</h3>
+    <p>remove.bg API Key(s), optional einer pro Zeile. Wenn ein Proxy verwendet wird, kann das Key-Feld leer bleiben.</p>
+    <label style="font-size:11px;color:var(--text2);font-weight:700">API Key(s)</label>
+    <textarea id="apiInput" rows="5" spellcheck="false" placeholder="Key hier einfügen …"
+      style="width:100%;resize:vertical;background:var(--deep);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace"></textarea>
+    <label style="font-size:11px;color:var(--text2);font-weight:700">Proxy URL</label>
+    <input id="proxyInput" type="url" spellcheck="false" placeholder="https://…"
+      style="width:100%;background:var(--deep);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px;font-size:12px">
+    <div class="modal-btns">
+      <button class="hbtn" id="apiCancel" type="button" style="flex:1">Abbrechen</button>
+      <button class="hbtn primary" id="apiSave" type="button" style="flex:1">Speichern</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 <style>
