@@ -750,6 +750,46 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
 .motion-row{display:flex;gap:6px;margin-top:8px}.motion-row button{flex:1}
 </style>
 <script id="composer-theme-early-init">try {document.documentElement.setAttribute('data-ui-theme',localStorage.getItem('sc-composer-ui-theme-v1')==='dark'?'dark':'light');} catch (_) {document.documentElement.setAttribute('data-ui-theme','light');}</script>
+<style id="light-onboarding-contrast-v5">
+/* Light mode: onboarding overlay legibility. Keep original dark styling untouched. */
+html[data-ui-theme="light"] #obCard { background:#ffffff !important; border-color:#d5dfeb !important; color:#1d2939 !important; box-shadow:0 18px 52px rgba(20,35,60,.28) !important; }
+html[data-ui-theme="light"] #obTitle { color:#182a43 !important; }
+html[data-ui-theme="light"] #obText { color:#40546c !important; }
+html[data-ui-theme="light"] #obStep { color:#526781 !important; }
+html[data-ui-theme="light"] #obSkip { color:#315b8d !important; }
+html[data-ui-theme="light"] #obBack { background:#f0f4f9 !important; border-color:#cbd7e5 !important; color:#254364 !important; }
+html[data-ui-theme="light"] #obBack:hover { background:#e3ebf5 !important; color:#183b65 !important; }
+html[data-ui-theme="light"] #obSkip:hover { color:#003c9e !important; }
+html[data-ui-theme="light"] .ob-dot { background:#bdcbdc !important; }
+html[data-ui-theme="light"] .ob-dot.active { background:#1266c3 !important; }
+</style>
+
+<style id="light-ai-panel-contrast-v9">
+/* AI placement controls: preview label assets are intentionally unchanged. */
+html[data-ui-theme="light"] #aiPosInline .corner-btn {
+  background:#f5f8fc !important; color:#244365 !important;
+  border:1.5px solid #cbd7e5 !important; border-radius:5px;
+}
+html[data-ui-theme="light"] #aiPosInline .corner-btn[data-active] {
+  background:#e4f0ff !important; color:#0057b8 !important;
+  border-color:#0873db !important; box-shadow:inset 0 0 0 1px #0873db;
+}
+html[data-ui-theme="light"] #aiPosInline .corner-btn:hover {
+  background:#eaf3ff !important; border-color:#4388d4 !important; color:#004c9e !important;
+}
+html[data-ui-theme="light"] #aiPosInline .corner-btn:focus-visible {
+  outline:2px solid #0873db; outline-offset:2px;
+}
+html[data-ui-theme="light"] #aiPosInline [style*="grid-template-columns:repeat(3,1fr)"] > div {
+  background:#eef2f7 !important; border-color:#d8e0eb !important;
+}
+html[data-ui-theme="light"] #aiPosInline [style*="grid-template-columns:repeat(3,1fr)"] > div > div {
+  background:#9bacc1 !important;
+}
+html[data-ui-theme="light"] #aiPosInline .insp-sub-label,
+html[data-ui-theme="light"] #aiPosInline span[style*="color:#888888"] {color:#526780 !important;}
+html[data-ui-theme="light"] #aiMarginVal {color:#0057b8 !important;}
+</style>
 </head>
 <body>
 
@@ -883,6 +923,39 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
         <span class="lib-label">Layout-Stile</span>
       </div>
       <div id="layoutStyleGrid" class="lib-grid" style="margin-bottom:4px;">
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedstory')" title="Image + Copy">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="fbStoryPreview" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#18295f"/><stop offset=".48" stop-color="#6f8fa8"/><stop offset="1" stop-color="#d9b39b"/>
+              </linearGradient>
+              <linearGradient id="fbStoryScrim" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0" stop-color="#000" stop-opacity=".58"/><stop offset=".7" stop-color="#000" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="60" height="80" fill="url(#fbStoryPreview)"/>
+            <circle cx="43" cy="27" r="13" fill="#e5c7b2" opacity=".72"/>
+            <path d="M0 55 C14 45 25 50 36 39 C46 29 53 34 60 28 V80 H0Z" fill="#263d50" opacity=".48"/>
+            <rect y="42" width="60" height="38" fill="url(#fbStoryScrim)"/>
+            <rect x="5" y="59" width="37" height="5" rx="1" fill="#fff"/>
+            <rect x="5" y="66" width="29" height="5" rx="1" fill="#fff"/>
+            <rect x="5" y="73" width="22" height="2.5" rx="1" fill="#fff" opacity=".78"/>
+          </svg>
+          <div class="layout-style-label">Image + Copy</div>
+        </div>
+        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedimage')" title="Image Only">
+          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="fbImagePreview" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8eb7c9"/><stop offset=".48" stop-color="#d8c0a9"/><stop offset="1" stop-color="#536c78"/>
+              </linearGradient>
+            </defs>
+            <rect width="60" height="80" fill="url(#fbImagePreview)"/>
+            <circle cx="43" cy="24" r="12" fill="#f0d5bd" opacity=".78"/>
+            <path d="M0 54 C12 43 24 49 35 38 C45 29 52 34 60 26 V80 H0Z" fill="#294553" opacity=".55"/>
+          </svg>
+          <div class="layout-style-label">Image Only</div>
+        </div>
         <div class="layout-style-card" onclick="applyLayoutStyle('split')" title="Split">
           <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
             <defs><linearGradient id="lg1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0028A5"/><stop offset="1" stop-color="#9B59B6"/></linearGradient></defs>
@@ -935,39 +1008,6 @@ input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px var(--in
             <path d="M0 69 L60 55" fill="none" stroke="url(#lg2stripe)" stroke-width="2.3"/>
           </svg>
           <div class="layout-style-label">Offer Hero</div>
-        </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedstory')" title="Image + Copy">
-          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="fbStoryPreview" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#18295f"/><stop offset=".48" stop-color="#6f8fa8"/><stop offset="1" stop-color="#d9b39b"/>
-              </linearGradient>
-              <linearGradient id="fbStoryScrim" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0" stop-color="#000" stop-opacity=".58"/><stop offset=".7" stop-color="#000" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <rect width="60" height="80" fill="url(#fbStoryPreview)"/>
-            <circle cx="43" cy="27" r="13" fill="#e5c7b2" opacity=".72"/>
-            <path d="M0 55 C14 45 25 50 36 39 C46 29 53 34 60 28 V80 H0Z" fill="#263d50" opacity=".48"/>
-            <rect y="42" width="60" height="38" fill="url(#fbStoryScrim)"/>
-            <rect x="5" y="59" width="37" height="5" rx="1" fill="#fff"/>
-            <rect x="5" y="66" width="29" height="5" rx="1" fill="#fff"/>
-            <rect x="5" y="73" width="22" height="2.5" rx="1" fill="#fff" opacity=".78"/>
-          </svg>
-          <div class="layout-style-label">Image + Copy</div>
-        </div>
-        <div class="layout-style-card" onclick="applyLayoutStyle('fullbleedimage')" title="Image Only">
-          <svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="fbImagePreview" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#8eb7c9"/><stop offset=".48" stop-color="#d8c0a9"/><stop offset="1" stop-color="#536c78"/>
-              </linearGradient>
-            </defs>
-            <rect width="60" height="80" fill="url(#fbImagePreview)"/>
-            <circle cx="43" cy="24" r="12" fill="#f0d5bd" opacity=".78"/>
-            <path d="M0 54 C12 43 24 49 35 38 C45 29 52 34 60 26 V80 H0Z" fill="#294553" opacity=".55"/>
-          </svg>
-          <div class="layout-style-label">Image Only</div>
         </div>
       </div>
       <div class="lib-divider" style="margin:6px 0 10px;"></div>
@@ -4453,6 +4493,7 @@ function syncAiPosSection() {
   if (vl) vl.textContent = Math.round(mg * 100) + '%';
   document.querySelectorAll('.corner-btn').forEach(btn => {
     const active = btn.dataset.corner === (S.aiLabel.aiCorner || 'bl');
+    btn.toggleAttribute('data-active', active);
     btn.style.borderColor = active ? '#3878f0' : '#3a3a3a';
     btn.style.background  = active ? '#1a1a1a' : '#161616';
     btn.style.color       = active ? '#fff'    : '#bbb';
@@ -4509,17 +4550,22 @@ function rebuildAiLabels() {
     const wrap = document.createElement('div');
     const isActive = S.aiLabel?.builtinId === al.id;
     const border = isActive ? '#3878f0' : 'transparent';
+    wrap.className = 'cnc-ai-label-card' + (isActive ? ' is-selected' : '');
     wrap.style.cssText = 'background:#252830;border-radius:6px;padding:5px;cursor:pointer;border:2px solid ' + border + ';transition:border-color .1s;';
     wrap.title = al.label;
     const img = document.createElement('img');
     img.src = al.dataUrl;
     img.style.cssText = 'width:100%;height:auto;display:block;border-radius:3px;';
-    wrap.appendChild(img);
+    const preview = document.createElement('div');
+    preview.className = 'cnc-ai-label-preview' + (al.id === 'ai-trans-pos' ? ' preview-dark' : al.id === 'ai-trans-neg' ? ' preview-light' : '');
+    preview.appendChild(img);
+    wrap.appendChild(preview);
     const lbl = document.createElement('div');
     lbl.textContent = al.label;
+    lbl.className = 'cnc-ai-label-caption';
     lbl.style.cssText = 'font-size:8px;color:#b0b4be;text-align:center;margin-top:3px;';
     wrap.appendChild(lbl);
-    wrap.onmouseenter = () => { if (!isActive) wrap.style.borderColor = '#4a4a4a'; };
+    wrap.onmouseenter = () => { if (!isActive) wrap.style.borderColor = document.documentElement.dataset.uiTheme === 'light' ? '#9bb6da' : '#4a4a4a'; };
     wrap.onmouseleave = () => { if (!isActive) wrap.style.borderColor = 'transparent'; };
     wrap.onclick = () => { applyAiLabel(al); rebuildAiLabels(); };
     grid.appendChild(wrap);
@@ -12637,8 +12683,31 @@ window.__composerRender = render;
     }catch(e){ console.warn('[Auto Draft] Wiederherstellung fehlgeschlagen',e); return false; }
   }
 
+  // Canvas Initial Size Fix: verify the actual preview ratio after both the
+  // initial format selection and asynchronous IndexedDB restoration have run.
+  // A selected preset alone is not proof that its canvas geometry was applied.
+  // Never reset the layout; only re-apply the already selected format if the
+  // displayed canvas genuinely has the wrong aspect ratio.
+  function reconcileInitialCanvasAspect(){
+    if (typeof S === 'undefined' || !S || !S.format || S.format === 'custom') return;
+    if (typeof FORMATS === 'undefined' || !FORMATS[S.format]) return;
+    const el = document.getElementById('mainCanvas');
+    if (!el) return;
+    const expected = FORMATS[S.format].w / FORMATS[S.format].h;
+    const actual = el.getBoundingClientRect();
+    if (!actual.width || !actual.height) return;
+    if (Math.abs(actual.width / actual.height - expected) / expected < 0.015) return;
+    console.info('[Canvas Initial Size Fix] Re-applying selected format', S.format);
+    setFormat(S.format);
+    if (typeof render === 'function') render();
+  }
+
   async function boot(){
     await restore();
+    // Two animation frames allow browser layout and late draft restoration to
+    // settle before validating the real on-screen aspect ratio.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    reconcileInitialCanvasAspect();
     restoring=false;
     ['input','change','pointerup','keyup'].forEach(ev=>document.addEventListener(ev,queue,true));
     setInterval(queue,2500); // also catches changes made by tool buttons
@@ -12854,9 +12923,95 @@ html[data-ui-theme="dark"] #ftIconGrid .shape-thumb img {
   apply(root.getAttribute('data-ui-theme'));
 })();
 </script>
+
+<style id="composer-light-inspector-polish-v4">
+/* Light inspector polish: presentation only. Dark theme remains unchanged. */
+html[data-ui-theme="light"] #builtinShapeGrid > div {
+  background:#fff !important; border-color:#dce4ed !important;
+  border-radius:8px !important; padding:7px 3px !important;
+  box-shadow:0 1px 2px rgba(22,47,78,.04);
+}
+html[data-ui-theme="light"] #builtinShapeGrid > div:hover {
+  background:#f0f6ff !important; border-color:#7ba7df !important;
+}
+html[data-ui-theme="light"] #builtinShapeGrid > div:has(img) img {
+  filter:brightness(0) saturate(100%) invert(22%) sepia(20%) saturate(1350%) hue-rotate(177deg) !important;
+  opacity:.9 !important;
+}
+html[data-ui-theme="light"] #builtinShapeGrid > div > div:last-child {
+  color:#50647b !important; font-size:9px !important;
+}
+html[data-ui-theme="light"] #layerPanel > div {
+  background:#fff !important; border:1px solid #dbe4ee !important;
+  border-radius:7px !important; min-height:36px !important;
+  box-shadow:0 1px 2px rgba(22,47,78,.035);
+}
+html[data-ui-theme="light"] #layerPanel > div > span {
+  color:#253a54 !important; font-size:11px !important; font-weight:500;
+}
+html[data-ui-theme="light"] #layerPanel > div > button {
+  background:#f3f6fa !important; color:#255da0 !important;
+  border:1px solid #dce5ef !important; border-radius:5px !important;
+}
+html[data-ui-theme="light"] #layerPanel > div > button:hover:not(:disabled) {
+  background:#e7f0ff !important; border-color:#9cbfe8 !important;
+}
+html[data-ui-theme="light"] .typo-selection-card {
+  background:#f6f9ff !important; border-color:#d3e1f4 !important;
+}
+html[data-ui-theme="light"] .typo-block-card {
+  background:#fff !important; border-color:#dce5ef !important;
+}
+html[data-ui-theme="light"] .typo-card {
+  box-shadow:0 1px 2px rgba(22,47,78,.035);
+}
+html[data-ui-theme="light"] .prop-title {
+  color:#253b55 !important; font-weight:650 !important;
+  border-bottom-color:#e2e9f1 !important;
+}
+html[data-ui-theme="light"] .prop-section {gap:8px;}
+</style>
+
+<style id="composer-light-contrast-v8">
+/* Light-only contrast corrections. Preserve Dark palette and editor artwork. */
+html[data-ui-theme="light"] .prop-row:has(#iconInput) label:has(#iconInput) {
+ background:#f3f7fc !important; color:#193a62 !important; border:1px solid #cbd8e8 !important;
+ font-weight:600 !important; border-radius:6px !important; padding:5px 10px !important;
+}
+html[data-ui-theme="light"] .prop-row:has(#iconInput) label:has(#iconInput):hover {
+ background:#e5f0ff !important; border-color:#2473cf !important; color:#124c91 !important;
+}
+html[data-ui-theme="light"] #guideToggleBtn {
+ background:#ffffff !important; color:#23405e !important; border:1px solid #c9d6e5 !important;
+ box-shadow:0 3px 12px rgba(30,52,80,.14) !important;
+}
+html[data-ui-theme="light"] #guideToggleBtn:hover {
+ background:#edf5ff !important; color:#1159ac !important; border-color:#79a9e6 !important;
+}
+html[data-ui-theme="light"] #guideToggleBtn .cnc-tip {color:inherit !important;}
+html[data-ui-theme="light"] #guideToggleBtn svg {color:inherit !important;}
+html[data-ui-theme="light"] #iconPreview {background:#eef2f7 !important;border:1px solid #d7e0eb !important;}
+</style>
 </body>
 </html>
 <style>
 #iconCategoryChips{display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;padding-bottom:3px;scrollbar-width:thin;white-space:nowrap}
 #iconCategoryChips .icon-cat{flex:0 0 auto}
+
+/* v10 — AI Label library previews, light theme only. Never recolor exported SVGs. */
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-card {
+  background:#f7f9fc !important; border-color:#d9e2ee !important;
+  box-shadow:0 1px 2px rgba(20,44,79,.04);
+}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-card.is-selected {
+  border-color:#1769d2 !important; box-shadow:0 0 0 1px rgba(23,105,210,.15);
+}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-caption {color:#243a59 !important;font-size:10px !important;}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview {
+  background:#e9eef5; border-radius:5px; min-height:56px;
+  display:flex; align-items:center; justify-content:center; padding:5px;
+}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview.preview-dark {background:#343d4c;}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview.preview-light {background:#e9eef5;}
+html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview img {max-width:100%;}
 </style>
