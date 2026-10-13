@@ -1556,7 +1556,7 @@ html[data-ui-theme="light"] #aiMarginVal {color:#0057b8 !important;}
             <div class="typo-control-group"><span class="typo-control-label">Größe</span><div class="typo-button-row">
               <button type="button" class="hbtn ribbonFmtScale" data-scale="0.8" title="Auswahl kleiner">80%</button><button type="button" class="hbtn ribbonFmtScale" data-scale="1" title="Standardgröße">100%</button><button type="button" class="hbtn ribbonFmtScale" data-scale="1.2" title="Auswahl größer">120%</button>
             </div></div>
-          </div><div id="ribbonFmtHint" class="typo-status-hint">Text markieren → Gewicht oder Größe wählen</div>
+          </div><div style="margin-top:9px;display:flex;justify-content:flex-end"><button type="button" class="hbtn" id="ribbonResetFormatting" title="Individuelle Schriftstärken und Größen entfernen">↺ Formatierung zurücksetzen</button></div><div id="ribbonFmtHint" class="typo-status-hint">Text markieren → Gewicht oder Größe wählen</div>
         </div>
         <input class="pi" id="txt2" value="" placeholder="Zeile 2" style="display:none;">
       </div>
@@ -5277,10 +5277,12 @@ function applyProductBlob(blob) {
               const cB=Math.max(0, Math.round((H-1-maxY)/H*100)-pad);
               S.product.cropL=cL; S.product.cropR=cR;
               S.product.cropT=cT; S.product.cropB=cB;
-              // Rescale so visible area = 80% of canvas
+              // On initial product upload, fit the visible image inside 90% of
+              // both canvas dimensions. Preserve aspect ratio and center the
+              // visible (nontransparent) content; never run during AutoSave restore.
               const visFracW=(100-cL-cR)/100, visFracH=(100-cT-cB)/100;
               if(visFracW>0 && visFracH>0){
-                const targetW=CW*0.80/visFracW, targetH=CH*0.80/visFracH;
+                const targetW=CW*0.90/visFracW, targetH=CH*0.90/visFracH;
                 const scale=Math.min(targetW/bw, targetH/bh);
                 const nw=Math.round(bw*scale), nh=Math.round(bh*scale);
                 S.product.w=nw; S.product.h=nh;
@@ -5303,6 +5305,20 @@ function applyProductBlob(blob) {
           } catch(e){ console.warn('auto-crop failed',e); }
         })();
 
+        // v15: for opaque images with white padding, detect the actual visible
+        // product bounds too. The 90% target refers to visible content, not file edges.
+        if (!(S.product.cropL || S.product.cropR || S.product.cropT || S.product.cropB)) {
+          const visibleCrop = detectContentCrop(img);
+          if (visibleCrop) {
+            applyNormalizedCrop(S.product, visibleCrop);
+            ['T','B','L','R'].forEach(k => {
+              const slider=document.getElementById('crop'+k);
+              const label=document.getElementById('crop'+k+'Val');
+              if (slider) slider.value=S.product['crop'+k];
+              if (label) label.textContent=S.product['crop'+k]+'%';
+            });
+          }
+        }
         // (sliders updated inside auto-crop block above)
         const thumb=document.getElementById('productThumb');
         if(thumb){thumb.src=url; thumb.style.display='block';}
@@ -5774,6 +5790,16 @@ canvas.addEventListener('mousedown',e=>{
     multiSel.clear(); updateAlignToolbar();
   }
 
+  // ft resize handle — Phase 7X.3B1: use dox/doy (DW/DH document space)
+  const ftResize = hitFtResizeHandle(dox, doy);
+  if (ftResize === 'right' || ftResize === 'bottom-right') {
+    pushUndo();
+    const ft = S.freeTexts[S.selected];
+    S.dragging = true; S.resizing = true; S.resizeCorner = 'ft-' + ftResize;
+    // v18: document-space baseline for deterministic proportional resize
+    S.dragStart = {x: dox, y: doy, origMaxW: ft.maxWidth || Math.round(DW * 0.82), origSize: ft.fontSize || 32, origLineHeight: ft.lineHeightFactor || 1.2, ftId: S.selected};
+    canvas.style.cursor = ftResize === 'right' ? 'ew-resize' : 'nwse-resize'; render(); return;
+  }
   // Text must win over an overlapping product/image placeholder. Otherwise the first
   // click of a text double-click can open the image upload dialog and editing is impossible.
   const _textFirstHit = hitFreeText(dox, doy);
@@ -5816,16 +5842,6 @@ canvas.addEventListener('mousedown',e=>{
       S.dragStart={x,y,bx:ab.x,by:ab.y,br:ab.r,ba:ab.aspect??1};
     }
     return;
-  }
-  // ft resize handle — Phase 7X.3B1: use dox/doy (DW/DH document space)
-  const ftResize = hitFtResizeHandle(dox, doy);
-  if (ftResize === 'right' || ftResize === 'bottom-right') {
-    pushUndo();
-    const ft = S.freeTexts[S.selected];
-    S.dragging = true; S.resizing = true; S.resizeCorner = 'ft-' + ftResize;
-    // Phase 7X.3B1: dragStart.x/y in DW space; origMaxW default in DW space
-    S.dragStart = {x: dox, y: doy, origMaxW: ft.maxWidth || Math.round(DW * 0.82), origSize: ft.fontSize || 32, ftId: S.selected};
-    canvas.style.cursor = ftResize === 'right' ? 'ew-resize' : 'nwse-resize'; render(); return;
   }
   if (hitAiLabel(x,y)) {
     pushUndo();
@@ -5939,10 +5955,13 @@ canvas.addEventListener('mousemove',e=>{
       if (c === 'ft-right') {
         ft.maxWidth = Math.max(50, Math.min(Math.round(DW - ft.x), Math.round(S.dragStart.origMaxW + dxDoc)));
       } else {
-        // bottom-right: drag right = wider, drag down = bigger font
-        ft.maxWidth = Math.max(50, Math.min(Math.round(DW - ft.x), Math.round(S.dragStart.origMaxW + dxDoc)));
-        ft.fontSize = Math.max(8, Math.round(S.dragStart.origSize + dy * 0.5)); // dy: CW-space, font-size sensitivity
-        ft._roleSize = false; // Phase 7B.4A: fontSize manually changed via drag
+        // v18: corner scales width AND font from the same factor, preserving wrap proportions.
+        const baseline = Math.max(50, S.dragStart.origMaxW);
+        const scale = Math.max(0.25, Math.min(4, (baseline + dxDoc) / baseline));
+        ft.maxWidth = Math.max(50, Math.min(Math.round(DW - ft.x), Math.round(baseline * scale)));
+        ft.fontSize = Math.max(8, Math.round(S.dragStart.origSize * (ft.maxWidth / baseline)));
+        ft._roleSize = false;
+        if (ft._layoutManaged) ft._layoutAttached = false;
         syncFtProps();
       }
       render(); return;
@@ -6481,7 +6500,8 @@ function openFtInlineEditor(ftId) {
       ed.style.width = Math.max(40, ed.scrollWidth + 2) + 'px';
     }
     // auto-grow height
-    const newH = ls2.length * fsScreen * lh + fsScreen * 0.5;
+    ed.style.height = 'auto';
+    const newH = Math.max(ls2.length * fsScreen * lh + fsScreen * 0.5, ed.scrollHeight + 4);
     ed.style.height = newH + 'px';
     // sync side panel
     const panelInp = document.getElementById('ftTextInput');
@@ -6550,8 +6570,8 @@ document.addEventListener('keydown',e=>{
     if (!S.selected) return;
     e.preventDefault();
     pushUndo();
-    if (S.selected==='product'){S.product=null;S.selected=null;render();}
-    else if(S.selected==='product2'){S.product2=null;S.selected=null;render();}
+    if (S.selected==='product'){S.product=null;S.selected=null;rebuildLayerPanel();render();}
+    else if(S.selected==='product2'){S.product2=null;S.selected=null;rebuildLayerPanel();render();}
     else if(S.selected==='badge'){S.badge=null;S.selected=null;rebuildPalette();rebuildCustomShapes();render();}
     else if(S.selected==='badge2'){S.badge2=null;S.selected=null;rebuildLayerPanel();render();}
     else if(S.selected?.startsWith('xbadge_')){const _xi=parseInt(S.selected.split('_')[1]);if(S.extraBadges&&S.extraBadges[_xi]!==undefined){S.extraBadges.splice(_xi,1);S.layerOrder=S.layerOrder.filter(l=>l!==S.selected);S.selected=null;rebuildLayerPanel();render();}}
@@ -6688,6 +6708,7 @@ document.getElementById('p2DeleteBtn').addEventListener('click',()=>{
   document.getElementById('p2SizeVal').textContent='100%';
   document.getElementById('p2OpacSlider').value=100;
   document.getElementById('p2OpacVal').textContent='100%';
+  rebuildLayerPanel();
   render();
 });
 
@@ -7130,6 +7151,18 @@ document.querySelectorAll('.ribbonFmtWeight').forEach(btn=>btn.addEventListener(
 document.querySelectorAll('.ribbonFmtScale').forEach(btn=>btn.addEventListener('click',e=>{
   e.preventDefault(); applyRibbonInlineFormat({scale:+btn.dataset.scale});
 }));
+
+// Clear inline weight/size overrides, leaving the base font and Ribbon content intact.
+document.getElementById('ribbonResetFormatting')?.addEventListener('click', () => {
+  const b = targetBadge();
+  if (!b || b.priceMode || !Array.isArray(b.richRuns) || !b.richRuns.length) return;
+  pushUndo();
+  b.richRuns = [];
+  ribbonTextSelection = {start:0,end:0};
+  const hint = document.getElementById('ribbonFmtHint');
+  if (hint) hint.textContent = 'Individuelle Formatierung entfernt · Grundschrift ist aktiv';
+  render();
+});
 
 document.getElementById('ribbonLineHeight')?.addEventListener('input', e => {
   const ab = targetBadge(); if (!ab || ab.priceMode) return;
@@ -8431,8 +8464,8 @@ function deleteSelectedObj() {
   if (!S.selected) return;
   pushUndo();
   const s = S.selected;
-  if      (s==='product')  { S.product=null; S.selected=null; render(); }
-  else if (s==='product2') { S.product2=null; S.selected=null; render(); }
+  if      (s==='product')  { S.product=null; S.selected=null; rebuildLayerPanel(); render(); }
+  else if (s==='product2') { S.product2=null; S.selected=null; rebuildLayerPanel(); render(); }
   else if (s==='badge')    { S.badge=null; S.selected=null; rebuildPalette(); rebuildCustomShapes(); render(); }
   else if (s==='badge2')   { S.badge2=null; S.selected=null; rebuildLayerPanel(); render(); }
   else if (s.startsWith('xbadge_')) {
@@ -10481,14 +10514,14 @@ function drawFtSelection(c) {
   c.beginPath(); c.rect(0, 0, CW, CH); c.clip();
   // Selection box follows actual rendered glyph bounds (alignment-aware)
   c.strokeStyle='rgba(56,120,240,.8)'; c.lineWidth=1.5; c.setLineDash([5,4]);
-  c.strokeRect(b.glyphX - 4, b.y - 4, b.w + 8, b.h + 8); c.setLineDash([]);
+  c.strokeRect(b.x - 4, b.y - 4, b.containerW + 8, b.h + 8); c.setLineDash([]);
   // Phase 7X.2 hotfix B: handles at BOUND edges (glyph right), not container right.
   // b.glyphX + b.w + 4 = bound right edge. Matches bound strokeRect geometry exactly.
-  const hx = b.glyphX + b.w + 4, hy = b.y + b.h / 2;
+  const hx = b.x + b.containerW + 4, hy = b.y + b.h / 2;
   c.beginPath(); c.rect(hx-5, hy-5, 10, 10);
   c.fillStyle='#fff'; c.strokeStyle='#3878f0'; c.lineWidth=1.5; c.fill(); c.stroke();
   // Bottom-right handle at bound bottom-right corner
-  const cx2 = b.glyphX + b.w + 4, cy2 = b.y + b.h + 4;
+  const cx2 = b.x + b.containerW + 4, cy2 = b.y + b.h + 4;
   c.beginPath(); c.rect(cx2-5, cy2-5, 10, 10);
   c.fill(); c.stroke();
   c.restore();
@@ -10503,8 +10536,8 @@ function hitFtResizeHandle(mx, my) {
   const _fsc = CW > 0 ? DW / CW : 1, _fscY = CH > 0 ? DH / CH : 1;
   const b = getFtBounds(ft, _c, _fsc, _fscY, 1, 1);
   // Phase 7X.2 hotfix B: match drawing — handles at BOUND edges (glyph right)
-  const hx = b.glyphX + b.w + 4, hy = b.y + b.h / 2;
-  const hbr_x = b.glyphX + b.w + 4, hbr_y = b.y + b.h + 4;
+  const hx = b.x + b.containerW + 4, hy = b.y + b.h / 2;
+  const hbr_x = b.x + b.containerW + 4, hbr_y = b.y + b.h + 4;
   if (Math.abs(mx-hx)<10 && Math.abs(my-hy)<10) return 'right';
   if (Math.abs(mx-hbr_x)<10 && Math.abs(my-hbr_y)<10) return 'bottom-right';
   return null;
@@ -11444,6 +11477,22 @@ function _layoutAddText(item, x, y, maxWidth) {
     _layoutIndex:Number.isFinite(item._layoutIndex) ? item._layoutIndex : null,
     glow:{enabled:false,opacity:0.70,radius:0.04,colorA:'#F20505',colorB:'#0445C8',colorC:'#1FB9FF'}
   };
+  // v18: fit single-word layout headlines to the template region on first creation.
+  // Preserve manual typography and all existing/saved objects.
+  if ((item.role === 'headline' || item.role === 'expressiveHeadline') &&
+      ft.text.trim() && !/\s/.test(ft.text.trim())) {
+    const ctx = document.createElement('canvas').getContext('2d');
+    const scale = DW / Math.max(1, CW);
+    const available = Math.max(1, ft.maxWidth - 4);
+    for (let attempt=0; attempt<20; attempt++) {
+      const px = Math.max(1, Math.round(ft.fontSize * scale));
+      ctx.font = `${ft.fontWeight} ${px}px ${getFtFontName(ft)}`;
+      applyFtCanvasTracking(ctx, ft, 1);
+      if (ctx.measureText(ft.text).width <= available) break;
+      ft.fontSize = Math.max(8, ft.fontSize * 0.97);
+    }
+    ft.fontSize = Math.round(ft.fontSize * 10) / 10;
+  }
   S.freeTexts[id] = ft;
   S.layerOrder.push(id);
   return ft;
@@ -11926,14 +11975,19 @@ function _layoutUpdateFullBleedStoryReadability(model) {
   let scrimOpacity=0;
   if(model.readability?.enabled!==false && (mode==='auto' || mode==='white')){
     if(scrimMode==='manual') scrimOpacity=manualStrength/100;
-    else if(stats){
-      // White-text risk: bright pixels, insufficient contrast and local texture all
-      // contribute. Keep dark/quiet photos almost untouched; lift protection smoothly
-      // on bright or busy imagery.
-      const contrastNeed=Math.max(0, stats.whiteBad-.06) * .70;
-      const brightnessNeed=Math.max(0, stats.avgLum-.16) * .72;
-      const textureNeed=Math.min(.12, Math.sqrt(stats.variance) * .22);
-      scrimOpacity=Math.max(0,Math.min(maxOp,contrastNeed+brightnessNeed+textureNeed));
+    else {
+      // v19 AutoSchutz: a missing/failed photo sample must NOT silently disable
+      // protection. Auto always provides a subtle baseline, with stronger protection
+      // when the image is bright or busy. Manual mode remains untouched.
+      const baseline=.22;
+      if(stats){
+        const contrastNeed=Math.max(0, stats.whiteBad-.06) * .70;
+        const brightnessNeed=Math.max(0, stats.avgLum-.16) * .72;
+        const textureNeed=Math.min(.12, Math.sqrt(stats.variance) * .22);
+        scrimOpacity=Math.min(maxOp,Math.max(baseline,contrastNeed+brightnessNeed+textureNeed));
+      } else {
+        scrimOpacity=Math.min(maxOp,baseline);
+      }
     }
   }
   // Direction follows the ACTUAL text position. In Auto, use the nearest canvas edge
@@ -13014,4 +13068,38 @@ html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview {
 html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview.preview-dark {background:#343d4c;}
 html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview.preview-light {background:#e9eef5;}
 html[data-ui-theme="light"] #aiLabelGrid .cnc-ai-label-preview img {max-width:100%;}
+</style>
+
+
+<style id="composer-v12-frame-light-polish">
+/* Badge/Frame shape selector: UI preview only, never exported artwork. */
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn {
+  background:#fff !important;
+  color:#34465e !important;
+  border:1px solid #d7e0eb !important;
+  box-shadow:0 1px 2px rgba(26,48,76,.045) !important;
+}
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn .ssbg {
+  background:#9aabba !important;
+  box-shadow:inset 0 0 0 1px rgba(33,57,83,.10) !important;
+  opacity:1 !important;
+}
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn:hover {
+  background:#f2f7fd !important;
+  border-color:#83a9d7 !important;
+  color:#1d4f91 !important;
+}
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn:hover .ssbg {
+  background:#6f8aa8 !important;
+}
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn.active {
+  background:#edf4ff !important;
+  border-color:#1767c6 !important;
+  color:#1767c6 !important;
+  box-shadow:0 0 0 1px rgba(23,103,198,.14) !important;
+}
+html[data-ui-theme="light"] #libPanel-badge .shape-sel-btn.active .ssbg {
+  background:#8fa7bd !important;
+  box-shadow:inset 0 0 0 1px rgba(33,57,83,.12) !important;
+}
 </style>
