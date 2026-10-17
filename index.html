@@ -866,6 +866,11 @@ html[data-ui-theme="light"] #aiMarginVal {color:#0057b8 !important;}
     <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"/></svg>
     <span class="theme-label">Dark</span>
   </button>
+  <!-- Template Library — editor-level action, adjacent to Export -->
+  <button type="button" class="hbtn-svg" id="sctpl-launch" title="Gespeicherte Vorlagen verwalten" aria-haspopup="dialog" aria-controls="sctpl-modal">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+    <span class="sctpl-header-label">Vorlagen</span>
+  </button>
   <!-- Primary: Export -->
   <button class="hbtn-export" id="headerExportBtn" title="Bild exportieren">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1v8"/><path d="M4 6l3 3 3-3"/><path d="M2 10v1.5A1.5 1.5 0 0 0 3.5 13h7a1.5 1.5 0 0 0 1.5-1.5V10"/></svg>
@@ -1183,6 +1188,18 @@ html[data-ui-theme="light"] #aiMarginVal {color:#0057b8 !important;}
         <strong>+ Motion laden</strong>
         <span>WebM für schnelle Vorschau oder Binkies Image Strip ZIP für Production-GIF.</span>
       </label>
+      <div style="border:1px solid #47515c;border-radius:9px;padding:10px;margin:10px 0;font-size:12px">
+        <strong>Smooth Loop · 2 Frames (Beta)</strong>
+        <div style="margin-top:8px">Frame A / Frame B (PNG, JPG)</div>
+        <input id="smoothFrameA" type="file" accept="image/png,image/jpeg" style="width:100%;margin:5px 0">
+        <input id="smoothFrameB" type="file" accept="image/png,image/jpeg" style="width:100%;margin:5px 0">
+        <label>Übergang <span id="smoothTransitionValue">1.2 s</span></label>
+        <input id="smoothTransition" type="range" min="400" max="3000" step="100" value="1200" style="width:100%">
+        <label>Standzeit <span id="smoothHoldValue">0.5 s</span></label>
+        <input id="smoothHold" type="range" min="0" max="2000" step="100" value="500" style="width:100%">
+        <button id="smoothCreate" class="isp-btn-secondary" style="width:100%;margin-top:8px">↔ Smooth Loop erstellen</button>
+        <div id="smoothStatus" style="margin-top:6px;color:#a7bac9">Zwei Bilder auswählen.</div>
+      </div>
       <div class="motion-status" id="motionStatus">Noch keine Animation geladen.</div>
       <div class="motion-controls" id="motionControls">
         <div class="insp-sub-label">Vorschau</div>
@@ -10784,9 +10801,13 @@ async function exportMotionGif(){
     // Keep the E-Mail animation at 5.4 s independent of frame count.
     // Four hold frames retain the Golden rhythm; remaining time is spread
     // evenly across motion frames.
-    const targetDurationMs=5400;
+    const targetDurationMs=m.smoothLoop ? 2*(m.smoothLoop.transitionMs+m.smoothLoop.holdMs) : 5400;
     const delays=new Array(wanted).fill(100);
-    if(wanted>=4){
+    if(m.smoothLoop){
+      const frameDelay=Math.max(20,Math.round(targetDurationMs/wanted/10)*10);
+      delays.fill(frameDelay);
+      delays[wanted-1]=Math.max(20,targetDurationMs-frameDelay*(wanted-1));
+    } else if(wanted>=4){
       const holdA=0;
       const holdB=Math.round((wanted-1)/3);
       const holdC=Math.round((wanted-1)*2/3);
@@ -12603,6 +12624,48 @@ window.__composerRender = render;
     const first=m.frames[0];status.innerHTML=`<b>${f.name.replace(/[<>]/g,'')}</b><br>${m.frames.length} PNG Frames · ${first.naturalWidth} × ${first.naturalHeight} · ${(f.size/1024/1024).toFixed(1)} MB<br><span style="color:#65d18a">✓ Image Strip · RGBA Master</span>`;
     redraw();startTick();
   }
+  // v20 isolated two-image Crossfade: generate complete cycle into image-compatible canvases.
+  const smoothA=document.getElementById('smoothFrameA'),smoothB=document.getElementById('smoothFrameB');
+  const smoothT=document.getElementById('smoothTransition'),smoothH=document.getElementById('smoothHold');
+  const smoothStatus=document.getElementById('smoothStatus');
+  const updateSmoothLabels=()=>{
+    document.getElementById('smoothTransitionValue').textContent=(+smoothT.value/1000).toFixed(1)+' s';
+    document.getElementById('smoothHoldValue').textContent=(+smoothH.value/1000).toFixed(1)+' s';
+  };
+  smoothT.addEventListener('input',updateSmoothLabels);smoothH.addEventListener('input',updateSmoothLabels);
+  async function decodeSmooth(file){
+    if(!file||!/^image\/(png|jpeg)$/.test(file.type))throw Error('Bitte PNG oder JPG für beide Frames auswählen.');
+    const url=URL.createObjectURL(file),img=new Image();
+    try{await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(Error('Bild konnte nicht geladen werden.'));img.src=url;});return img;}
+    finally{URL.revokeObjectURL(url);}
+  }
+  document.getElementById('smoothCreate').addEventListener('click',async()=>{
+    const btn=document.getElementById('smoothCreate');btn.disabled=true;
+    try{
+      const [a,b]=await Promise.all([decodeSmooth(smoothA.files[0]),decodeSmooth(smoothB.files[0])]);
+      if(a.naturalWidth!==b.naturalWidth||a.naturalHeight!==b.naturalHeight)throw Error('Frame A und B müssen dieselben Abmessungen haben.');
+      const W=a.naturalWidth,H=a.naturalHeight;
+      if(W*H>4000000)throw Error('Für Beta bitte Bilder mit höchstens 4 Megapixel verwenden.');
+      const transitionMs=+smoothT.value,holdMs=+smoothH.value,total=2*(transitionMs+holdMs),count=24;
+      // Sample at frame centres: no duplicated endpoint / no discontinuity at loop boundary.
+      const generated=[];
+      for(let i=0;i<count;i++){
+        const t=(i+0.5)*total/count;
+        let mix=t<holdMs?0:t<holdMs+transitionMs?(t-holdMs)/transitionMs:t<2*holdMs+transitionMs?1:1-(t-2*holdMs-transitionMs)/transitionMs;
+        mix=Math.max(0,Math.min(1,mix));
+        const c=document.createElement('canvas');c.width=W;c.height=H;
+        const ctx=c.getContext('2d');ctx.drawImage(a,0,0,W,H);ctx.globalAlpha=mix;ctx.drawImage(b,0,0,W,H);ctx.globalAlpha=1;
+        generated.push(c);
+        if(i%4===0)await new Promise(r=>setTimeout(r,0));
+      }
+      clearMotion();const m=window.__motionPoc;
+      Object.assign(m,{type:'strip',name:'Smooth Loop',fps:count/(total/1000),frames:generated,frameIndex:0,frameImage:generated[0],ready:true,playing:true,lastTick:0,smoothLoop:{transitionMs,holdMs}});
+      loop.checked=true;controls.classList.add('on');
+      status.textContent=`Smooth Loop · ${W} × ${H} · ${count} Frames · ${(total/1000).toFixed(1)} s`;
+      smoothStatus.textContent='✓ Preview bereit. GIF über Export (lokale Engine).';redraw();startTick();
+    }catch(e){smoothStatus.textContent='⚠ '+e.message;console.error('[Smooth Loop]',e);}
+    finally{btn.disabled=false;}
+  });
   function loadVideo(f){
     const url=URL.createObjectURL(f),v=document.createElement('video');v.muted=true;v.playsInline=true;v.loop=loop.checked;v.preload='auto';v.src=url;
     Object.assign(window.__motionPoc,{type:'video',video:v,url,ready:false,name:f.name});status.textContent='Animation wird geladen …';
@@ -13046,6 +13109,163 @@ html[data-ui-theme="light"] #guideToggleBtn .cnc-tip {color:inherit !important;}
 html[data-ui-theme="light"] #guideToggleBtn svg {color:inherit !important;}
 html[data-ui-theme="light"] #iconPreview {background:#eef2f7 !important;border:1px solid #d7e0eb !important;}
 </style>
+<style id="sctpl-v21-1-styles">
+/* v21.1: Template Library uses the existing Composer theme tokens. */
+#sctpl-launch {flex-shrink:0}
+#sctpl-modal {position:fixed;inset:0;z-index:11001;background:rgba(10,17,28,.62);display:none;align-items:center;justify-content:center;padding:20px;font-family:inherit;font-size:13px;color:var(--text-primary)}
+#sctpl-modal.is-open {display:flex}
+#sctpl-panel {position:relative;background:var(--surface-panel);border:1px solid var(--border);border-radius:var(--radius-xl,16px);width:min(680px,96vw);max-height:min(90vh,850px);overflow:auto;box-shadow:0 22px 70px rgba(0,0,0,.35);padding:22px}
+#sctpl-panel * {box-sizing:border-box}
+#sctpl-panel h2,#sctpl-panel h3,#sctpl-panel p {margin:0}
+#sctpl-panel h2{font-size:19px;font-weight:700;color:var(--text-primary)}
+#sctpl-panel h3{font-size:13px;font-weight:700;color:var(--text-primary)}
+.sctpl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.sctpl-subtitle{color:var(--text-muted);font-size:11px;margin-top:4px !important}
+#sctpl-panel button{font:inherit;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface-control);color:var(--text-secondary);border-radius:var(--radius-sm,6px);padding:8px 11px;min-height:33px;transition:background .15s,border-color .15s}
+#sctpl-panel button:hover:not(:disabled){background:var(--surface-hover);color:var(--text-primary);border-color:var(--border-strong)}
+#sctpl-panel button:focus-visible,#sctpl-panel input:focus-visible{outline:2px solid var(--interactive);outline-offset:2px}
+#sctpl-panel button:disabled{opacity:.6;cursor:wait}
+#sctpl-panel .sctpl-primary{background:var(--interactive);border-color:var(--interactive);color:#fff}
+#sctpl-panel .sctpl-primary:hover:not(:disabled){background:var(--interactive-hover);color:#fff}
+#sctpl-panel .sctpl-danger{color:var(--danger)}
+#sctpl-panel .sctpl-close{padding:4px 9px;min-width:31px;min-height:31px;font-size:19px;line-height:1}
+.sctpl-intro{color:var(--text-secondary);line-height:1.5;margin-bottom:15px !important}
+.sctpl-section{background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:12px;padding:15px;margin:12px 0 16px}
+.sctpl-section-title{font-size:13px;font-weight:700;margin-bottom:11px !important}
+.sctpl-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+#sctpl-panel input[type=text]{background:var(--surface-control);color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm,6px);padding:9px 10px;font:inherit;font-size:13px;min-width:160px;width:100%}
+#sctpl-panel input::placeholder{color:var(--text-muted)}
+.sctpl-actions{display:flex;gap:8px;flex-wrap:wrap}
+.sctpl-note{margin-top:9px !important;color:var(--text-muted);font-size:11px;line-height:1.5}
+.sctpl-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 5px;flex-wrap:wrap}
+.sctpl-toolbar h3{margin-right:auto !important}
+#sctpl-message{min-height:19px;margin:7px 0 !important;font-size:12px;color:var(--text-secondary);line-height:1.5}
+#sctpl-message[data-type="error"]{color:var(--danger)}
+#sctpl-message[data-type="success"]{color:var(--success)}
+.sctpl-entry{display:flex;align-items:center;gap:10px;border-top:1px solid var(--border-subtle);padding:11px 0;flex-wrap:wrap}
+.sctpl-entry-meta{flex:1 1 180px;min-width:150px;display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
+.sctpl-entry-meta strong{font-size:13px;color:var(--text-primary)}
+.sctpl-entry-meta small{font-size:11px;color:var(--text-muted)}
+.sctpl-entry-actions{display:flex;gap:6px;flex-wrap:wrap}
+#sctpl-panel .sctpl-entry-actions button{padding:6px 9px;min-height:30px;font-size:11.5px}
+.sctpl-empty{color:var(--text-muted);font-size:12px;padding:18px 8px;text-align:center;border:1px dashed var(--border);border-radius:8px;margin-top:9px}
+#sctpl-replace{display:none;position:absolute;z-index:2;inset:0;background:var(--surface-panel);padding:24px;border-radius:inherit;align-items:center;justify-content:center}
+#sctpl-replace.is-open{display:flex}
+.sctpl-confirm-card{max-width:510px;width:100%;border:1px solid var(--border);border-radius:12px;background:var(--surface-elevated);padding:20px}
+.sctpl-confirm-card h3{font-size:17px !important;margin-bottom:9px !important}
+.sctpl-confirm-card p{line-height:1.6;color:var(--text-secondary);margin-bottom:14px !important}
+.sctpl-confirm-buttons{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:920px){#sctpl-launch .sctpl-header-label{display:none}#sctpl-launch{padding:6px 9px}}
+@media(max-width:550px){#sctpl-modal{padding:8px}#sctpl-panel{padding:14px;max-height:94vh}.sctpl-actions>button{flex:1 1 180px}}
+@media(prefers-reduced-motion:reduce){#sctpl-panel button{transition:none}}
+</style>
+<div id="sctpl-modal" role="dialog" aria-modal="true" aria-labelledby="sctpl-title" aria-hidden="true">
+ <div id="sctpl-panel" tabindex="-1">
+  <div class="sctpl-head">
+   <div><h2 id="sctpl-title">Template Library <small style="font-size:11px;color:var(--text-muted);font-weight:500">v21.1 Beta</small></h2><p class="sctpl-subtitle">Vorlagen erstellen, öffnen und weitergeben</p></div>
+   <button id="sctpl-close" class="sctpl-close" type="button" title="Schließen" aria-label="Schließen">×</button>
+  </div>
+  <p class="sctpl-intro">Vorlagen in der Bibliothek bleiben <strong>in diesem Browser</strong>. Für eine Kopie auf dem Computer nutze „In Ordner speichern“ oder den .sctpl-Export.</p>
+  <section class="sctpl-section" aria-labelledby="sctpl-save-heading">
+   <h3 class="sctpl-section-title" id="sctpl-save-heading">Aktuelle Komposition speichern</h3>
+   <div class="sctpl-name-row"><input id="sctpl-name" type="text" maxlength="90" placeholder="Name der Vorlage" aria-label="Name der Vorlage"/></div>
+   <div class="sctpl-actions">
+    <button id="sctpl-save" type="button" class="sctpl-primary">▦ In Bibliothek speichern</button>
+    <button id="sctpl-folder" type="button">↓ In Ordner speichern</button>
+   </div>
+   <p class="sctpl-note">Bibliothek = nur in diesem Browser · Ordner = einzelne .sctpl-Datei zum Sichern oder Teilen.</p>
+  </section>
+  <div class="sctpl-toolbar"><h3>Gespeicherte Vorlagen</h3><button id="sctpl-import" type="button">↑ .sctpl importieren</button><input id="sctpl-file" type="file" accept=".sctpl,application/json" hidden></div>
+  <p id="sctpl-message" role="status" aria-live="polite"></p>
+  <div id="sctpl-items"></div>
+  <div id="sctpl-replace" aria-hidden="true">
+   <div class="sctpl-confirm-card" role="group" aria-labelledby="sctpl-replace-title">
+    <h3 id="sctpl-replace-title">Vorlage öffnen?</h3>
+    <p id="sctpl-replace-text">Die aktuelle Komposition wird ersetzt.</p>
+    <div class="sctpl-confirm-buttons">
+     <button id="sctpl-keep" class="sctpl-primary" type="button">Aktuelle sichern &amp; öffnen</button>
+     <button id="sctpl-discard" type="button">Ohne Sichern öffnen</button>
+     <button id="sctpl-cancel" type="button">Abbrechen</button>
+    </div>
+    <p class="sctpl-note">„Aktuelle sichern“ erstellt zuvor eine neue Vorlage in dieser Browser-Bibliothek.</p>
+   </div>
+  </div>
+ </div>
+</div>
+<script id="sctpl-v21-1-script">
+/* Template Library v21.1 — shared DB + .sctpl v1 compatibility, unchanged composer editing stack. */
+(()=>{'use strict';
+const DB='sc_composer_template_library_v1', STORE='templates', FORMAT='sc-composer-template', VERSION=1;
+const KEYS=['format','customW','customH','bg','product','product2','badge','badge2','extraBadges','aiLabel','label','layerOrder','stripe','bgStripe','bgSplit','bgFlipped','stripeY','stripeAngle','stripeWidth','fontName','activeFontName','freeTexts','layoutStyle','showGuides','exportFmt','freistellen'];
+const $=id=>document.getElementById(id),modal=$('sctpl-modal'),panel=$('sctpl-panel'),items=$('sctpl-items'),message=$('sctpl-message'),nameField=$('sctpl-name'),replace=$('sctpl-replace');
+let busy=false,pending=null,lastFocus=null;
+function say(t,type='info'){message.textContent=t;message.dataset.type=type;}
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:'id'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function transact(mode,action){const db=await openDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,mode),req=action(tx.objectStore(STORE));let result;req.onsuccess=()=>result=req.result;req.onerror=()=>reject(req.error);tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}finally{db.close()}}
+const all=()=>transact('readonly',s=>s.getAll()),put=v=>transact('readwrite',s=>s.put(v)),remove=id=>transact('readwrite',s=>s.delete(id));
+function pack(v,seen=new WeakSet()){
+ if(v==null||['string','number','boolean'].includes(typeof v))return v;
+ if(typeof v==='function')return undefined;
+ if(v instanceof HTMLImageElement)return {__swcImage:v.src||''};
+ if(v instanceof HTMLElement||v instanceof Event)return undefined;
+ if(typeof v==='object'){if(seen.has(v))return undefined;seen.add(v);if(Array.isArray(v))return v.map(x=>pack(x,seen));const o={};for(const [k,x] of Object.entries(v)){const p=pack(x,seen);if(p!==undefined)o[k]=p}return o}return undefined;
+}
+async function unpack(v){if(v==null||typeof v!=='object')return v;if(Object.prototype.hasOwnProperty.call(v,'__swcImage')){if(!v.__swcImage)return null;const img=new Image();await new Promise((ok,no)=>{img.onload=ok;img.onerror=()=>no(new Error('Bild konnte nicht geladen werden'));img.src=v.__swcImage});return img}if(Array.isArray(v))return Promise.all(v.map(unpack));const o={};for(const [k,x] of Object.entries(v))o[k]=await unpack(x);return o}
+function hasMotion(){return !!(window.__motionPoc&&(window.__motionPoc.ready||window.__motionPoc.video||window.__motionPoc.frames?.length))}
+function snapshot(){if(!window.S)throw Error('Composer-Zustand nicht verfügbar');const state={};for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(window.S,k))state[k]=pack(window.S[k]);return state}
+function valid(d){return d&&d.format===FORMAT&&d.version===VERSION&&d.state&&typeof d.state==='object'&&!Array.isArray(d.state)&&typeof d.name==='string'&&d.name.trim().length>0}
+function id(){return typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function'?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2)}
+function filenameFor(name){return (name.replace(/[^a-z0-9_-]+/gi,'_').slice(0,70)||'template')+'.sctpl'}
+function createEntry(name,state){return {format:FORMAT,version:VERSION,id:id(),name,savedAt:Date.now(),state}}
+function getName(){const n=nameField.value.trim();if(!n){say('Bitte zuerst einen Namen für die Vorlage eingeben.','error');nameField.focus();return null}return n}
+function ensureCanSave(){if(hasMotion()){say('Diese Beta kann aktive Motion-Assets nicht als Vorlage sichern.','error');return false}return true}
+async function saveCurrent(name){if(!ensureCanSave())return false;await put(createEntry(name,snapshot()));return true}
+function download(filename,content){const blob=new Blob([content],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
+async function saveFile(name,entry){
+ const blob=new Blob([JSON.stringify(entry,null,2)],{type:'application/json'});
+ if(typeof window.showSaveFilePicker==='function'){
+  try{const handle=await window.showSaveFilePicker({suggestedName:filenameFor(name),types:[{description:'SC Composer Template (.sctpl)',accept:{'application/json':['.sctpl']}}]});const writable=await handle.createWritable();try{await writable.write(blob);await writable.close()}catch(err){try{await writable.abort()}catch(_){}throw err}return 'chosen'}
+  catch(err){if(err?.name==='AbortError')return 'cancelled';if(err?.name!=='SecurityError'&&err?.name!=='NotAllowedError'&&err?.name!=='TypeError')throw err;}
+ }
+ download(filenameFor(name),JSON.stringify(entry,null,2));return 'download';
+}
+async function refresh(){const entries=(await all()).sort((a,b)=>b.savedAt-a.savedAt);items.replaceChildren();if(!entries.length){const p=document.createElement('p');p.className='sctpl-empty';p.textContent='Noch keine Vorlagen in diesem Browser gespeichert.';items.append(p);return}
+ for(const e of entries){const row=document.createElement('div');row.className='sctpl-entry';const meta=document.createElement('div');meta.className='sctpl-entry-meta';const n=document.createElement('strong');n.textContent=e.name;const d=document.createElement('small');d.textContent='Gespeichert: '+new Date(e.savedAt).toLocaleString('de-CH',{dateStyle:'short',timeStyle:'short'});meta.append(n,d);row.append(meta);const actions=document.createElement('div');actions.className='sctpl-entry-actions';
+  for(const [label,fn,cls] of [['Öffnen',()=>askOpen(e),''],['↓ .sctpl',()=>{download(filenameFor(e.name),JSON.stringify(e,null,2));say('Datei exportiert (Download).','success')},''],['Löschen',async()=>{if(confirm('Vorlage „'+e.name+'“ aus der Browser-Bibliothek löschen?')){await remove(e.id);await refresh();say('Vorlage aus der Bibliothek gelöscht.','success')}},'sctpl-danger']]){const b=document.createElement('button');b.type='button';b.textContent=label;if(cls)b.className=cls;b.addEventListener('click',()=>Promise.resolve(fn()).catch(err=>say(err.message,'error')));actions.append(b)}row.append(actions);items.append(row)}
+}
+async function applyTemplate(e,decodedState){
+ // Assets have already been decoded before backup and live-state replacement.
+ const st=decodedState,S=window.S;if(!S)throw Error('Composer-Zustand nicht verfügbar');
+ if(st.format==='custom'&&st.customW&&st.customH&&typeof setCustomFormat==='function')setCustomFormat(st.customW,st.customH);
+ else if(st.format&&typeof FORMATS!=='undefined'&&FORMATS[st.format]&&typeof setFormat==='function')setFormat(st.format);
+ for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(st,k))S[k]=st[k];
+ if(S.bg?.id&&typeof BG_PRESETS!=='undefined'){const bg=BG_PRESETS.find(p=>p.id===S.bg.id);if(bg)S.bg=bg}
+ S.dragging=false;S.resizing=false;S.dragStart=null;S.resizeCorner=null;S.selected=null;
+ for(const f of ['rebuildLayerPanel','rebuildBgGrid','syncBgFlipBtn','syncBgSplitUI','syncStripeUI','syncPropPanel','updateP2UI','updateRemoveBgUI','updateUI','updateInspector','render'])if(typeof window[f]==='function')window[f]();
+ await new Promise(requestAnimationFrame);if(typeof window.render==='function')window.render();setTimeout(()=>{if(typeof window.render==='function')window.render()},120);
+ closeModal(true);
+}
+function askOpen(e){if(!valid(e)){say('Ungültiges Template-Format.','error');return}if(hasMotion()){say('Diese Beta kann aktive Motion-Assets nicht wiederherstellen.','error');return}pending=e;$('sctpl-replace-text').textContent='„'+e.name+'“ öffnen? Dabei wird die aktuelle Komposition ersetzt. Du kannst sie zuerst in der Browser-Bibliothek sichern.';replace.classList.add('is-open');replace.setAttribute('aria-hidden','false');$('sctpl-keep').focus();}
+function hideConfirm(){pending=null;replace.classList.remove('is-open');replace.setAttribute('aria-hidden','true')}
+async function completeOpen(backup){if(busy||!pending)return;const e=pending;busy=true;for(const id of ['sctpl-keep','sctpl-discard','sctpl-cancel'])$(id).disabled=true;try{
+  // Prepare the new assets BEFORE saving/replacing current state. If decoding fails, leave editor intact.
+  const decoded=await unpack(e.state);
+  if(backup){const date=new Date();const label='Komposition vor Wechsel '+date.toLocaleString('de-CH').replace(/[/:]/g,'-');if(!await saveCurrent(label))return;}
+  await applyTemplate(e,decoded);say(backup?'Aktuelle Komposition gesichert und Vorlage geöffnet.':'Vorlage geöffnet.','success');
+ }catch(err){say('Öffnen fehlgeschlagen: '+err.message,'error')}finally{busy=false;for(const id of ['sctpl-keep','sctpl-discard','sctpl-cancel'])$(id).disabled=false;hideConfirm();}}
+function openModal(){lastFocus=document.activeElement;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');say('');refresh().catch(e=>say('Bibliothek konnte nicht geladen werden: '+e.message,'error'));nameField.focus()}
+function closeModal(force=false){if(busy&&!force)return;hideConfirm();modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');lastFocus?.focus?.()}
+$('sctpl-launch').addEventListener('click',openModal);
+$('sctpl-close').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('is-open')){e.stopPropagation();if(replace.classList.contains('is-open'))hideConfirm();else closeModal();}});
+$('sctpl-save').addEventListener('click',async()=>{if(busy)return;const name=getName();if(!name)return;busy=true;try{if(!await saveCurrent(name))return;nameField.value='';await refresh();say('„'+name+'“ in dieser Browser-Bibliothek gespeichert.','success')}catch(e){say('Speichern fehlgeschlagen: '+e.message,'error')}finally{busy=false}});
+$('sctpl-folder').addEventListener('click',async()=>{if(busy)return;const name=getName();if(!name||!ensureCanSave())return;busy=true;try{const entry=createEntry(name,snapshot()),mode=await saveFile(name,entry);if(mode==='chosen')say('„'+name+'“ als .sctpl im gewählten Ordner gespeichert.','success');else if(mode==='download')say('.sctpl wurde heruntergeladen. Der Speicherort richtet sich nach den Browser-Einstellungen.','success')}catch(e){say('Speichern in Ordner fehlgeschlagen: '+e.message,'error')}finally{busy=false}});
+$('sctpl-import').addEventListener('click',()=>$('sctpl-file').click());
+$('sctpl-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>80*1024*1024)throw Error('Datei zu groß (max. 80 MB)');const obj=JSON.parse(await file.text());if(!valid(obj))throw Error('Unbekanntes oder beschädigtes .sctpl-Format');obj.id=id();obj.savedAt=Date.now();await put(obj);await refresh();say('Vorlage in die Browser-Bibliothek importiert.','success')}catch(err){say('Import fehlgeschlagen: '+err.message,'error')}finally{e.target.value=''}});
+$('sctpl-keep').addEventListener('click',()=>completeOpen(true));$('sctpl-discard').addEventListener('click',()=>completeOpen(false));$('sctpl-cancel').addEventListener('click',hideConfirm);
+})();
+</script>
 </body>
 </html>
 <style>
